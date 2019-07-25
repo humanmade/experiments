@@ -371,6 +371,17 @@ function is_test_paused_for_post( string $test_id, int $post_id ) : bool {
  * @param array
  */
 function update_test_variants_for_post( string $test_id, int $post_id, array $variants ) {
+	/**
+	 * If the variants have changed we need to reset the current results
+	 * except for the last update timestamp.
+	 */
+	$old_variants = get_test_variants_for_post( $test_id, $post_id );
+	if ( ! empty( array_diff( $old_variants, $variants ) ) ) {
+		$results = get_test_results_for_post( $test_id, $post_id );
+		update_test_results_for_post( $test_id, $post_id, [
+			'timestamp' => $results['timestamp'] ?? 0,
+		] );
+	}
 	return update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_variants', $variants );
 }
 
