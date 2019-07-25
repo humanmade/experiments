@@ -47,17 +47,8 @@
 
 		constructor() {
 			super();
-
 			const root = this.attachShadow( { mode: 'open' } );
-
-			root.innerHTML = `
-			<style>
-				::slotted(test-variant + test-variant) {
-					display: none; visibility: hidden;
-				}
-			</style>
-			<slot></slot>
-			`;
+			root.innerHTML = `<slot></slot>`;
 		}
 
 		connectedCallback () {
@@ -78,6 +69,9 @@
 				selector: goal[ 1 ] || false,
 			};
 
+			// Track if we've initialised yet as slotchange can fire multiple times.
+			let initialised = false;
+
 			// Get the slot element.
 			const slot = this.shadowRoot.querySelector( 'slot' );
 			slot.addEventListener( 'slotchange', () => {
@@ -85,18 +79,56 @@
 					.filter( node => node.nodeName === 'TEST-VARIANT' );
 
 				// Wait for all our variants to be available.
-				if ( variants.length === variantCount ) {
-					const variant = variants[ variantId || 0 ]; // Default to control.
-					const parent = element.parentNode;
+				if ( variants.length !== variantCount && ! initialised ) {
+					return;
+				}
 
-					// Replace this entire <ab-test> element.
-					element.outerHTML = variant.innerHTML;
+				initialised = true;
 
-					// Call goal handler on parent.
-					if ( variantId !== false && goal[ 0 ] && ABTest.goals[ goal[ 0 ] ] ) {
-						ABTest.goals[ goal[ 0 ] ]( parent, data );
+				const variant = variants[ variantId || 0 ]; // Default to control.
+				const parent = element.parentNode;
+
+				// Replace this entire <ab-test> element.
+				element.outerHTML = variant.innerHTML;
+
+				// Call goal handler on parent.
+				const goalHandler = ABTest.goalHandlers[ goal[ 0 ] ] || false;
+				if ( variantId === false || !goal[ 0 ] || !goalHandler ) {
+					return;
+				}
+
+				// Get nodes to bind click handler for.
+				let nodes = [ parent ];
+				if ( data.selector ) {
+					nodes = parent.querySelectorAll( data.selector );
+				} else if ( goalHandler.closest ) {
+					// Find closest allowed element.
+					const allowedNodes = goalHandler.closest.map( tag => tag.toUpperCase() );
+					let el = parent;
+					while ( el.parentNode && allowedNodes.indexOf( el.nodeName ) < 0 ) {
+						el = el.parentNode;
+					}
+					if ( allowedNodes.indexOf( el.nodeName ) >= 0 ) {
+						nodes = [ el ];
 					}
 				}
+
+				// Apply goal callback for each found node.
+				nodes.forEach( node => {
+					goalHandler.callback( node, ( attributes = {}, metrics = {} ) => {
+						window.Altis.Analytics.record( data.eventType, {
+							attributes: {
+								...attributes,
+								eventTestId: data.testId,
+								eventPostId: data.postId,
+								eventVariantId: data.variantId,
+							},
+							metrics: {
+								...metrics,
+							}
+						} );
+					} );
+				} );
 			} );
 		}
 
@@ -143,57 +175,40 @@
 		}
 
 		getTestsForUser () {
-			return JSON.parse( window.localStorage.getItem( "_hm_tests" ) ) || {};
+			return JSON.parse( window.localStorage.getItem( "_altis_ab_tests" ) ) || {};
 		}
 
 		addTestForUser ( test ) {
-			window.localStorage.setItem( "_hm_tests", JSON.stringify( { ...this.getTestsForUser(), ...test } ) );
+			window.localStorage.setItem( "_altis_ab_tests", JSON.stringify( {
+				...this.getTestsForUser(),
+				...test
+			} ) );
 		}
 
 	}
 
-	ABTest.goals = {};
+	ABTest.goalHandlers = {};
 
 	/**
 	 * Add an event handler for recording an analytics event.
 	 * The event is then used to determine the goal success.
 	 *
-	 * Callback receives the <ab-test> element's parent node and
-	 * an object with the shape:
-	 * {
-	 *   testId: <string> The test's ID.
-	 *   postId: <int> The post ID for the test.
-	 *   variantId: <int> The selected variant ID.
-	 *   selector: <string|null> An optional selector to bind events to child elements in the variant HTML.
-	 * }
+	 * Callback receives the target node and a function to record
+	 * to record the event.
+	 *
+	 * @param
 	 */
-	ABTest.registerGoal = ( name, callback ) => {
-		ABTest.goals[ name ] = callback;
+	ABTest.registerGoal = ( name, callback, closest = [] ) => {
+		ABTest.goalHandlers[ name ] = {
+			callback,
+			closest: Array.isArray( closest ) ? closest : [ closest ],
+		};
 	};
 
 	// Register built in click goal handler.
-	ABTest.registerGoal( 'click', ( element, data = {} ) => {
-		// Get nodes to bind click handler for.
-		let nodes = [];
-		if ( data.selector ) {
-			nodes = element.querySelectorAll( data.selector );
-		} else {
-			// Find nearest clickable element.
-			const allowedNodes = [ 'A' ];
-			let el = element;
-			while ( el.parentNode && allowedNodes.indexOf( el.nodeName ) < 0 ) {
-				el = el.parentNode;
-			}
-			if ( allowedNodes.indexOf( el.nodeName ) >= 0 ) {
-				nodes = [ el ];
-			}
-		}
-
+	ABTest.registerGoal( 'click', ( element, record ) => {
 		// Collect attributes.
 		const attributes = {
-			eventTestId: data.testId,
-			eventPostId: data.postId,
-			eventVariantId: data.variantId,
 			sourceNode: element.nodeName || '',
 			sourceText: element.innerText || '',
 			sourceClassName: element.className || '',
@@ -201,24 +216,20 @@
 		};
 
 		// Bind handler.
-		nodes.forEach( node => {
-			node.addEventListener( 'click', event => {
-				window.Altis.Analytics.record( 'click', {
-					attributes: Object.assign( {}, attributes, {
-						targetNode: event.target.nodeName || '',
-						targetText: event.target.innerText || '',
-						targetClassName: event.target.className || '',
-						targetId: event.target.id || '',
-						elementNode: node.nodeName || '',
-						elementText: node.innerText || '',
-						elementClassName: node.className || '',
-						elementId: node.id || '',
-						elementHref: node.href || '',
-					} ),
-				} );
-			} );
+		element.addEventListener( 'click', event => {
+			record( Object.assign( {}, attributes, {
+				targetNode: event.target.nodeName || '',
+				targetText: event.target.innerText || '',
+				targetClassName: event.target.className || '',
+				targetId: event.target.id || '',
+				elementNode: node.nodeName || '',
+				elementText: node.innerText || '',
+				elementClassName: node.className || '',
+				elementId: node.id || '',
+				elementHref: node.href || '',
+			} ) );
 		} );
-	} );
+	}, [ 'a' ] );
 
 	// Define custom elements.
 	window.customElements.define( 'test-variant', TestVariant );
