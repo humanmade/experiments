@@ -15,7 +15,7 @@ export const Results = props => {
 
 	// Check if test has ended or we have a winner.
 	const hasEnded = endTime
-		? parseInt( endTime, 10 ) >= Date.now()
+		? parseInt( endTime, 10 ) < Date.now()
 		: winner !== false;
 
 	if ( !hasEnded && !winner ) {
