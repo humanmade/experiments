@@ -15,6 +15,7 @@
     "@babel/runtime": "^7.4.5",
     "@webcomponents/shadydom": "^1.6.0",
     "@wordpress/babel-preset-default": "^4.3.0",
+    "deepmerge": "^4.0.0",
     "styled-components": "^4.3.2"
   },
   "devDependencies": {

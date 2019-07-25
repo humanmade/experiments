@@ -38,7 +38,7 @@ function admin_scripts( string $hook ) {
 
 	wp_enqueue_script(
 		'altis-ab-tests-features-titles',
-		plugins_url( 'build/features/title-ab-test.js', ROOT_DIR . '/plugin.php' ),
+		plugins_url( 'build/features/titles.js', ROOT_DIR . '/plugin.php' ),
 		[
 			'wp-plugins',
 			'wp-blocks',

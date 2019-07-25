@@ -7,7 +7,7 @@ const EnvironmentPlugin = require('webpack').EnvironmentPlugin;
 const sharedConfig = {
   mode: mode,
   entry: {
-    "features/title-ab-test": path.resolve(__dirname, "src/features/title-ab-test/index.js"),
+    "features/titles": path.resolve(__dirname, "src/features/titles/index.js"),
     tests: path.resolve(__dirname, 'src/tests.js'),
   },
   output: {
@@ -55,7 +55,7 @@ const sharedConfig = {
     "Altis": "Altis",
     "wp": "wp",
     "react": "React",
-    "react-dom": "ReactDOM",
+    "react-dom": "ReactDOM"
   },
 };
 

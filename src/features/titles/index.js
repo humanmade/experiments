@@ -17,26 +17,26 @@ const PanelRowInner = styled.div`
 .components-base-control__help { margin-top: 5px; color: #666; }
 `
 
-registerPlugin('altis-ab-tests', {
-	title: __('Experiments', 'altis-ab-tests'),
+registerPlugin( 'altis-ab-tests', {
+	title: __( 'Experiments', 'altis-ab-tests' ),
 	icon: 'lightbulb',
-	render() {
+	render () {
 		return (
 			<Fragment>
 				<PluginSidebarMoreMenuItem
 					target="altis-ab-tests"
 				>
-					{ __('Experiments', 'altis-ab-tests') }
+					{ __( 'Experiments', 'altis-ab-tests' ) }
 				</PluginSidebarMoreMenuItem>
 				<PluginSidebar
 					name="altis-ab-tests"
-					title={__('Experiments', 'altis-ab-tests')}
+					title={ __( 'Experiments', 'altis-ab-tests' ) }
 				>
 					<Panel>
 						<PanelBody
-							title={__('Post Titles', 'altis-ab-tests')}
+							title={ __( 'Post Titles', 'altis-ab-tests' ) }
 							icon="editor-paragraph"
-							initialOpen={true}
+							initialOpen={ true }
 						>
 							<PanelRow>
 								<PanelRowInner>
@@ -50,8 +50,8 @@ registerPlugin('altis-ab-tests', {
 							</PanelRow>
 							<PanelRow>
 								<PanelRowInner>
-									<p>{__('Add multiple post titles and see how each performs in real time.', 'altis-ab-tests')}</p>
-									<p>{__('To get started fill out the title fields below.', 'altis-ab-tests')}</p>
+									<p>{ __( 'Add multiple post titles and see how each performs in real time.', 'altis-ab-tests' ) }</p>
+									<p>{ __( 'To get started fill out the title fields below.', 'altis-ab-tests' ) }</p>
 									<TitleTextField />
 								</PanelRowInner>
 							</PanelRow>
@@ -64,7 +64,7 @@ registerPlugin('altis-ab-tests', {
 								<PanelRowInner>
 									<DatesField
 										name="start_time"
-										label={__('Start date', 'altis-ab-tests')}
+										label={ __( 'Start date', 'altis-ab-tests' ) }
 									/>
 								</PanelRowInner>
 							</PanelRow>
@@ -72,8 +72,8 @@ registerPlugin('altis-ab-tests', {
 								<PanelRowInner>
 									<DatesField
 										name="end_time"
-										label={__('End date', 'altis-ab-tests')}
-										defaultValue={Date.now() + (30 * 24 * 60 * 60 * 1000)}
+										label={ __( 'End date', 'altis-ab-tests' ) }
+										defaultValue={ Date.now() + ( 30 * 24 * 60 * 60 * 1000 ) }
 									/>
 								</PanelRowInner>
 							</PanelRow>

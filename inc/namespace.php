@@ -151,7 +151,6 @@ function register_post_ab_tests_rest_fields() {
 						],
 						'paused' => [
 							'type' => 'boolean',
-							'default' => true,
 						],
 						'results' => [
 							'type' => 'object',
@@ -317,7 +316,7 @@ function get_test_variants_for_post( string $test_id, int $post_id ) : array {
  * @return int Timestamp
  */
 function get_test_start_time_for_post( string $test_id, int $post_id ) : int {
-	return (int) get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_start_time', true );
+	return (int) get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_start_time', true ) ?: milliseconds();
 }
 
 /**
@@ -328,7 +327,7 @@ function get_test_start_time_for_post( string $test_id, int $post_id ) : int {
  * @return int Timestamp
  */
 function get_test_end_time_for_post( string $test_id, int $post_id ) : int {
-	return (int) get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_end_time', true );
+	return (int) get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_end_time', true ) ?: milliseconds() + ( 30 * 24 * 60 * 60 * 1000 );
 }
 
 /**
@@ -361,7 +360,7 @@ function get_test_results_for_post( string $test_id, int $post_id ) : array {
  * @return bool
  */
 function is_test_paused_for_post( string $test_id, int $post_id ) : bool {
-	return get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_paused', true );
+	return get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_paused', true ) !== 'false';
 }
 
 /**
@@ -386,7 +385,7 @@ function update_test_start_time_for_post( string $test_id, int $post_id, int $da
 }
 
 /**
- * Update the start time for a given test for a given post.
+ * Update the end time for a given test for a given post.
  *
  * @param string $test_id
  * @param string $post_id
@@ -423,7 +422,7 @@ function update_test_results_for_post( string $test_id, int $post_id, array $dat
  * @return bool
  */
 function update_is_test_paused_for_post( string $test_id, int $post_id, bool $is_paused ) {
-	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_paused', $is_paused );
+	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_paused', $is_paused ? 'true' : 'false' );
 }
 
 /**
