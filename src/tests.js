@@ -101,7 +101,7 @@
 				let nodes = [ parent ];
 				if ( data.selector ) {
 					nodes = parent.querySelectorAll( data.selector );
-				} else if ( goalHandler.closest ) {
+				} else if ( goalHandler.closest.length ) {
 					// Find closest allowed element.
 					const allowedNodes = goalHandler.closest.map( tag => tag.toUpperCase() );
 					let el = parent;
