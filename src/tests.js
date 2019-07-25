@@ -145,13 +145,19 @@
 			// Check if this user already have a variant for this test.
 			const currentTests = this.getTestsForUser();
 			let variantId = false;
-			// Test variant can be 0 so check for not undefined and not strictly false.
-			if ( typeof currentTests[ testId ] !== 'undefined' && currentTests[ testId ] !== false ) {
+			// Test variant can be 0 so check for not undefined and not strictly false and
+			// that it's a valid index.
+			if (
+				typeof currentTests[ testId ] !== 'undefined' &&
+				currentTests[ testId ] !== false &&
+				currentTests[ testId ] < this.variantCount
+			) {
 				variantId = currentTests[ testId ];
 			} else if ( currentTests[ testId ] === false ) {
 				return variantId;
 			} else {
-				// Otherwise lets check the probability we should experiment on this individual. That sounded weird.
+				// Otherwise lets check the probability we should experiment on this individual.
+				// That sounded weird.
 				if ( Math.random() * 100 > trafficPercentage ) {
 					// Exclude from this test.
 					this.addTestForUser( {
