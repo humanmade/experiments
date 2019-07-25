@@ -450,10 +450,6 @@ function is_test_running_for_post( string $test_id, int $post_id ) : bool {
  * @return string
  */
 function output_test_html_for_post( string $test_id, int $post_id, string $default_output, array $args = [] ) : string {
-	if ( ! is_test_running_for_post( $test_id, $post_id ) ) {
-		return $default_output;
-	}
-
 	$test = get_post_ab_test( $test_id );
 	$variants = get_test_variants_for_post( $test_id, $post_id );
 
@@ -467,8 +463,13 @@ function output_test_html_for_post( string $test_id, int $post_id, string $defau
 		$winner = $results['winner'] - 1;
 		return call_user_func_array(
 			$test['variant_callback'],
-			[ $variants[ $winner ], $test_id, $post_id ]
+			[ $variants[ $winner ], $post_id, $args ]
 		);
+	}
+
+	// Return default value if test is otherwise not running.
+	if ( ! is_test_running_for_post( $test_id, $post_id ) ) {
+		return $default_output;
 	}
 
 	// Generate AB Test markup.
@@ -736,6 +737,10 @@ function process_results( array $aggregations, string $test_id, int $post_id ) :
 		$winning_variant = $variants[ $winning ];
 		if ( ! is_null( $winning_variant['p'] ) && $winning_variant['p'] < 0.01 ) {
 			$winner = $winning;
+
+			// Pause the test.
+			update_is_test_paused_for_post( $test_id, $post_id, true );
+
 			/**
 			 * Dispatch action when winner found.
 			 */

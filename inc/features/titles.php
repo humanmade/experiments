@@ -59,10 +59,6 @@ function admin_scripts( string $hook ) {
  * @return string
  */
 function add_title_ab_test_to_title( string $title, int $post_id ) : string {
-	if ( ! is_test_running_for_post( 'titles', $post_id ) ) {
-		return $title;
-	}
-
 	return output_test_html_for_post( 'titles', $post_id, $title );
 }
 
