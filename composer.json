@@ -1,0 +1,16 @@
+{
+    "name": "altis/ab-tests",
+    "description": "AB Testing for WordPress powered by AWS Pinpoint",
+    "type": "wordpress-plugin",
+    "require": {
+        "altis/aws-analytics": "dev-master",
+        "markrogoyski/math-php": "^0.51.0"
+    },
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Human Made Limited",
+            "email": "hello@humanmade.com"
+        }
+    ]
+}
