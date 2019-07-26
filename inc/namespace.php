@@ -15,9 +15,6 @@ use MathPHP\Probability\Distribution\Discrete;
 use WP_Post;
 use WP_Query;
 
-// Include features.
-require_once ROOT_DIR . '/inc/features/titles.php';
-
 /**
  * Bootstrap the plugin.
  */
@@ -44,6 +41,7 @@ function setup() {
 	 */
 	$titles_feature = apply_filters( 'altis.ab_tests.features.titles', true );
 	if ( $titles_feature ) {
+		require_once ROOT_DIR . '/inc/features/titles/namespace.php';
 		Features\Titles\setup();
 	}
 }
@@ -141,10 +139,10 @@ function register_post_ab_tests_rest_fields() {
 					'type' => 'object',
 					'properties' => [
 						'start_time' => [
-							'type' => 'integer'
+							'type' => 'integer',
 						],
 						'end_time' => [
-							'type' => 'integer'
+							'type' => 'integer',
 						],
 						'traffic_percentage' => [
 							'type' => 'number',
@@ -158,13 +156,13 @@ function register_post_ab_tests_rest_fields() {
 							'readOnly' => true,
 							'properties' => [
 								'timestamp' => [
-									'type' => 'integer'
+									'type' => 'integer',
 								],
 								'winning' => [
-									'type' => 'integer'
+									'type' => 'integer',
 								],
 								'winner' => [
-									'type' => 'integer'
+									'type' => 'integer',
 								],
 								'aggs' => [
 									'type' => 'array',
@@ -278,6 +276,7 @@ function handle_cron( string $test_id, int $page = 1 ) {
 		'post_status' => 'publish',
 		'posts_per_page' => $posts_per_page,
 		'paged' => $page,
+		// phpcs:ignore
 		'meta_key' => '_altis_ab_test_' . $test_id . '_variants',
 	] );
 
@@ -547,7 +546,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 
 	if ( ! is_array( $query_filter ) ) {
 		trigger_error( sprintf(
-			"AB Tests: Query filter for test %s on post %d is not an array",
+			'AB Tests: Query filter for test %s on post %d is not an array',
 			$test_id,
 			$post_id
 		), E_USER_WARNING );
@@ -564,7 +563,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	// Scope to events associated with this test.
 	$query_filter['filter'][] = [
 		'exists' => [
-			'field' => sprintf( "attributes.test_%s.keyword", $test_id_with_post ),
+			'field' => sprintf( 'attributes.test_%s.keyword', $test_id_with_post ),
 		],
 	];
 
@@ -586,7 +585,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 
 	if ( ! is_array( $goal_filter ) ) {
 		trigger_error( sprintf(
-			"AB Tests: Goal filter for test %s on post %d is not an array",
+			'AB Tests: Goal filter for test %s on post %d is not an array',
 			$test_id,
 			$post_id
 		), E_USER_WARNING );
@@ -615,11 +614,11 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	// Collect aggregates for statistical analysis.
 	$test_aggregation = [
 		// Variant buckets.
-		"test" => [
-			"terms" => [
-				"field" => sprintf( "attributes.test_%s.keyword", $test_id_with_post ),
+		'test' => [
+			'terms' => [
+				'field' => sprintf( 'attributes.test_%s.keyword', $test_id_with_post ),
 			],
-			"aggs" => [
+			'aggs' => [
 				// Conversion events.
 				'conversions' => [
 					'filter' => [
@@ -634,21 +633,21 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 				],
 			],
 		],
-		"timestamp" => [
-			"max" => [
-				"field" => "event_timestamp",
+		'timestamp' => [
+			'max' => [
+				'field' => 'event_timestamp',
 			],
 		],
 	];
 
 	$query = [
-		"size" => 0,
-		"query" => [
-			"bool" => $query_filter,
+		'size' => 0,
+		'query' => [
+			'bool' => $query_filter,
 		],
-		"aggs" => $test_aggregation,
-		"sort" => [
-			"event_timestamp" => "desc"
+		'aggs' => $test_aggregation,
+		'sort' => [
+			'event_timestamp' => 'desc',
 		],
 	];
 
@@ -730,7 +729,7 @@ function process_results( array $aggregations, string $test_id, int $post_id ) :
 			$max_rate = $rate;
 
 			// Check sample size is large enough.
-			if ( $size * $rate >= 5 && $size * (1 - $rate) >= 5 ) {
+			if ( $size * $rate >= 5 && $size * ( 1 - $rate ) >= 5 ) {
 				$winning = $id;
 			}
 		}
