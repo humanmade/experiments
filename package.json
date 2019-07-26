@@ -1,6 +1,6 @@
 {
   "name": "altis-ab-tests",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "AWS Pinpoint powered testing tools for WordPress",
   "repository": "https://github.com/humanmade/ab-tests",
   "main": "src/tests.js",
@@ -12,23 +12,23 @@
   "author": "Robert O'Rourke <rob@humanmade.com>",
   "license": "GPL-3.0",
   "dependencies": {
-    "@babel/runtime": "^7.4.5",
-    "@webcomponents/shadydom": "^1.6.0",
-    "@wordpress/babel-preset-default": "^4.3.0",
-    "deepmerge": "^4.0.0",
-    "styled-components": "^4.3.2"
-  },
-  "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/plugin-transform-runtime": "^7.4.4",
     "@babel/polyfill": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-react": "^7.0.0",
+    "@babel/runtime": "^7.4.5",
+    "@webcomponents/shadydom": "^1.6.0",
+    "@wordpress/babel-preset-default": "^4.3.0",
     "babel-loader": "^8.0.6",
-    "eslint": "^6.0.1",
+    "deepmerge": "^4.0.0",
+    "styled-components": "^4.3.2",
     "webpack": "^4.35.0",
     "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^3.3.5"
+  },
+  "devDependencies": {
+    "eslint": "^6.0.1"
   }
 }

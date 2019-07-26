@@ -454,10 +454,10 @@ function is_test_running_for_post( string $test_id, int $post_id ) : bool {
 /**
  * Render the AB Test markup for the given test and post.
  *
- * @param string $test_id
- * @param integer $post_id
- * @param string $default_output
- * @param array $args
+ * @param string $test_id The current test ID.
+ * @param integer $post_id The post ID for the test.
+ * @param string $default_output The fallback / control variant output.
+ * @param array $args Optional array of args to pass through to the `variant_callback`.
  * @return string
  */
 function output_test_html_for_post( string $test_id, int $post_id, string $default_output, array $args = [] ) : string {
@@ -494,11 +494,11 @@ function output_test_html_for_post( string $test_id, int $post_id, string $defau
 		variant-count="<?php echo intval( count( $variants ) + 1 ); ?>"
 	>
 		<test-variant control="true"><?php echo $default_output; ?></test-variant>
-		<?php foreach ( $variants as $variant ) { ?>
+		<?php foreach ( $variants as $variant ) : ?>
 		<test-variant>
 			<?php echo call_user_func_array( $test['variant_callback'], [ $variant, $post_id, $args ] ); ?>
 		</test-variant>
-		<?php } ?>
+		<?php endforeach; ?>
 	</ab-test>
 	<?php
 	return ob_get_clean();
