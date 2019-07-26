@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Altis AB Tests
  * Description: A companion plugin to Altis Analytics that provides built in AB Testing features and an extensible API.
- * Version: 0.1.0
+ * Version: 1.0.0
  * Author: Human Made Limited
  * Author URL: https://humanmade.com/
  */
