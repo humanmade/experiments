@@ -10,7 +10,7 @@ export const Results = props => {
 	const { winner, variants = [] } = results;
 
 	// Ensure titles and variants are present.
-	if ( !titles.length || variants.length < 2 ) {
+	if ( ! titles.length || variants.length < 2 ) {
 		return null;
 	}
 
@@ -19,7 +19,7 @@ export const Results = props => {
 		? parseInt( endTime, 10 ) < Date.now()
 		: winner !== false;
 
-	if ( !hasEnded && !winner ) {
+	if ( ! hasEnded && ! winner ) {
 		return null;
 	}
 

@@ -1,11 +1,12 @@
 ( async () => {
 	// Set public path for dynamic chunks.
+	// eslint-disable-next-line
 	__webpack_public_path__ = window.Altis.Analytics.ABTest.BuildURL;
 
 	const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
 
 	// Load polyfill async if needed.
-	if ( !supportsShadowDOMV1 ) {
+	if ( ! supportsShadowDOMV1 ) {
 		await import( '@webcomponents/shadydom' );
 	}
 
@@ -25,23 +26,23 @@
 	 */
 	class ABTest extends HTMLElement {
 
-		get testId () {
+		get testId() {
 			return this.getAttribute( 'test-id' );
 		}
 
-		get postId () {
+		get postId() {
 			return this.getAttribute( 'post-id' );
 		}
 
-		get trafficPercentage () {
+		get trafficPercentage() {
 			return this.getAttribute( 'traffic-percentage' );
 		}
 
-		get goal () {
+		get goal() {
 			return this.getAttribute( 'goal' );
 		}
 
-		get variantCount () {
+		get variantCount() {
 			return parseInt( this.getAttribute( 'variant-count' ), 10 );
 		}
 
@@ -51,7 +52,7 @@
 			root.innerHTML = `<slot></slot>`;
 		}
 
-		connectedCallback () {
+		connectedCallback() {
 			// Assign variant ID.
 			const variantId = this.getVariantId();
 
@@ -93,7 +94,7 @@
 
 				// Call goal handler on parent.
 				const goalHandler = ABTest.goalHandlers[ goal[ 0 ] ] || false;
-				if ( variantId === false || !goal[ 0 ] || !goalHandler ) {
+				if ( variantId === false || ! goal[ 0 ] || ! goalHandler ) {
 					return;
 				}
 
@@ -125,14 +126,14 @@
 							},
 							metrics: {
 								...metrics,
-							}
+							},
 						} );
 					} );
 				} );
 			} );
 		}
 
-		getVariantId () {
+		getVariantId() {
 			const testId = `${ this.testId }_${ this.postId }`;
 			const trafficPercentage = this.trafficPercentage;
 
@@ -161,14 +162,14 @@
 				if ( Math.random() * 100 > trafficPercentage ) {
 					// Exclude from this test.
 					this.addTestForUser( {
-						[ testId ]: false
+						[ testId ]: false,
 					} );
 					return variantId;
 				}
 				// Add one of the variants to the cookie.
 				variantId = Math.floor( Math.random() * this.variantCount );
 				this.addTestForUser( {
-					[ testId ]: variantId
+					[ testId ]: variantId,
 				} );
 			}
 
@@ -180,14 +181,14 @@
 			return variantId;
 		}
 
-		getTestsForUser () {
-			return JSON.parse( window.localStorage.getItem( "_altis_ab_tests" ) ) || {};
+		getTestsForUser() {
+			return JSON.parse( window.localStorage.getItem( '_altis_ab_tests' ) ) || {};
 		}
 
-		addTestForUser ( test ) {
-			window.localStorage.setItem( "_altis_ab_tests", JSON.stringify( {
+		addTestForUser( test ) {
+			window.localStorage.setItem( '_altis_ab_tests', JSON.stringify( {
 				...this.getTestsForUser(),
-				...test
+				...test,
 			} ) );
 		}
 
@@ -215,10 +216,11 @@
 	ABTest.registerGoal( 'click', ( element, record ) => {
 		// Collect attributes.
 		const attributes = {
-			sourceNode: element.nodeName || '',
-			sourceText: element.innerText || '',
-			sourceClassName: element.className || '',
-			sourceId: element.id || '',
+			elementNode: element.nodeName || '',
+			elementText: element.innerText || '',
+			elementClassName: element.className || '',
+			elementId: element.id || '',
+			elementHref: element.href || '',
 		};
 
 		// Bind handler.
@@ -228,11 +230,7 @@
 				targetText: event.target.innerText || '',
 				targetClassName: event.target.className || '',
 				targetId: event.target.id || '',
-				elementNode: node.nodeName || '',
-				elementText: node.innerText || '',
-				elementClassName: node.className || '',
-				elementId: node.id || '',
-				elementHref: node.href || '',
+				targetSrc: event.target.nodeName === 'IMG' ? event.target.src : '',
 			} ) );
 		} );
 	}, [ 'a' ] );

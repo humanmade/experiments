@@ -11,7 +11,7 @@ const { PluginSidebar, PluginSidebarMoreMenuItem } = wp.editPost;
 const { registerPlugin } = wp.plugins;
 const { __ } = wp.i18n;
 const {
-	Panel, PanelBody, PanelRow
+	Panel, PanelBody, PanelRow,
 } = wp.components;
 
 const PanelRowInner = styled.div`
@@ -21,7 +21,7 @@ const PanelRowInner = styled.div`
 registerPlugin( 'altis-ab-tests', {
 	title: __( 'Experiments', 'altis-ab-tests' ),
 	icon: 'lightbulb',
-	render () {
+	render() {
 		return (
 			<Fragment>
 				<PluginSidebarMoreMenuItem

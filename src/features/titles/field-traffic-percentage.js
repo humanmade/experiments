@@ -36,7 +36,7 @@ export const TrafficPercentageWithData = compose(
 			.getEditedPostAttribute( 'ab_tests' ).titles.traffic_percentage || 35;
 		return {
 			percentage: parseFloat( percentage ),
-			ab_tests: select( 'core/editor' ).getEditedPostAttribute( 'ab_tests' )
+			ab_tests: select( 'core/editor' ).getEditedPostAttribute( 'ab_tests' ),
 		};
 	} ),
 	withDispatch( ( dispatch, props ) => {
@@ -47,9 +47,9 @@ export const TrafficPercentageWithData = compose(
 				}, {
 					ab_tests: {
 						titles: {
-							traffic_percentage: percentage
-						}
-					}
+							traffic_percentage: percentage,
+						},
+					},
 				} ) );
 			}
 		};

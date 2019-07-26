@@ -54,7 +54,7 @@ export const TitleTextField = props => {
 							} }
 							placeholder={ __( 'Enter your title here.', 'altis-ab-tests' ) }
 							value={ title }
-							readOnly={ !paused }
+							readOnly={ ! paused }
 						/>
 						<PercentageChange>
 							{ `${ change >= 0 ? '+' : '' }${ change.toFixed( 2 ) }` }%
@@ -90,7 +90,7 @@ export const TitleTextFieldWithData = compose(
 					newTitles[ index ] = title;
 				}
 				dispatch( 'core/editor' ).editPost( {
-					ab_test_titles: newTitles
+					ab_test_titles: newTitles,
 				} );
 			}
 		};
