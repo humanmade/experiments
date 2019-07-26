@@ -92,7 +92,7 @@ export const TitleTextFieldWithData = compose(
 				dispatch( 'core/editor' ).editPost( {
 					ab_test_titles: newTitles,
 				} );
-			}
+			},
 		};
 	} )
 )( TitleTextField );

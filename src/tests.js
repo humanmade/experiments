@@ -3,7 +3,7 @@
 	// eslint-disable-next-line
 	__webpack_public_path__ = window.Altis.Analytics.ABTest.BuildURL;
 
-	const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
+	const supportsShadowDOMV1 = ! ! HTMLElement.prototype.attachShadow;
 
 	// Load polyfill async if needed.
 	if ( ! supportsShadowDOMV1 ) {
@@ -17,7 +17,7 @@
 		constructor() {
 			super();
 			const root = this.attachShadow( { mode: 'open' } );
-			root.innerHTML = `<slot></slot>`;
+			root.innerHTML = '<slot></slot>';
 		}
 	}
 
@@ -49,7 +49,7 @@
 		constructor() {
 			super();
 			const root = this.attachShadow( { mode: 'open' } );
-			root.innerHTML = `<slot></slot>`;
+			root.innerHTML = '<slot></slot>';
 		}
 
 		connectedCallback() {

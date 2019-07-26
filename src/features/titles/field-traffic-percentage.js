@@ -51,7 +51,7 @@ export const TrafficPercentageWithData = compose(
 						},
 					},
 				} ) );
-			}
+			},
 		};
 	} )
 )( TrafficPercentage );

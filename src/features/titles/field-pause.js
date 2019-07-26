@@ -49,7 +49,7 @@ export const PauseFieldWithData = compose(
 						},
 					},
 				} ) );
-			}
+			},
 		};
 	} )
 )( PauseField );
