@@ -1,9 +1,10 @@
+/* global wp */
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import deepmerge from 'deepmerge';
 
 const { RangeControl } = wp.components;
-const { withSelect, withDispatch, useSelect } = wp.data;
+const { withSelect, withDispatch } = wp.data;
 const { compose } = wp.compose;
 const { __ } = wp.i18n;
 

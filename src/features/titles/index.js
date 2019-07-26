@@ -1,3 +1,4 @@
+/* global wp */
 import React, { Fragment } from 'react';
 import DatesField from './field-dates';
 import TitleTextField from './field-title-text';

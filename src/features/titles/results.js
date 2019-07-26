@@ -1,3 +1,4 @@
+/* global wp */
 import React, { Fragment } from 'react';
 
 const { withSelect } = wp.data;

@@ -1,3 +1,4 @@
+/* global wp */
 import React, { Fragment } from 'react';
 import deepmerge from 'deepmerge';
 
@@ -10,7 +11,7 @@ export const PauseField = props => {
 	const { paused, setPaused, published } = props;
 
 	// Only published posts can be unpaused.
-	if ( !published ) {
+	if ( ! published ) {
 		return null;
 	}
 
@@ -39,24 +40,15 @@ export const PauseFieldWithData = compose(
 	withDispatch( ( dispatch, props ) => {
 		return {
 			setPaused: paused => {
-				console.log( deepmerge( {
-					ab_tests: props.ab_tests,
-				}, {
-						ab_tests: {
-							titles: {
-								paused: paused
-							}
-						}
-					} ), props.ab_tests )
 				dispatch( 'core/editor' ).editPost( deepmerge( {
 					ab_tests: props.ab_tests,
 				}, {
-						ab_tests: {
-							titles: {
-								paused: paused
-							}
-						}
-					} ) );
+					ab_tests: {
+						titles: {
+							paused: paused,
+						},
+					},
+				} ) );
 			}
 		};
 	} )

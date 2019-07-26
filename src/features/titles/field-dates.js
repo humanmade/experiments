@@ -1,17 +1,17 @@
+/* global wp */
 import React, { Fragment } from 'react';
 import deepmerge from 'deepmerge';
 
 const { TimePicker } = wp.components;
 const { withSelect, withDispatch } = wp.data;
 const { compose } = wp.compose;
-const { __ } = wp.i18n;
 
 export const DateRange = props => {
 	const {
 		description,
 		label,
 		setTime,
-		time
+		time,
 	} = props;
 
 	return (
