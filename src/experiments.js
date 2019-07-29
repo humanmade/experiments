@@ -1,7 +1,7 @@
 ( async () => {
 	// Set public path for dynamic chunks.
 	// eslint-disable-next-line
-	__webpack_public_path__ = window.Altis.Analytics.ABTest.BuildURL;
+	__webpack_public_path__ = window.Altis.Analytics.Experiments.BuildURL;
 
 	const supportsShadowDOMV1 = ! ! HTMLElement.prototype.attachShadow;
 
