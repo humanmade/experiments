@@ -102,7 +102,7 @@ function get_post_ab_test( string $test_id ) : array {
  * Register the rest api field for all the tests on a post.
  */
 function register_post_ab_tests_rest_fields() {
-	register_rest_field( 'post', 'experiments', [
+	register_rest_field( 'post', 'ab_tests', [
 		'get_callback' => function ( $post ) {
 			$response = [];
 			foreach ( array_keys( get_post_ab_tests() ) as $test_id ) {
