@@ -1,6 +1,6 @@
 {
-    "name": "altis/ab-tests",
-    "description": "AB Testing for WordPress powered by AWS Pinpoint",
+    "name": "altis/experiments",
+    "description": "Web Experimentation framework for Altis",
     "type": "wordpress-plugin",
     "require": {
         "altis/aws-analytics": "^1.0.0",
