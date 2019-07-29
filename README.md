@@ -126,9 +126,9 @@ How you manage the variant data is up to you, for example you could use Fieldman
 
 Note you should use the following functions to get and update the variants:
 
-**`get_test_variants_for_post( string $test_id, int $post_id ) : array`**
+**`get_ab_test_variants_for_post( string $test_id, int $post_id ) : array`**
 
-**`update_test_variants_for_post( string $test_id, int $post_id, array $variants )`**
+**`update_ab_test_variants_for_post( string $test_id, int $post_id, array $variants )`**
 
 ## Roadmap
 
