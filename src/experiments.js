@@ -22,9 +22,11 @@
 	}
 
 	/**
-	 * Custom AB Test element.
+	 * Test element base class.
 	 */
-	class ABTest extends HTMLElement {
+	class Test extends HTMLElement {
+
+		storageKey = '_altis_tests';
 
 		get testId() {
 			return this.getAttribute( 'test-id' );
@@ -34,16 +36,20 @@
 			return this.getAttribute( 'post-id' );
 		}
 
+		get testIdWithPost() {
+			return `${ this.testId }_${ this.postId }`;
+		}
+
 		get trafficPercentage() {
 			return this.getAttribute( 'traffic-percentage' );
 		}
 
-		get goal() {
-			return this.getAttribute( 'goal' );
-		}
-
 		get variantCount() {
 			return parseInt( this.getAttribute( 'variant-count' ), 10 );
+		}
+
+		get goal() {
+			return this.getAttribute( 'goal' );
 		}
 
 		constructor() {
@@ -53,6 +59,42 @@
 		}
 
 		connectedCallback() {
+			// Extract test set by URL parameters.
+			const regex = new RegExp( `(utm_campaign|set_test)=test_${ this.testIdWithPost }:(\\d+)`, 'i' );
+			const url_test = window.location.search.match( regex );
+			if ( url_test ) {
+				this.addTestForUser( { [ this.testIdWithPost ]: parseInt( url_test[ 2 ], 10 ) } );
+			}
+
+			// Initialise component.
+			this.init();
+		}
+
+		init() {
+			window.console && window.console.error( 'Children of Class Test must implement an init() method.' );
+		}
+
+		getTestsForUser() {
+			return JSON.parse( window.localStorage.getItem( this.storageKey ) ) || {};
+		}
+
+		addTestForUser( test ) {
+			window.localStorage.setItem( this.storageKey, JSON.stringify( {
+				...this.getTestsForUser(),
+				...test,
+			} ) );
+		}
+
+	}
+
+	/**
+	 * Custom AB Test element.
+	 */
+	class ABTest extends Test {
+
+		storageKey = '_altis_ab_tests';
+
+		init() {
 			// Assign variant ID.
 			const variantId = this.getVariantId();
 
@@ -93,7 +135,7 @@
 				element.outerHTML = variant.innerHTML;
 
 				// Call goal handler on parent.
-				const goalHandler = ABTest.goalHandlers[ goal[ 0 ] ] || false;
+				const goalHandler = Test.goalHandlers[ goal[ 0 ] ] || false;
 				if ( variantId === false || ! goal[ 0 ] || ! goalHandler ) {
 					return;
 				}
@@ -134,14 +176,8 @@
 		}
 
 		getVariantId() {
-			const testId = `${ this.testId }_${ this.postId }`;
+			const testId = this.testIdWithPost;
 			const trafficPercentage = this.trafficPercentage;
-
-			// Extract test set by campaign parameter and add for user.
-			const utm_test = window.location.search.match( /utm_campaign=test_([a-z0-9_-]+):(\d+)/i );
-			if ( utm_test ) {
-				this.addTestForUser( { [ utm_test[ 1 ] ]: parseInt( utm_test[ 2 ], 10 ) } );
-			}
 
 			// Check if this user already have a variant for this test.
 			const currentTests = this.getTestsForUser();
@@ -181,20 +217,12 @@
 			return variantId;
 		}
 
-		getTestsForUser() {
-			return JSON.parse( window.localStorage.getItem( '_altis_ab_tests' ) ) || {};
-		}
-
-		addTestForUser( test ) {
-			window.localStorage.setItem( '_altis_ab_tests', JSON.stringify( {
-				...this.getTestsForUser(),
-				...test,
-			} ) );
-		}
-
 	}
 
-	ABTest.goalHandlers = {};
+	/**
+	 * Static list of goal handlers.
+	 */
+	Test.goalHandlers = {};
 
 	/**
 	 * Add an event handler for recording an analytics event.
@@ -205,15 +233,15 @@
 	 *
 	 * @param
 	 */
-	ABTest.registerGoal = ( name, callback, closest = [] ) => {
-		ABTest.goalHandlers[ name ] = {
+	Test.registerGoal = ( name, callback, closest = [] ) => {
+		Test.goalHandlers[ name ] = {
 			callback,
 			closest: Array.isArray( closest ) ? closest : [ closest ],
 		};
 	};
 
 	// Register built in click goal handler.
-	ABTest.registerGoal( 'click', ( element, record ) => {
+	Test.registerGoal( 'click', ( element, record ) => {
 		// Collect attributes.
 		const attributes = {
 			elementNode: element.nodeName || '',
@@ -240,7 +268,7 @@
 	window.customElements.define( 'ab-test', ABTest );
 
 	// Expose ABTest methods.
-	window.Altis.Analytics.ABTest = Object.assign( {}, window.Altis.Analytics.ABTest || {}, {
-		registerGoal: ABTest.registerGoal,
+	window.Altis.Analytics.Experiments = Object.assign( {}, window.Altis.Analytics.Experiments || {}, {
+		registerGoal: Test.registerGoal,
 	} );
 } )();
