@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin Name: Altis AB Tests
- * Description: A companion plugin to Altis Analytics that provides built in AB Testing features and an extensible API.
- * Version: 1.0.0
+ * Plugin Name: Altis Experiments
+ * Description: A companion plugin to Altis Analytics that provides a web experimentation framework.
+ * Version: 1.1.0
  * Author: Human Made Limited
  * Author URL: https://humanmade.com/
  */
 
-namespace Altis\AB_Tests;
+namespace Altis\Experiments;
 
 const ROOT_DIR = __DIR__;
 

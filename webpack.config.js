@@ -8,7 +8,7 @@ const sharedConfig = {
 	mode: mode,
 	entry: {
 		'features/titles': path.resolve( __dirname, 'src/features/titles/index.js' ),
-		tests: path.resolve( __dirname, 'src/tests.js' ),
+		experiments: path.resolve( __dirname, 'src/experiments.js' ),
 	},
 	output: {
 		path: path.resolve( __dirname, 'build' ),

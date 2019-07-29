@@ -2,14 +2,14 @@
 /**
  * Title AB testing feature.
  *
- * @package altis-ab-tests
+ * @package altis-experiments
  */
 
-namespace Altis\AB_Tests\Features\Titles;
+namespace Altis\Experiments\Features\Titles;
 
-use const Altis\AB_Tests\ROOT_DIR;
-use function Altis\AB_Tests\output_test_html_for_post;
-use function Altis\AB_Tests\register_post_ab_test;
+use const Altis\Experiments\ROOT_DIR;
+use function Altis\Experiments\output_test_html_for_post;
+use function Altis\Experiments\register_post_ab_test;
 
 /**
  * Bootstrap Title AB Tests Feature.
@@ -36,7 +36,7 @@ function admin_scripts( string $hook ) {
 	}
 
 	wp_enqueue_script(
-		'altis-ab-tests-features-titles',
+		'altis-experiments-features-titles',
 		plugins_url( 'build/features/titles.js', ROOT_DIR . '/plugin.php' ),
 		[
 			'wp-plugins',
@@ -58,7 +58,7 @@ function admin_scripts( string $hook ) {
  * @return string
  */
 function add_title_ab_test_to_title( string $title, int $post_id ) : string {
-	return output_test_html_for_post( 'titles', $post_id, $title );
+	return output_ab_test_html_for_post( 'titles', $post_id, $title );
 }
 
 /**

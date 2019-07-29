@@ -1,9 +1,9 @@
 {
-  "name": "altis-ab-tests",
+  "name": "altis-experiments",
   "version": "0.1.0",
-  "description": "AWS Pinpoint powered testing tools for WordPress",
+  "description": "Web experimentation tools for Altis",
   "repository": "https://github.com/humanmade/ab-tests",
-  "main": "src/tests.js",
+  "main": "src/experiments.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --config webpack.config.js",

@@ -1,25 +1,25 @@
-Altis AB Tests
-==============
+Altis Experiments
+=================
 
-AB Testing tools for Altis.
+Web Experimentation framework for Altis.
 
 ## Features
 
 The plugin currently provides the following built in features:
 
-### Post titles
+### Post Title AB Tests
 
 With this feature enabled it's simple to create AB Tests for your post titles directly from the post edit screen.
 
 It is enabled by default but can be disabled using the following filter:
 
 ```php
-add_filter( 'altis.ab_tests.features.titles', '__return_false' );
+add_filter( 'altis.experiments.features.titles', '__return_false' );
 ```
 
 ## Usage
 
-The plugin provides a programmatic API to register AB tests for posts:
+The plugin provides a programmatic API to register custom AB Tests for post data:
 
 **`register_post_ab_test( string $test_id, array $options )`**
 
@@ -34,7 +34,7 @@ Sets up the test.
   - `query_filter <string | callable>`: Elasticsearch bool query to filter total events being queried.
   - `variant_callback <callable>`: An optional callback used to render variants based. Recieves the variant value, test ID and post ID as arguments. By default passes the variant value through directly.
 
-**`output_test_html_for_post( string $test_id, int $post_id, string $default_content, array $args = [] )`**
+**`output_ab_test_html_for_post( string $test_id, int $post_id, string $default_content, array $args = [] )`**
 
 Returns the AB Test markup for client side processing.
 
@@ -44,7 +44,7 @@ Returns the AB Test markup for client side processing.
 - `$args`: An optional array of data to pass through to `variant_callback`.
 
 ```php
-namespace Altis\AB_Tests;
+namespace Altis\Experiments;
 
 // Register the test.
 register_post_ab_test( 'featured_images', [
@@ -62,7 +62,7 @@ register_post_ab_test( 'featured_images', [
 
 // Apply the test by filtering some standard output.
 add_filter( 'post_thumbnail_html', function ( $html, $post_id, $post_thumbnail_id, $size, $attr ) {
-	return output_test_html_for_post( 'featured_images', $post_id, $html, [
+	return output_ab_test_html_for_post( 'featured_images', $post_id, $html, [
 		'size' => $size,
 		'attr' => $attr,
 	] );
@@ -85,7 +85,7 @@ For example setting the goal to `click:.my-target` will track a conversion when 
 
 You can define your own goal handlers in JavaScript:
 
-**`Altis.Analytics.ABTest.registerGoal( name <string>, callback <function>, closest <array> )`**
+**`Altis.Analytics.Experiments.registerGoal( name <string>, callback <function>, closest <array> )`**
 
 This function adds a goal handler where `name` corresponds to the value of `$options['goal']` when registering an AB Test.
 
@@ -99,7 +99,7 @@ The callback receives the following parameters:
 The `closest` parameter allows you to ensure the element passed to your callback is of a certain type, achieved by stepping up through the DOM tree, for example to return only anchor tags you would pass `[ 'a' ]`.
 
 ```js
-Altis.Analytics.ABTest.registerGoal( 'scrollIntoView', function ( element, record ) {
+Altis.Analytics.Experiments.registerGoal( 'scrollIntoView', function ( element, record ) {
 	var listener = function () {
 		// Check element has come into view or not.
 		if ( element.getBoundingClientRect().top > window.innerHeight ) {

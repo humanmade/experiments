@@ -2,11 +2,11 @@
 /**
  * AB Tests.
  *
- * @package altis-ab-tests
+ * @package altis-experiments
  *
  */
 
-namespace Altis\AB_Tests;
+namespace Altis\Experiments;
 
 use function Altis\Analytics\Utils\merge_aggregates;
 use function Altis\Analytics\Utils\milliseconds;
@@ -32,14 +32,14 @@ function setup() {
 	add_action( 'rest_api_init', __NAMESPACE__ . '\\register_post_ab_tests_rest_fields' );
 
 	// Hook cron task.
-	add_action( 'altis_post_ab_test_cron', __NAMESPACE__ . '\\handle_cron', 10, 2 );
+	add_action( 'altis_post_ab_test_cron', __NAMESPACE__ . '\\handle_post_ab_test_cron', 10, 2 );
 
 	/**
 	 * Enable Title AB Tests.
 	 *
 	 * @param bool $enabled Whether to enable this feature or not.
 	 */
-	$titles_feature = apply_filters( 'altis.ab_tests.features.titles', true );
+	$titles_feature = apply_filters( 'altis.experiments.features.titles', true );
 	if ( $titles_feature ) {
 		require_once ROOT_DIR . '/inc/features/titles/namespace.php';
 		Features\Titles\setup();
@@ -51,8 +51,8 @@ function setup() {
  */
 function enqueue_scripts() {
 	wp_enqueue_script(
-		'altis-ab-tests',
-		plugins_url( 'build/tests.js', ROOT_DIR . '/plugin.php' ),
+		'altis-experiments',
+		plugins_url( 'build/experiments.js', ROOT_DIR . '/plugin.php' ),
 		[
 			'altis-analytics',
 		]
@@ -60,7 +60,7 @@ function enqueue_scripts() {
 	wp_add_inline_script(
 		'altis-ab-tests',
 		sprintf(
-			'var Altis = Altis || {}; Altis.Analytics = Altis.Analytics || {}; Altis.Analytics.ABTest = %s;',
+			'var Altis = Altis || {}; Altis.Analytics = Altis.Analytics || {}; Altis.Analytics.Experiments = %s;',
 			wp_json_encode( [
 				'BuildURL' => plugins_url( 'build/', ROOT_DIR . '/plugin.php' ),
 			] )
@@ -102,7 +102,7 @@ function get_post_ab_test( string $test_id ) : array {
  * Register the rest api field for all the tests on a post.
  */
 function register_post_ab_tests_rest_fields() {
-	register_rest_field( 'post', 'ab_tests', [
+	register_rest_field( 'post', 'experiments', [
 		'get_callback' => function ( $post ) {
 			$response = [];
 			foreach ( array_keys( get_post_ab_tests() ) as $test_id ) {
@@ -242,10 +242,10 @@ function register_post_ab_test( string $test_id, array $options ) {
 		$options['rest_api_variants_field'],
 		[
 			'get_callback' => function ( $post ) use ( $test_id ) : array {
-				return get_test_variants_for_post( $test_id, $post['id'] );
+				return get_ab_test_variants_for_post( $test_id, $post['id'] );
 			},
 			'update_callback' => function ( array $variants, WP_Post $post ) use ( $test_id ) {
-				return update_test_variants_for_post( $test_id, $post->ID, $variants );
+				return update_ab_test_variants_for_post( $test_id, $post->ID, $variants );
 			},
 			'schema' => [
 				'type' => 'array',
@@ -268,7 +268,7 @@ function register_post_ab_test( string $test_id, array $options ) {
  * @param string $test_id
  * @param integer $page
  */
-function handle_cron( string $test_id, int $page = 1 ) {
+function handle_post_ab_test_cron( string $test_id, int $page = 1 ) {
 	$posts_per_page = 50;
 	$posts = new WP_Query( [
 		'post_type' => get_post_types( [ 'public' => true ] ),
@@ -297,7 +297,7 @@ function handle_cron( string $test_id, int $page = 1 ) {
  * @param string $post_id
  * @return array
  */
-function get_test_variants_for_post( string $test_id, int $post_id ) : array {
+function get_ab_test_variants_for_post( string $test_id, int $post_id ) : array {
 	$value = get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_variants', true );
 
 	if ( $value ) {
@@ -369,12 +369,12 @@ function is_test_paused_for_post( string $test_id, int $post_id ) : bool {
  * @param string $post_id
  * @param array
  */
-function update_test_variants_for_post( string $test_id, int $post_id, array $variants ) {
+function update_ab_test_variants_for_post( string $test_id, int $post_id, array $variants ) {
 	/**
 	 * If the variants have changed we need to reset the current results
 	 * except for the last update timestamp.
 	 */
-	$old_variants = get_test_variants_for_post( $test_id, $post_id );
+	$old_variants = get_ab_test_variants_for_post( $test_id, $post_id );
 	if ( ! empty( array_diff( $old_variants, $variants ) ) ) {
 		$results = get_test_results_for_post( $test_id, $post_id );
 		update_test_results_for_post( $test_id, $post_id, [
@@ -443,7 +443,7 @@ function update_is_test_paused_for_post( string $test_id, int $post_id, bool $is
  * @return boolean
  */
 function is_test_running_for_post( string $test_id, int $post_id ) : bool {
-	$has_variants = (bool) get_test_variants_for_post( $test_id, $post_id );
+	$has_variants = (bool) get_ab_test_variants_for_post( $test_id, $post_id );
 	$is_paused = (bool) is_test_paused_for_post( $test_id, $post_id );
 	$start_time = (int) get_test_start_time_for_post( $test_id, $post_id );
 	$end_time = (int) get_test_end_time_for_post( $test_id, $post_id );
@@ -459,9 +459,9 @@ function is_test_running_for_post( string $test_id, int $post_id ) : bool {
  * @param array $args Optional array of args to pass through to the `variant_callback`.
  * @return string
  */
-function output_test_html_for_post( string $test_id, int $post_id, string $default_output, array $args = [] ) : string {
+function output_ab_test_html_for_post( string $test_id, int $post_id, string $default_output, array $args = [] ) : string {
 	$test = get_post_ab_test( $test_id );
-	$variants = get_test_variants_for_post( $test_id, $post_id );
+	$variants = get_ab_test_variants_for_post( $test_id, $post_id );
 
 	// Check for winner and return that if present.
 	$results = get_test_results_for_post( $test_id, $post_id );
@@ -678,7 +678,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	);
 
 	// Sort buckets by variant ID.
-	$variants = get_test_variants_for_post( $test_id, $post_id );
+	$variants = get_ab_test_variants_for_post( $test_id, $post_id );
 	$new_aggs = $result['aggregations']['sterms#test']['buckets'] ?? [];
 	$sorted_aggs = array_fill( 0, count( $variants ) + 1, [] );
 
@@ -692,7 +692,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	);
 
 	// Process for a winner.
-	$processed_results = process_results( $merged_data['aggs'], $test_id, $post_id );
+	$processed_results = analyse_ab_test_results( $merged_data['aggs'], $test_id, $post_id );
 	$merged_data = wp_parse_args( $processed_results, $merged_data );
 
 	// Save updated data.
@@ -705,7 +705,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
  * @param array $aggregations Results from elasticsearch.
  * @return array Array of winner ID, current winning variant ID and variant stats.
  */
-function process_results( array $aggregations, string $test_id, int $post_id ) : array {
+function analyse_ab_test_results( array $aggregations, string $test_id, int $post_id ) : array {
 	// Track winning variant.
 	$winner = false;
 	$winning = false;
