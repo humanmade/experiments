@@ -8,7 +8,7 @@
 namespace Altis\Experiments\Features\Titles;
 
 use const Altis\Experiments\ROOT_DIR;
-use function Altis\Experiments\output_test_html_for_post;
+use function Altis\Experiments\output_ab_test_html_for_post;
 use function Altis\Experiments\register_post_ab_test;
 
 /**

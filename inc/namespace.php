@@ -58,7 +58,7 @@ function enqueue_scripts() {
 		]
 	);
 	wp_add_inline_script(
-		'altis-ab-tests',
+		'altis-experiments',
 		sprintf(
 			'var Altis = Altis || {}; Altis.Analytics = Altis.Analytics || {}; Altis.Analytics.Experiments = %s;',
 			wp_json_encode( [
