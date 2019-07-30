@@ -2,11 +2,11 @@
 /**
  * AB Tests.
  *
- * @package altis-ab-tests
+ * @package altis-experiments
  *
  */
 
-namespace Altis\AB_Tests;
+namespace Altis\Experiments;
 
 use function Altis\Analytics\Utils\merge_aggregates;
 use function Altis\Analytics\Utils\milliseconds;
@@ -32,14 +32,14 @@ function setup() {
 	add_action( 'rest_api_init', __NAMESPACE__ . '\\register_post_ab_tests_rest_fields' );
 
 	// Hook cron task.
-	add_action( 'altis_post_ab_test_cron', __NAMESPACE__ . '\\handle_cron', 10, 2 );
+	add_action( 'altis_post_ab_test_cron', __NAMESPACE__ . '\\handle_post_ab_test_cron', 10, 2 );
 
 	/**
 	 * Enable Title AB Tests.
 	 *
 	 * @param bool $enabled Whether to enable this feature or not.
 	 */
-	$titles_feature = apply_filters( 'altis.ab_tests.features.titles', true );
+	$titles_feature = apply_filters( 'altis.experiments.features.titles', true );
 	if ( $titles_feature ) {
 		require_once ROOT_DIR . '/inc/features/titles/namespace.php';
 		Features\Titles\setup();
@@ -51,16 +51,16 @@ function setup() {
  */
 function enqueue_scripts() {
 	wp_enqueue_script(
-		'altis-ab-tests',
-		plugins_url( 'build/tests.js', ROOT_DIR . '/plugin.php' ),
+		'altis-experiments',
+		plugins_url( 'build/experiments.js', ROOT_DIR . '/plugin.php' ),
 		[
 			'altis-analytics',
 		]
 	);
 	wp_add_inline_script(
-		'altis-ab-tests',
+		'altis-experiments',
 		sprintf(
-			'var Altis = Altis || {}; Altis.Analytics = Altis.Analytics || {}; Altis.Analytics.ABTest = %s;',
+			'var Altis = Altis || {}; Altis.Analytics = Altis.Analytics || {}; Altis.Analytics.Experiments = %s;',
 			wp_json_encode( [
 				'BuildURL' => plugins_url( 'build/', ROOT_DIR . '/plugin.php' ),
 			] )
@@ -107,11 +107,11 @@ function register_post_ab_tests_rest_fields() {
 			$response = [];
 			foreach ( array_keys( get_post_ab_tests() ) as $test_id ) {
 				$response[ $test_id ] = [
-					'start_time'         => get_test_start_time_for_post( $test_id, $post['id'] ),
-					'end_time'           => get_test_end_time_for_post( $test_id, $post['id'] ),
-					'traffic_percentage' => get_test_traffic_percentage_for_post( $test_id, $post['id'] ),
-					'paused'             => is_test_paused_for_post( $test_id, $post['id'] ),
-					'results'            => (object) get_test_results_for_post( $test_id, $post['id'] ),
+					'start_time'         => get_ab_test_start_time_for_post( $test_id, $post['id'] ),
+					'end_time'           => get_ab_test_end_time_for_post( $test_id, $post['id'] ),
+					'traffic_percentage' => get_ab_test_traffic_percentage_for_post( $test_id, $post['id'] ),
+					'paused'             => is_ab_test_paused_for_post( $test_id, $post['id'] ),
+					'results'            => (object) get_ab_test_results_for_post( $test_id, $post['id'] ),
 				];
 			}
 			return $response;
@@ -119,16 +119,16 @@ function register_post_ab_tests_rest_fields() {
 		'update_callback' => function ( $value, WP_Post $post ) {
 			foreach ( $value as $test_id => $test ) {
 				if ( isset( $test['start_time'] ) ) {
-					update_test_start_time_for_post( $test_id, $post->ID, $test['start_time'] );
+					update_ab_test_start_time_for_post( $test_id, $post->ID, $test['start_time'] );
 				}
 				if ( isset( $test['end_time'] ) ) {
-					update_test_end_time_for_post( $test_id, $post->ID, $test['end_time'] );
+					update_ab_test_end_time_for_post( $test_id, $post->ID, $test['end_time'] );
 				}
 				if ( isset( $test['traffic_percentage'] ) ) {
-					update_test_traffic_percentage_for_post( $test_id, $post->ID, $test['traffic_percentage'] );
+					update_ab_test_traffic_percentage_for_post( $test_id, $post->ID, $test['traffic_percentage'] );
 				}
 				if ( isset( $test['paused'] ) ) {
-					update_is_test_paused_for_post( $test_id, $post->ID, $test['paused'] );
+					update_is_ab_test_paused_for_post( $test_id, $post->ID, $test['paused'] );
 				}
 			}
 		},
@@ -242,10 +242,10 @@ function register_post_ab_test( string $test_id, array $options ) {
 		$options['rest_api_variants_field'],
 		[
 			'get_callback' => function ( $post ) use ( $test_id ) : array {
-				return get_test_variants_for_post( $test_id, $post['id'] );
+				return get_ab_test_variants_for_post( $test_id, $post['id'] );
 			},
 			'update_callback' => function ( array $variants, WP_Post $post ) use ( $test_id ) {
-				return update_test_variants_for_post( $test_id, $post->ID, $variants );
+				return update_ab_test_variants_for_post( $test_id, $post->ID, $variants );
 			},
 			'schema' => [
 				'type' => 'array',
@@ -268,7 +268,7 @@ function register_post_ab_test( string $test_id, array $options ) {
  * @param string $test_id
  * @param integer $page
  */
-function handle_cron( string $test_id, int $page = 1 ) {
+function handle_post_ab_test_cron( string $test_id, int $page = 1 ) {
 	$posts_per_page = 50;
 	$posts = new WP_Query( [
 		'post_type' => get_post_types( [ 'public' => true ] ),
@@ -297,7 +297,7 @@ function handle_cron( string $test_id, int $page = 1 ) {
  * @param string $post_id
  * @return array
  */
-function get_test_variants_for_post( string $test_id, int $post_id ) : array {
+function get_ab_test_variants_for_post( string $test_id, int $post_id ) : array {
 	$value = get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_variants', true );
 
 	if ( $value ) {
@@ -314,7 +314,7 @@ function get_test_variants_for_post( string $test_id, int $post_id ) : array {
  * @param string $post_id
  * @return int Timestamp
  */
-function get_test_start_time_for_post( string $test_id, int $post_id ) : int {
+function get_ab_test_start_time_for_post( string $test_id, int $post_id ) : int {
 	return (int) get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_start_time', true ) ?: milliseconds();
 }
 
@@ -325,7 +325,7 @@ function get_test_start_time_for_post( string $test_id, int $post_id ) : int {
  * @param string $post_id
  * @return int Timestamp
  */
-function get_test_end_time_for_post( string $test_id, int $post_id ) : int {
+function get_ab_test_end_time_for_post( string $test_id, int $post_id ) : int {
 	return (int) get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_end_time', true ) ?: milliseconds() + ( 30 * 24 * 60 * 60 * 1000 );
 }
 
@@ -336,7 +336,7 @@ function get_test_end_time_for_post( string $test_id, int $post_id ) : int {
  * @param string $post_id
  * @return int A percentage
  */
-function get_test_traffic_percentage_for_post( string $test_id, int $post_id ) : int {
+function get_ab_test_traffic_percentage_for_post( string $test_id, int $post_id ) : int {
 	return (int) get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_traffic_percentage', true );
 }
 
@@ -347,7 +347,7 @@ function get_test_traffic_percentage_for_post( string $test_id, int $post_id ) :
  * @param string $post_id
  * @return array Results array
  */
-function get_test_results_for_post( string $test_id, int $post_id ) : array {
+function get_ab_test_results_for_post( string $test_id, int $post_id ) : array {
 	return (array) get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_results', true );
 }
 
@@ -358,7 +358,7 @@ function get_test_results_for_post( string $test_id, int $post_id ) : array {
  * @param string $post_id
  * @return bool
  */
-function is_test_paused_for_post( string $test_id, int $post_id ) : bool {
+function is_ab_test_paused_for_post( string $test_id, int $post_id ) : bool {
 	return get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_paused', true ) !== 'false';
 }
 
@@ -369,15 +369,15 @@ function is_test_paused_for_post( string $test_id, int $post_id ) : bool {
  * @param string $post_id
  * @param array
  */
-function update_test_variants_for_post( string $test_id, int $post_id, array $variants ) {
+function update_ab_test_variants_for_post( string $test_id, int $post_id, array $variants ) {
 	/**
 	 * If the variants have changed we need to reset the current results
 	 * except for the last update timestamp.
 	 */
-	$old_variants = get_test_variants_for_post( $test_id, $post_id );
+	$old_variants = get_ab_test_variants_for_post( $test_id, $post_id );
 	if ( ! empty( array_diff( $old_variants, $variants ) ) ) {
-		$results = get_test_results_for_post( $test_id, $post_id );
-		update_test_results_for_post( $test_id, $post_id, [
+		$results = get_ab_test_results_for_post( $test_id, $post_id );
+		update_ab_test_results_for_post( $test_id, $post_id, [
 			'timestamp' => $results['timestamp'] ?? 0,
 		] );
 	}
@@ -390,7 +390,7 @@ function update_test_variants_for_post( string $test_id, int $post_id, array $va
  * @param string $test_id
  * @param string $post_id
  */
-function update_test_start_time_for_post( string $test_id, int $post_id, int $date ) {
+function update_ab_test_start_time_for_post( string $test_id, int $post_id, int $date ) {
 	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_start_time', $date );
 }
 
@@ -400,7 +400,7 @@ function update_test_start_time_for_post( string $test_id, int $post_id, int $da
  * @param string $test_id
  * @param string $post_id
  */
-function update_test_end_time_for_post( string $test_id, int $post_id, int $date ) {
+function update_ab_test_end_time_for_post( string $test_id, int $post_id, int $date ) {
 	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_end_time', $date );
 }
 
@@ -410,7 +410,7 @@ function update_test_end_time_for_post( string $test_id, int $post_id, int $date
  * @param string $test_id
  * @param string $post_id
  */
-function update_test_traffic_percentage_for_post( string $test_id, int $post_id, int $percent ) {
+function update_ab_test_traffic_percentage_for_post( string $test_id, int $post_id, int $percent ) {
 	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_traffic_percentage', $percent );
 }
 
@@ -420,7 +420,7 @@ function update_test_traffic_percentage_for_post( string $test_id, int $post_id,
  * @param string $test_id
  * @param string $post_id
  */
-function update_test_results_for_post( string $test_id, int $post_id, array $data ) {
+function update_ab_test_results_for_post( string $test_id, int $post_id, array $data ) {
 	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_results', $data );
 }
 
@@ -431,7 +431,7 @@ function update_test_results_for_post( string $test_id, int $post_id, array $dat
  * @param string $post_id
  * @return bool
  */
-function update_is_test_paused_for_post( string $test_id, int $post_id, bool $is_paused ) {
+function update_is_ab_test_paused_for_post( string $test_id, int $post_id, bool $is_paused ) {
 	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_paused', $is_paused ? 'true' : 'false' );
 }
 
@@ -442,11 +442,11 @@ function update_is_test_paused_for_post( string $test_id, int $post_id, bool $is
  * @param integer $post_id
  * @return boolean
  */
-function is_test_running_for_post( string $test_id, int $post_id ) : bool {
-	$has_variants = (bool) get_test_variants_for_post( $test_id, $post_id );
-	$is_paused = (bool) is_test_paused_for_post( $test_id, $post_id );
-	$start_time = (int) get_test_start_time_for_post( $test_id, $post_id );
-	$end_time = (int) get_test_end_time_for_post( $test_id, $post_id );
+function is_ab_test_running_for_post( string $test_id, int $post_id ) : bool {
+	$has_variants = (bool) get_ab_test_variants_for_post( $test_id, $post_id );
+	$is_paused = (bool) is_ab_test_paused_for_post( $test_id, $post_id );
+	$start_time = (int) get_ab_test_start_time_for_post( $test_id, $post_id );
+	$end_time = (int) get_ab_test_end_time_for_post( $test_id, $post_id );
 	return $has_variants && ! $is_paused && $start_time <= milliseconds() && $end_time > milliseconds();
 }
 
@@ -459,12 +459,12 @@ function is_test_running_for_post( string $test_id, int $post_id ) : bool {
  * @param array $args Optional array of args to pass through to the `variant_callback`.
  * @return string
  */
-function output_test_html_for_post( string $test_id, int $post_id, string $default_output, array $args = [] ) : string {
+function output_ab_test_html_for_post( string $test_id, int $post_id, string $default_output, array $args = [] ) : string {
 	$test = get_post_ab_test( $test_id );
-	$variants = get_test_variants_for_post( $test_id, $post_id );
+	$variants = get_ab_test_variants_for_post( $test_id, $post_id );
 
 	// Check for winner and return that if present.
-	$results = get_test_results_for_post( $test_id, $post_id );
+	$results = get_ab_test_results_for_post( $test_id, $post_id );
 	if ( isset( $results['winner'] ) && $results['winner'] !== false ) {
 		if ( $results['winner'] === 0 ) {
 			return $default_output;
@@ -478,7 +478,7 @@ function output_test_html_for_post( string $test_id, int $post_id, string $defau
 	}
 
 	// Return default value if test is otherwise not running.
-	if ( ! is_test_running_for_post( $test_id, $post_id ) ) {
+	if ( ! is_ab_test_running_for_post( $test_id, $post_id ) ) {
 		return $default_output;
 	}
 
@@ -488,7 +488,7 @@ function output_test_html_for_post( string $test_id, int $post_id, string $defau
 	<ab-test
 		test-id="<?php echo esc_attr( $test_id ); ?>"
 		post-id="<?php echo esc_attr( $post_id ); ?>"
-		traffic-percentage="<?php echo get_test_traffic_percentage_for_post( $test_id, $post_id ); ?>"
+		traffic-percentage="<?php echo get_ab_test_traffic_percentage_for_post( $test_id, $post_id ); ?>"
 		goal="<?php echo esc_attr( $test['goal'] ); ?>"
 		variant-count="<?php echo intval( count( $variants ) + 1 ); ?>"
 	>
@@ -518,10 +518,10 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	$test_id_with_post = $test_id . '_' . $post_id;
 
 	// Bail if test no longer running.
-	if ( ! is_test_running_for_post( $test_id, $post_id ) ) {
-		if ( get_test_end_time_for_post( $test_id, $post_id ) <= milliseconds() ) {
+	if ( ! is_ab_test_running_for_post( $test_id, $post_id ) ) {
+		if ( get_ab_test_end_time_for_post( $test_id, $post_id ) <= milliseconds() ) {
 			// Pause the test.
-			update_is_test_paused_for_post( $test_id, $post_id, true );
+			update_is_ab_test_paused_for_post( $test_id, $post_id, true );
 
 			/**
 			 * Dispatch action when test has ended.
@@ -535,7 +535,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	}
 
 	// Get existing data for use with queries.
-	$data = get_test_results_for_post( $test_id, $post_id );
+	$data = get_ab_test_results_for_post( $test_id, $post_id );
 
 	// Process event filter.
 	if ( is_callable( $test['query_filter'] ) ) {
@@ -678,7 +678,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	);
 
 	// Sort buckets by variant ID.
-	$variants = get_test_variants_for_post( $test_id, $post_id );
+	$variants = get_ab_test_variants_for_post( $test_id, $post_id );
 	$new_aggs = $result['aggregations']['sterms#test']['buckets'] ?? [];
 	$sorted_aggs = array_fill( 0, count( $variants ) + 1, [] );
 
@@ -692,11 +692,11 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	);
 
 	// Process for a winner.
-	$processed_results = process_results( $merged_data['aggs'], $test_id, $post_id );
+	$processed_results = analyse_ab_test_results( $merged_data['aggs'], $test_id, $post_id );
 	$merged_data = wp_parse_args( $processed_results, $merged_data );
 
 	// Save updated data.
-	update_test_results_for_post( $test_id, $post_id, $merged_data );
+	update_ab_test_results_for_post( $test_id, $post_id, $merged_data );
 }
 
 /**
@@ -705,7 +705,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
  * @param array $aggregations Results from elasticsearch.
  * @return array Array of winner ID, current winning variant ID and variant stats.
  */
-function process_results( array $aggregations, string $test_id, int $post_id ) : array {
+function analyse_ab_test_results( array $aggregations, string $test_id, int $post_id ) : array {
 	// Track winning variant.
 	$winner = false;
 	$winning = false;
@@ -749,7 +749,7 @@ function process_results( array $aggregations, string $test_id, int $post_id ) :
 			$winner = $winning;
 
 			// Pause the test.
-			update_is_test_paused_for_post( $test_id, $post_id, true );
+			update_is_ab_test_paused_for_post( $test_id, $post_id, true );
 
 			/**
 			 * Dispatch action when winner found.
