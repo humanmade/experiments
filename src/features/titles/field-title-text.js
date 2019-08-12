@@ -2,99 +2,114 @@
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 
-const { TextControl } = wp.components;
-const { withSelect, withDispatch } = wp.data;
-const { compose } = wp.compose;
+const { TextareaControl, Icon } = wp.components;
 const { __ } = wp.i18n;
 
 const Variant = styled.div`
-margin-bottom: 5px;
-position: relative;
+	margin-bottom: 5px;
+	position: relative;
 `;
 
-const PercentageChange = styled.div`
-position: absolute;
-top: 0;
-right: 0;
-font-size: 90%;
+const Views = styled.div`
+	font-size: 80%;
+	color: #666;
+
+	.dashicon {
+		margin-right: 4px;
+		vertical-align: middle;
+		position: relative;
+		width: 0.9rem;
+		top: -1px;
+	}
 `;
+
+const letters = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase();
 
 export const TitleTextField = props => {
-	const { results, titles, setTitles, paused } = props;
-	const { variants } = results;
+	const {
+		onChange,
+		isEditable,
+		titles,
+		variants,
+		defaultTitle,
+	} = props;
 
-	const finalVariants = new Array( titles.length + 1 )
-		.fill( { rate: 0.0 } )
-		.map( ( variant, id ) => Object.assign( {}, variant, ( variants && variants[ id ] ) || {} ) );
-	const control = finalVariants[ 0 ];
+	// Add the current post title if we have no titles yet.
+	if ( ! titles.length ) {
+		titles.push( defaultTitle );
+	}
+
+	const setTitles = ( titles = [], title = '', index = 0, remove = false ) => {
+		const newTitles = titles.slice();
+		if ( remove ) {
+			newTitles.splice( index, 1 );
+		} else {
+			newTitles[ index ] = title;
+		}
+		onChange( newTitles );
+	};
 
 	return (
 		<Fragment>
 			{ titles.map( ( title, index ) => {
 				// Get variant data.
-				const variantId = index + 1;
-				const variant = finalVariants[ variantId ];
-				const change = ( variant.rate - control.rate ) * 100;
+				const variant = ( variants && variants[ index ] ) || { size: 0 };
 
 				return (
 					<Variant key={ index }>
-						<TextControl
+						<TextareaControl
 							autoFocus={ titles.length - 1 === index }
 							key={ index }
-							label={ `${ __( 'Title ' ) } ${ index + 1 }` }
+							label={ `
+								${ __( 'Title', 'altis-ab-tests' ) }
+								${ letters[ index ] }
+								${ index === 0 ? __( '(original)', 'altis-ab-tests' ) : '' }
+							` }
 							onChange={ value => setTitles( titles, value, index ) }
 							onKeyUp={ event => {
 								if (
 									title === '' &&
 									event.target.value === '' &&
-									( ( event.key && event.key === 'Backspace' ) || ( event.which && event.which === 8 ) )
+									(
+										( event.key && event.key === 'Backspace' ) ||
+										( event.which && event.which === 8 )
+									)
 								) {
 									setTitles( titles, '', index, true );
 								}
 							} }
-							placeholder={ __( 'Enter your title here.', 'altis-ab-tests' ) }
+							onFocus={ event => {
+								const length = event.target.value.length * 2;
+								event.target.setSelectionRange( length, length );
+							} }
+							placeholder={ __( 'Enter another title here.', 'altis-ab-tests' ) }
 							value={ title }
-							readOnly={ ! paused }
+							readOnly={ ! isEditable }
+							rows={3}
 						/>
-						<PercentageChange>
-							{ `${ change >= 0 ? '+' : '' }${ change.toFixed( 2 ) }` }%
-						</PercentageChange>
+						{ variant.size > 0 && (
+							<Views>
+								<Icon icon="visibility" />
+								{ variant.size }
+								{ ' ' }
+								<span className="screen-reader-text">{ __( 'views', 'altis-ab-tests' ) }</span>
+							</Views>
+						) }
 					</Variant>
 				)
 			} ) }
-			{ paused && <TextControl
-				label={ __( 'New title', 'altis-ab-tests' ) }
-				onChange={ value => setTitles( titles, value, titles.length ) }
-				placeholder={ __( 'Enter your title here.', 'altis-ab-tests' ) }
-				value=""
-			/> }
+			{ isEditable && titles.length < letters.length && (
+				<TextareaControl
+					autoFocus={ titles.length <= 1 }
+					label={ `${ __( 'Title', 'altis-ab-tests' ) } ${ letters[ titles.length ] }` }
+					onChange={ value => setTitles( titles, value, titles.length ) }
+					placeholder={ __( 'Enter another title here.', 'altis-ab-tests' ) }
+					value=""
+					rows={ 3 }
+				/>
+			) }
 		</Fragment>
 	);
 };
 
-export const TitleTextFieldWithData = compose(
-	withSelect( select => {
-		return {
-			titles: select( 'core/editor' ).getEditedPostAttribute( 'ab_test_titles' ) || [],
-			results: select( 'core/editor' ).getCurrentPostAttribute( 'ab_tests' ).titles.results || {},
-			paused: select( 'core/editor' ).getEditedPostAttribute( 'ab_tests' ).titles.paused,
-		};
-	} ),
-	withDispatch( dispatch => {
-		return {
-			setTitles: ( titles = [], title = '', index = 0, remove = false ) => {
-				const newTitles = titles.slice();
-				if ( remove ) {
-					newTitles.splice( index, 1 );
-				} else {
-					newTitles[ index ] = title;
-				}
-				dispatch( 'core/editor' ).editPost( {
-					ab_test_titles: newTitles,
-				} );
-			},
-		};
-	} )
-)( TitleTextField );
-
-export default TitleTextFieldWithData;
+export default TitleTextField;

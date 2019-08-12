@@ -1,87 +1,66 @@
 /* global wp */
 import React, { Fragment } from 'react';
-import DatesField from './field-dates';
-import TitleTextField from './field-title-text';
-import TrafficPercentageField from './field-traffic-percentage';
-import PauseField from './field-pause';
+import withTestData from './data';
+import Settings from './settings';
 import Results from './results';
-import styled from 'styled-components';
+import {
+	Panel,
+	PluginIcon,
+} from './components';
 
 const { PluginSidebar, PluginSidebarMoreMenuItem } = wp.editPost;
 const { registerPlugin } = wp.plugins;
 const { __ } = wp.i18n;
-const {
-	Panel, PanelBody, PanelRow,
-} = wp.components;
+const { PanelBody } = wp.components;
+const { compose } = wp.compose;
+const { createElement } = wp.element;
 
-const PanelRowInner = styled.div`
-.components-base-control__help { margin-top: 5px; color: #666; }
-`
+const Plugin = compose(
+	withTestData
+)( props => {
+	const { test } = props;
+	const { started, paused, results } = test;
+	const { winner = false } = results;
+
+	const classNames = [];
+
+	if ( started ) {
+		classNames.push( 'is-started' );
+	}
+
+	if ( paused ) {
+		classNames.push( 'is-paused' );
+	}
+
+	return (
+		<Fragment>
+			<PluginSidebarMoreMenuItem
+				target="altis-ab-tests"
+			>
+				{ __( 'Experiments', 'altis-ab-tests' ) }
+			</PluginSidebarMoreMenuItem>
+			<PluginSidebar
+				name="altis-ab-tests"
+				title={ __( 'Experiments', 'altis-ab-tests' ) }
+			>
+				<Panel>
+					<PanelBody
+						className={ classNames.join( ' ' ) }
+						title={ __( 'Post Titles', 'altis-ab-tests' ) }
+						icon={ paused ? 'controls-pause' : 'chart-line' }
+						initialOpen={ true }
+					>
+						{ winner !== false && <Results /> }
+						{ winner === false && <Settings /> }
+					</PanelBody>
+				</Panel>
+			</PluginSidebar>
+		</Fragment>
+	);
+} );
 
 registerPlugin( 'altis-ab-tests', {
 	title: __( 'Experiments', 'altis-ab-tests' ),
-	icon: 'lightbulb',
-	render() {
-		return (
-			<Fragment>
-				<PluginSidebarMoreMenuItem
-					target="altis-ab-tests"
-				>
-					{ __( 'Experiments', 'altis-ab-tests' ) }
-				</PluginSidebarMoreMenuItem>
-				<PluginSidebar
-					name="altis-ab-tests"
-					title={ __( 'Experiments', 'altis-ab-tests' ) }
-				>
-					<Panel>
-						<PanelBody
-							title={ __( 'Post Titles', 'altis-ab-tests' ) }
-							icon="editor-paragraph"
-							initialOpen={ true }
-						>
-							<PanelRow>
-								<PanelRowInner>
-									<Results />
-								</PanelRowInner>
-							</PanelRow>
-							<PanelRow>
-								<PanelRowInner>
-									<PauseField />
-								</PanelRowInner>
-							</PanelRow>
-							<PanelRow>
-								<PanelRowInner>
-									<p>{ __( 'Add multiple post titles and see how each performs in real time.', 'altis-ab-tests' ) }</p>
-									<p>{ __( 'To get started fill out the title fields below.', 'altis-ab-tests' ) }</p>
-									<TitleTextField />
-								</PanelRowInner>
-							</PanelRow>
-							<PanelRow>
-								<PanelRowInner>
-									<TrafficPercentageField />
-								</PanelRowInner>
-							</PanelRow>
-							<PanelRow>
-								<PanelRowInner>
-									<DatesField
-										name="start_time"
-										label={ __( 'Start date', 'altis-ab-tests' ) }
-									/>
-								</PanelRowInner>
-							</PanelRow>
-							<PanelRow>
-								<PanelRowInner>
-									<DatesField
-										name="end_time"
-										label={ __( 'End date', 'altis-ab-tests' ) }
-										defaultValue={ Date.now() + ( 30 * 24 * 60 * 60 * 1000 ) }
-									/>
-								</PanelRowInner>
-							</PanelRow>
-						</PanelBody>
-					</Panel>
-				</PluginSidebar>
-			</Fragment>
-		)
-	},
+	icon: createElement( PluginIcon ),
+	render: Plugin,
 } );

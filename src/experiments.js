@@ -118,6 +118,15 @@
 			// Get the slot element.
 			const slot = this.shadowRoot.querySelector( 'slot' );
 			slot.addEventListener( 'slotchange', () => {
+				let fallback = Array.from( slot.assignedElements() )
+					.filter( node => node.nodeName === 'TEST-FALLBACK' );
+
+				// Use fallback if we're not in the test.
+				if ( fallback.length > 0 && variantId === false ) {
+					element.outerHTML = fallback[0].innerHTML;
+					return;
+				}
+
 				let variants = Array.from( slot.assignedElements() )
 					.filter( node => node.nodeName === 'TEST-VARIANT' );
 
@@ -264,6 +273,7 @@
 	}, [ 'a' ] );
 
 	// Define custom elements.
+	window.customElements.define( 'test-fallback', TestVariant );
 	window.customElements.define( 'test-variant', TestVariant );
 	window.customElements.define( 'ab-test', ABTest );
 

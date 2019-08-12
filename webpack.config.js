@@ -57,6 +57,7 @@ const sharedConfig = {
 		'wp': 'wp',
 		'react': 'React',
 		'react-dom': 'ReactDOM',
+		'moment': 'moment',
 	},
 };
 
