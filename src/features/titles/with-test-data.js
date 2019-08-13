@@ -91,7 +91,7 @@ const withTestData = compose(
 			updateTitles,
 			resetTest: message => {
 				if ( ! window.confirm(
-					message || __( 'Are you sure you want to reset the test?', 'altis-ab-tests' )
+					message || __( 'Are you sure you want to reset the test?', 'altis-experiments' )
 				) ) {
 					return;
 				}
@@ -102,7 +102,12 @@ const withTestData = compose(
 					end_time: Date.now() + ( 30 * 24 * 60 * 60 * 1000 ),
 					traffic_percentage: 35,
 					started: false,
-					results: {},
+					results: {
+						aggs: [],
+						variants: [],
+						winner: false,
+						winning: false,
+					},
 				}, [], true );
 			},
 			saveTest,

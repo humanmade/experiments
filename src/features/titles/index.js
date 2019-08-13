@@ -18,7 +18,10 @@ const { createElement } = wp.element;
 const Plugin = compose(
 	withTestData
 )( props => {
-	const { test } = props;
+	const {
+		post,
+		test,
+	} = props;
 	const {
 		started,
 		paused,
@@ -39,21 +42,27 @@ const Plugin = compose(
 
 	const hasEnded = endTime < Date.now();
 
+	// Opt the editing user out of the test.
+	// This effectively resets their variant after previewing.
+	const tests = JSON.parse( window.localStorage.getItem( '_altis_ab_tests' ) || '{}' );
+	tests[ `titles_${ post.id }` ] = false;
+	window.localStorage.setItem( '_altis_ab_tests', JSON.stringify( tests ) );
+
 	return (
 		<Fragment>
 			<PluginSidebarMoreMenuItem
-				target="altis-ab-tests"
+				target="altis-experiments"
 			>
-				{ __( 'Experiments', 'altis-ab-tests' ) }
+				{ __( 'Experiments', 'altis-experiments' ) }
 			</PluginSidebarMoreMenuItem>
 			<PluginSidebar
-				name="altis-ab-tests"
-				title={ __( 'Experiments', 'altis-ab-tests' ) }
+				name="altis-experiments"
+				title={ __( 'Experiments', 'altis-experiments' ) }
 			>
 				<Panel>
 					<PanelBody
 						className={ classNames.join( ' ' ) }
-						title={ __( 'Post Titles', 'altis-ab-tests' ) }
+						title={ __( 'Post Titles', 'altis-experiments' ) }
 						icon={ paused ? 'controls-pause' : 'chart-line' }
 						initialOpen={ true }
 					>
@@ -70,8 +79,8 @@ const Plugin = compose(
 	);
 } );
 
-registerPlugin( 'altis-ab-tests', {
-	title: __( 'Experiments', 'altis-ab-tests' ),
+registerPlugin( 'altis-experiments', {
+	title: __( 'Experiments', 'altis-experiments' ),
 	icon: createElement( PluginIcon ),
 	render: Plugin,
 } );

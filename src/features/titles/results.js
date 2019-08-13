@@ -44,17 +44,17 @@ export const Results = props => {
 		<StyledResults>
 			<PanelRow>
 				{ winner !== false && (
-					<Notice>{ __( 'Your test is complete!', 'altis-ab-tests' ) }</Notice>
+					<Notice>{ __( 'Your test is complete!', 'altis-experiments' ) }</Notice>
 				) }
 				{ hasEnded && winner === false && (
 					<Notice>
-						{ __( 'The test has ended without finding a statistically significant difference between the variants.', 'altis-ab-tests' ) }
+						{ __( 'The test has ended without finding a statistically significant difference between the variants.', 'altis-experiments' ) }
 					</Notice>
 				) }
 				<CenteredButton
 					onClick={ () => resetTest() }
 				>
-					{ __( 'Start a new test', 'altis-ab-tests' ) }
+					{ __( 'Start a new test', 'altis-experiments' ) }
 				</CenteredButton>
 			</PanelRow>
 			<PanelRow>
@@ -64,22 +64,22 @@ export const Results = props => {
 
 					return (
 						<Variant key={ index } highlight={ index === winner }>
-							<h3>{ `${ __( 'Title', 'altis-ab-tests' ) } ${ getLetter( index ) } ${ index === 0 ? __( '(original)', 'altis-ab-tests' ) : '' }` }</h3>
+							<h3>{ `${ __( 'Title', 'altis-experiments' ) } ${ getLetter( index ) } ${ index === 0 ? __( '(original)', 'altis-experiments' ) : '' }` }</h3>
 							<p>{ title }</p>
 							<PercentageChange>
 								{ ( variant.rate * 100 ).toFixed( 2 ) }%
 							</PercentageChange>
 							{ winner === 0 && winner === index && (
-								<p className="description">{ __( 'The original title performed better than the others!', 'altis-ab-tests' ) }</p>
+								<p className="description">{ __( 'The original title performed better than the others!', 'altis-experiments' ) }</p>
 							) }
 							{ winner !== 0 && winner === index && (
 								<Fragment>
-									<p className="description">{ __( 'This title performed better than the others and is now the title of this post!', 'altis-ab-tests' ) }</p>
+									<p className="description">{ __( 'This title performed better than the others and is now the title of this post!', 'altis-experiments' ) }</p>
 									<Button
 										isLink
 										onClick={ () => revertTitle() }
 									>
-										{ __( 'Revert to original title', 'altis-ab-tests' ) }
+										{ __( 'Revert to original title', 'altis-experiments' ) }
 									</Button>
 								</Fragment>
 							) }
@@ -88,16 +88,16 @@ export const Results = props => {
 				} ) }
 			</PanelRow>
 			<PanelRow>
-				<h3>{ __( 'Traffic Percentage', 'altis-ab-tests' ) }</h3>
+				<h3>{ __( 'Traffic Percentage', 'altis-experiments' ) }</h3>
 				<p>{ trafficPercentage }%</p>
 
-				<h3>{ __( 'Start Date', 'altis-ab-tests' ) }</h3>
+				<h3>{ __( 'Start Date', 'altis-experiments' ) }</h3>
 				<p>{ getDateString( startTime ) }</p>
 
-				<h3>{ __( 'End Date', 'altis-ab-tests' ) }</h3>
+				<h3>{ __( 'End Date', 'altis-experiments' ) }</h3>
 				<p>{ getDateString( endTime ) }</p>
 
-				<h3>{ __( 'Duration', 'altis-ab-tests' ) }</h3>
+				<h3>{ __( 'Duration', 'altis-experiments' ) }</h3>
 				<p>{ getDurationString( endTime - startTime ) }</p>
 			</PanelRow>
 		</StyledResults>

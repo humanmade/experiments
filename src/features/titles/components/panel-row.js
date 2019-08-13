@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const { PanelRow } = wp.components;
 
 const StyledPanelRow = styled( PanelRow )`
-	.altis-ab-tests-panel-row {
+	.altis-experiments-panel-row {
 		flex: 0 0 100%;
 	}
 	.components-base-control__help {
@@ -18,7 +18,7 @@ const StyledPanelRow = styled( PanelRow )`
 
 const PanelRowInner = props => (
 	<StyledPanelRow>
-		<div className="altis-ab-tests-panel-row">
+		<div className="altis-experiments-panel-row">
 			{ props.children }
 		</div>
 	</StyledPanelRow>

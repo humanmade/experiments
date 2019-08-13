@@ -102,18 +102,18 @@ export const StyledResults = styled.div`
 `;
 
 export const Variant = styled.div.attrs( props => ( {
-	className: `altis-ab-tests-variant ${ props.highlight ? 'altis-ab-tests-variant--highlight' : '' }`,
+	className: `altis-experiments-variant ${ props.highlight ? 'altis-experiments-variant--highlight' : '' }`,
 } ) )`
 	margin: 25px 0;
 	position: relative;
 
-	.altis-ab-tests-variant__change {
+	.altis-experiments-variant__change {
 		color: ${ props => props.highlight ? '#25865b' : 'inherit' };
 	}
 `;
 
 export const PercentageChange = styled.div.attrs( {
-	className: 'altis-ab-tests-variant__change',
+	className: 'altis-experiments-variant__change',
 } )`
 	position: absolute;
 	top: 0;

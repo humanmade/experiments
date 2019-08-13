@@ -31,7 +31,7 @@ const PluginIcon = props => {
 
 	return (
 		<Icon winner={ winner !== false }>
-			{ __( 'A/B', 'altis-ab-tests' ) }
+			{ __( 'A/B', 'altis-experiments' ) }
 		</Icon>
 	);
 };

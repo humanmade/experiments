@@ -19,10 +19,10 @@ export const DateRange = props => {
 	const showTimeRecommendation = ( endTime - startTime ) < ( 14 * 24 * 60 * 60 * 1000 );
 
 	return (
-		<div className="altis-ab-tests-date-range">
-			<div className="altis-ab-tests-date-range__field">
-				<div className="altis-ab-tests-date-range__label">
-					<label>{ __( 'Start date', 'altis-ab-tests' ) }</label>
+		<div className="altis-experiments-date-range">
+			<div className="altis-experiments-date-range__field">
+				<div className="altis-experiments-date-range__label">
+					<label>{ __( 'Start date', 'altis-experiments' ) }</label>
 				</div>
 				<TimePicker
 					currentTime={ new Date( startTime ).toISOString().replace( /\.\d+Z$/, 'Z' ) }
@@ -32,12 +32,12 @@ export const DateRange = props => {
 					} }
 				/>
 			</div>
-			<div className="altis-ab-tests-date-range__field">
-				<div className="altis-ab-tests-date-range__label">
-					<label>{ __( 'End date', 'altis-ab-tests' ) }</label>
+			<div className="altis-experiments-date-range__field">
+				<div className="altis-experiments-date-range__label">
+					<label>{ __( 'End date', 'altis-experiments' ) }</label>
 				</div>
 				{ showTimeRecommendation && (
-					<Notice>{ __( 'It is recommended to allow at least two weeks to achieve statistically significant results.', 'altis-ab-tests' ) }</Notice>
+					<Notice>{ __( 'It is recommended to allow at least two weeks to achieve statistically significant results.', 'altis-experiments' ) }</Notice>
 				) }
 				<TimePicker
 					currentTime={ new Date( endTime ).toISOString().replace( /\.\d+Z$/, 'Z' ) }
@@ -48,7 +48,7 @@ export const DateRange = props => {
 				/>
 			</div>
 			{ description && (
-				<p className="altis-ab-tests-date-range__description description">{ description }</p>
+				<p className="altis-experiments-date-range__description description">{ description }</p>
 			) }
 		</div>
 	);

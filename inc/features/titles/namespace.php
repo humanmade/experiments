@@ -73,6 +73,7 @@ function init() {
 	register_post_ab_test(
 		'titles',
 		[
+			'label' => __( 'Titles', 'altis-experiments' ),
 			'goal' => 'click',
 			// Exclude all events from the target post page.
 			'query_filter' => function ( $test_id, $post_id ) : array {

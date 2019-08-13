@@ -27,12 +27,14 @@ Sets up the test.
 
 - `$test_id`: A unique ID for the test.
 - `$options`: Configuration options for the test.
+  - `label <string>`: A human readable label for the test.
   - `rest_api_variants_field <string>`: The field name to make variants available at.
   - `rest_api_variants_type <string>`:  The data type of the variants.
   - `goal <string>`: The conversion goal event name, eg "click".
   - `goal_filter <string | callable>`: Elasticsearch bool query to filter goal results. If a callable is passed it receives the test ID and post ID as arguments.
   - `query_filter <string | callable>`: Elasticsearch bool query to filter total events being queried.
-  - `variant_callback <callable>`: An optional callback used to render variants based. Recieves the variant value, test ID and post ID as arguments. By default passes the variant value through directly.
+  - `variant_callback <callable>`: An optional callback used to render variants based. Recieves the variant value, post ID and an optional array of data as arguments. By default passes the variant value through directly.
+  - `winner_callback <callable>`: An optional callback used to perform updates to the post when a winner is found. Recieves the winning variant value and post ID as arguments. Default is no-op.
 
 **`output_ab_test_html_for_post( string $test_id, int $post_id, string $default_content, array $args = [] )`**
 

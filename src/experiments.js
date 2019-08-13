@@ -72,7 +72,7 @@
 		connectedCallback() {
 			// Extract test set by URL parameters.
 			const regex = new RegExp( `(utm_campaign|set_test)=test_${ this.testIdWithPost }:(\\d+)`, 'i' );
-			const url_test = window.location.search.match( regex );
+			const url_test = unescape( window.location.search ).match( regex );
 			if ( url_test ) {
 				this.addTestForUser( { [ this.testIdWithPost ]: parseInt( url_test[ 2 ], 10 ) } );
 			}

@@ -34,6 +34,10 @@ function setup() {
 	// Hook cron task.
 	add_action( 'altis_post_ab_test_cron', __NAMESPACE__ . '\\handle_post_ab_test_cron', 10, 2 );
 
+	// Register notifications.
+	add_action( 'altis.experiments.test.ended', __NAMESPACE__ . '\\send_post_ab_test_notification', 10, 2 );
+	add_action( 'altis.experiments.test.winner_found', __NAMESPACE__ . '\\send_post_ab_test_notification', 10, 2 );
+
 	/**
 	 * Enable Title AB Tests.
 	 *
@@ -184,27 +188,27 @@ function register_post_ab_tests_rest_fields() {
 										'properties' => [
 											'value' => [
 												'type' => [ 'number', 'string' ],
-												'description' => __( 'Variant value', 'altis-ab-tests' ),
+												'description' => __( 'Variant value', 'altis-experiments' ),
 											],
 											'size' => [
 												'type' => 'integer',
 												'default' => 0,
-												'description' => __( 'Variant sample size', 'altis-ab-tests' ),
+												'description' => __( 'Variant sample size', 'altis-experiments' ),
 											],
 											'hits' => [
 												'type' => 'integer',
 												'default' => 0,
-												'description' => __( 'Variant conversion count', 'altis-ab-tests' ),
+												'description' => __( 'Variant conversion count', 'altis-experiments' ),
 											],
 											'rate' => [
 												'type' => 'number',
 												'default' => 0,
-												'description' => __( 'Variant conversion rate', 'altis-ab-tests' ),
+												'description' => __( 'Variant conversion rate', 'altis-experiments' ),
 											],
 											'p' => [
 												'type' => 'number',
 												'default' => 1,
-												'description' => __( 'Variant p-value', 'altis-ab-tests' ),
+												'description' => __( 'Variant p-value', 'altis-experiments' ),
 											],
 										],
 									],
@@ -224,6 +228,7 @@ function register_post_ab_tests_rest_fields() {
  * @param string $test_id
  * @param array $options
  *     $options = [
+ *       'label' => (string) A human readable name for the test.
  *       'rest_api_variants_field' => (string) REST API field name to return variants on.
  *       'rest_api_variants_type' => (string) REST API field data type.
  *       'goal' => (string) The event handler.
@@ -237,6 +242,7 @@ function register_post_ab_test( string $test_id, array $options ) {
 	global $post_ab_tests;
 
 	$options = wp_parse_args( $options, [
+		'label' => $test_id,
 		'rest_api_variants_field' => 'ab_test_' . $test_id,
 		'rest_api_variants_type' => 'string',
 		'goal' => 'click',
@@ -271,12 +277,61 @@ function register_post_ab_test( string $test_id, array $options ) {
 		]
 	);
 
-	// Register notification.
-	// add_action( "altis.ab_tests.winner_found.{$test_id}", function ( $post_id, $winning_variant ) {}, 10, 2 );
-
 	// Set up background task.
 	if ( ! wp_next_scheduled( 'altis_post_ab_test_cron', [ $test_id ] ) ) {
 		wp_schedule_event( time(), 'hourly', 'altis_post_ab_test_cron', [ $test_id ] );
+	}
+}
+
+/**
+ * Dispatches an email notification with a link to the post edit screen.
+ *
+ * @param string $test_id
+ * @param integer $post_id
+ */
+function send_post_ab_test_notification( string $test_id, int $post_id ) {
+	$test = get_post_ab_test( $test_id );
+
+	// Get post and post author.
+	$post = get_post( $post_id );
+
+	$subject = sprintf(
+		// translators: %1$s = test name, %2$s = post title.
+		__( 'Your test %1$s on "%2$s" has finished', 'altis-experiments' ),
+		$test['label'],
+		$post->post_title
+	);
+	$message = sprintf(
+		// translators: %s is replaced by an link to edit the post.
+		__( "Click the link below to view the results:\n\n%s", 'altis-experiments' ),
+		get_edit_post_link( $post_id ) . '#experiments-' . $test_id
+	);
+
+	/**
+	 * Filter the recipients list for the test results.
+	 *
+	 * @param array $recipients List of user IDs.
+	 * @param string $test_id
+	 * @param int $post_id
+	 */
+	$recipients = apply_filters(
+		'altis.experiments.test.notification.recipients',
+		[ $post->post_author ],
+		$test_id,
+		$post_id
+	);
+
+	foreach ( $recipients as $recipient ) {
+		$user = get_user_by( 'id', $recipient );
+		if ( ! $user || is_wp_error( $user ) ) {
+			continue;
+		}
+
+		wp_mail(
+			$user->get( 'email' ),
+			$subject,
+			$message
+		);
 	}
 }
 
@@ -595,7 +650,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 			 * @param string $post_id The post ID for the test.
 			 * @param array $data The test results so far.
 			 */
-			do_action( 'altis.ab_tests.ended', $test_id, $post_id, $data );
+			do_action( 'altis.experiments.test.ended', $test_id, $post_id );
 
 			/**
 			 * Dispatch action when a test of this type has ended.
@@ -603,7 +658,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 			 * @param string $post_id The post ID for the test.
 			 * @param array $data The test results so far.
 			 */
-			do_action( "altis.ab_tests.ended.{$test_id}", $post_id, $data );
+			do_action( "altis.experiments.test.ended.{$test_id}", $post_id );
 		}
 		return;
 	}
@@ -842,17 +897,15 @@ function analyse_ab_test_results( array $aggregations, string $test_id, int $pos
 			 *
 			 * @param string $test_id
 			 * @param int $post_id
-			 * @param array $winning_variant
 			 */
-			do_action( 'altis.ab_tests.winner_found', $test_id, $post_id, $winning_variant );
+			do_action( 'altis.experiments.test.winner_found', $test_id, $post_id );
 
 			/**
 			 * Dispatch action when winner found for test.
 			 *
 			 * @param int $post_id
-			 * @param array $winning_variant
 			 */
-			do_action( "altis.ab_tests.winner_found.{$test_id}", $post_id, $winning_variant );
+			do_action( "altis.experiments.test.winner_found.{$test_id}", $post_id );
 
 			/**
 			 * Run winner callback.
