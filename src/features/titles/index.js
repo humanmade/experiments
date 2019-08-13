@@ -1,6 +1,6 @@
 /* global wp */
 import React, { Fragment } from 'react';
-import withTestData from './data';
+import withTestData from './with-test-data';
 import Settings from './settings';
 import Results from './results';
 import {
@@ -19,7 +19,12 @@ const Plugin = compose(
 	withTestData
 )( props => {
 	const { test } = props;
-	const { started, paused, results } = test;
+	const {
+		started,
+		paused,
+		results,
+		end_time: endTime = Date.now() + ( 30 * 24 * 60 * 60 * 1000 ),
+	} = test;
 	const { winner = false } = results;
 
 	const classNames = [];
@@ -31,6 +36,8 @@ const Plugin = compose(
 	if ( paused ) {
 		classNames.push( 'is-paused' );
 	}
+
+	const hasEnded = endTime < Date.now();
 
 	return (
 		<Fragment>
@@ -50,8 +57,12 @@ const Plugin = compose(
 						icon={ paused ? 'controls-pause' : 'chart-line' }
 						initialOpen={ true }
 					>
-						{ winner !== false && <Results /> }
-						{ winner === false && <Settings /> }
+						{ ( winner !== false || hasEnded ) && (
+							<Results />
+						) }
+						{ ( winner === false && ! hasEnded ) && (
+							<Settings />
+						) }
 					</PanelBody>
 				</Panel>
 			</PluginSidebar>

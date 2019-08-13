@@ -1,6 +1,6 @@
 /* global wp */
 import React from 'react';
-import withTestData from '../data';
+import withTestData from '../with-test-data';
 import styled from 'styled-components';
 
 const { compose } = wp.compose;

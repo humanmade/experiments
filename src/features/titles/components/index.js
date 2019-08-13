@@ -1,25 +1,30 @@
 /* global wp */
 import styled from 'styled-components';
+import _Duration from './duration';
 import _PanelRow from './panel-row';
 import _PluginIcon from './plugin-icon';
 
+
 const {
 	Button: DefaultButton,
+	Icon: DefaultIcon,
 	Panel: DefaultPanel,
 } = wp.components;
 
 export const Button = DefaultButton;
 
+export const Duration = _Duration;
+
 export const Panel = styled( DefaultPanel )`
 	.components-panel__body-title {
 		.components-panel__icon {
-			color: #ccc;
+			color: #adb4c1;
 			align-self: flex-end;
 			width: 16px;
 			height: 16px;
 			position: absolute;
-			right: 40px;
-			top: 1rem;
+			right: 45px;
+			top: 1.1rem;
 		}
 	}
 `;
@@ -32,11 +37,26 @@ export const Notice = styled.p`
 	color: #6e7b92;
 `;
 
-export const Warning = styled.p`
+export const Warning = styled( props => (
+	<p { ...props }>
+		<DefaultIcon icon="warning" />
+		{ props.children }
+	</p>
+) ).attrs( {
+	className: 'ab-tests__warning',
+} )`
 	&& {
 		color: #d00115;
 		font-style: italic;
-		margin-top: 15px;
+		margin-top: 1em;
+		display: inline-flex;
+
+		.dashicon {
+			width: 1rem;
+			height: 1rem;
+			margin-right: 7px;
+			flex: 1 0 1rem;
+		}
 	}
 `;
 

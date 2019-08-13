@@ -1,6 +1,7 @@
 /* global wp */
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { getLetter } from './utils';
 
 const { TextareaControl, Icon } = wp.components;
 const { __ } = wp.i18n;
@@ -22,8 +23,6 @@ const Views = styled.div`
 		top: -1px;
 	}
 `;
-
-const letters = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase();
 
 export const TitleTextField = props => {
 	const {
@@ -62,7 +61,7 @@ export const TitleTextField = props => {
 							key={ index }
 							label={ `
 								${ __( 'Title', 'altis-ab-tests' ) }
-								${ letters[ index ] }
+								${ getLetter( index ) }
 								${ index === 0 ? __( '(original)', 'altis-ab-tests' ) : '' }
 							` }
 							onChange={ value => setTitles( titles, value, index ) }
@@ -98,10 +97,10 @@ export const TitleTextField = props => {
 					</Variant>
 				)
 			} ) }
-			{ isEditable && titles.length < letters.length && (
+			{ isEditable && titles.length < 26 && (
 				<TextareaControl
 					autoFocus={ titles.length <= 1 }
-					label={ `${ __( 'Title', 'altis-ab-tests' ) } ${ letters[ titles.length ] }` }
+					label={ `${ __( 'Title', 'altis-ab-tests' ) } ${ getLetter( titles.length ) }` }
 					onChange={ value => setTitles( titles, value, titles.length ) }
 					placeholder={ __( 'Enter another title here.', 'altis-ab-tests' ) }
 					value=""

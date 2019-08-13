@@ -11,6 +11,17 @@
 	}
 
 	/**
+	 * Custom test fallback element.
+	 */
+	class TestFallback extends HTMLElement {
+		constructor() {
+			super();
+			const root = this.attachShadow( { mode: 'open' } );
+			root.innerHTML = '<slot></slot>';
+		}
+	}
+
+	/**
 	 * Custom variant element.
 	 */
 	class TestVariant extends HTMLElement {
@@ -118,12 +129,17 @@
 			// Get the slot element.
 			const slot = this.shadowRoot.querySelector( 'slot' );
 			slot.addEventListener( 'slotchange', () => {
+				if ( initialised ) {
+					return;
+				}
+
 				let fallback = Array.from( slot.assignedElements() )
 					.filter( node => node.nodeName === 'TEST-FALLBACK' );
 
 				// Use fallback if we're not in the test.
 				if ( fallback.length > 0 && variantId === false ) {
 					element.outerHTML = fallback[0].innerHTML;
+					initialised = true;
 					return;
 				}
 
@@ -131,7 +147,7 @@
 					.filter( node => node.nodeName === 'TEST-VARIANT' );
 
 				// Wait for all our variants to be available.
-				if ( variants.length !== variantCount && ! initialised ) {
+				if ( variants.length !== variantCount ) {
 					return;
 				}
 
@@ -273,7 +289,7 @@
 	}, [ 'a' ] );
 
 	// Define custom elements.
-	window.customElements.define( 'test-fallback', TestVariant );
+	window.customElements.define( 'test-fallback', TestFallback );
 	window.customElements.define( 'test-variant', TestVariant );
 	window.customElements.define( 'ab-test', ABTest );
 

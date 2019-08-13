@@ -74,7 +74,7 @@ function enqueue_scripts() {
  * javascript isn't running.
  */
 function output_styles() {
-	echo '<style>test-variant + test-variant { display: none; visibility: hidden; }</style>';
+	echo '<style>test-variant { display: none; visibility: hidden; }</style>';
 }
 
 /**
@@ -525,7 +525,7 @@ function output_ab_test_html_for_post( string $test_id, int $post_id, string $de
 	$test = get_post_ab_test( $test_id );
 	$variants = get_ab_test_variants_for_post( $test_id, $post_id );
 
-	// Check for winner and return that if present.
+	// Check for a winner and return that if present.
 	$results = get_ab_test_results_for_post( $test_id, $post_id );
 	if ( isset( $results['winner'] ) && $results['winner'] !== false ) {
 		if ( $results['winner'] === 0 ) {
@@ -579,6 +579,9 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	// Get a unique ID for the test.
 	$test_id_with_post = $test_id . '_' . $post_id;
 
+	// Get existing data for use with queries.
+	$data = get_ab_test_results_for_post( $test_id, $post_id );
+
 	// Bail if test no longer running.
 	if ( ! is_ab_test_running_for_post( $test_id, $post_id ) ) {
 		if ( get_ab_test_end_time_for_post( $test_id, $post_id ) <= milliseconds() ) {
@@ -590,14 +593,21 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 			 *
 			 * @param string $test_id The test ID.
 			 * @param string $post_id The post ID for the test.
+			 * @param array $data The test results so far.
 			 */
-			do_action( 'altis.ab_tests.ended', $test_id, $post_id );
+			do_action( 'altis.ab_tests.ended', $test_id, $post_id, $data );
+
+			/**
+			 * Dispatch action when a test of this type has ended.
+			 *
+			 * @param string $post_id The post ID for the test.
+			 * @param array $data The test results so far.
+			 */
+			do_action( "altis.ab_tests.ended.{$test_id}", $post_id, $data );
 		}
 		return;
 	}
 
-	// Get existing data for use with queries.
-	$data = get_ab_test_results_for_post( $test_id, $post_id );
 
 	// Process event filter.
 	if ( is_callable( $test['query_filter'] ) ) {
@@ -742,7 +752,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	// Sort buckets by variant ID.
 	$variants = get_ab_test_variants_for_post( $test_id, $post_id );
 	$new_aggs = $result['aggregations']['sterms#test']['buckets'] ?? [];
-	$sorted_aggs = array_fill( 0, count( $variants ) + 1, [] );
+	$sorted_aggs = array_fill( 0, count( $variants ), [] );
 
 	foreach ( $new_aggs as $aggregation ) {
 		$sorted_aggs[ $aggregation['key'] ] = $aggregation;

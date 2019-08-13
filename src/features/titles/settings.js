@@ -3,23 +3,24 @@ import React, { Fragment } from 'react';
 import DateRangeField from './field-date-range';
 import TitleTextField from './field-title-text';
 import TrafficPercentageField from './field-traffic-percentage';
-import withTestData from './data';
+import withTestData from './with-test-data';
 
 import {
 	Button,
 	CenteredButton,
 	DestructivedButton,
+	Duration,
 	Notice,
 	PanelRow,
 	Warning,
 } from './components';
 
+import {
+	arrayEquals,
+} from './utils';
+
 const { compose } = wp.compose;
 const { __ } = wp.i18n;
-
-const arrayEquals = ( array1, array2 ) =>
-	array1.length === array2.length &&
-	array1.every( ( value, index ) => value === array2[ index ] )
 
 const Settings = props => {
 	const {
@@ -29,7 +30,6 @@ const Settings = props => {
 		title,
 		titles,
 		test,
-		resetTest,
 		setState,
 		updateTest,
 		updateTitles,
@@ -37,8 +37,8 @@ const Settings = props => {
 	const {
 		paused,
 		started,
-		start_time: startTime,
-		end_time: endTime,
+		start_time: startTime = Date.now(),
+		end_time: endTime = Date.now() + ( 30 * 24 * 60 * 60 * 1000 ),
 		traffic_percentage: trafficPercentage,
 		results = {},
 	} = test;
@@ -63,11 +63,23 @@ const Settings = props => {
 		updateTitles( prevTitles );
 	};
 
+	const isActive = started && startTime <= Date.now() && endTime >= Date.now();
+
 	return (
 		<Fragment>
 			<PanelRow>
-				{ started && (
-					<Notice>{ paused ? __( 'Your test is paused', 'altis-ab-tests' ) : __( 'Your test is running', 'altis-ab-tests' ) }</Notice>
+				{ paused && (
+					<Notice>{ __( 'Your test is paused', 'altis-ab-tests' ) }</Notice>
+				) }
+				{ isActive && ! paused && (
+					<Notice>{ __( 'Your test is running', 'altis-ab-tests' ) }</Notice>
+				) }
+				{ ! paused && startTime >= Date.now() && (
+					<Notice>
+						{ __( 'Your test will start in' ) }
+						{ ' ' }
+						<Duration time={ startTime - Date.now() } />
+					</Notice>
 				) }
 				{ started && (
 					<CenteredButton
@@ -89,7 +101,7 @@ const Settings = props => {
 						{ ! paused && __( 'Pause test', 'altis-ab-tests' ) }
 					</CenteredButton>
 				) }
-				{ !started && (
+				{ ! started && (
 					<CenteredButton
 						disabled={ titles.length < 2 }
 						isBusy={ isSaving }
@@ -140,7 +152,13 @@ const Settings = props => {
 			{ started && (
 				<PanelRow>
 					<DestructivedButton
-						onClick={ () => resetTest( __( 'Are you sure you want to cancel the test?', 'altis-ab-tests' ) ) }
+						onClick={ () => {
+							if ( window.confirm( __( 'Are you sure you want to cancel the test?', 'altis-ab-tests' ) ) ) {
+								updateTest( {
+									end_time: Date.now(),
+								}, false, true );
+							}
+						} }
 					>
 						{ __( 'Cancel test', 'altis-ab-tests' ) }
 					</DestructivedButton>

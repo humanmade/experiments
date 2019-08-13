@@ -4,11 +4,13 @@ import deepmerge from 'deepmerge';
 const { apiFetch } = wp;
 const { withSelect, withDispatch } = wp.data;
 const { compose, withState } = wp.compose;
+const { __ } = wp.i18n;
 
 const withTestData = compose(
 	withState( {
 		isSaving: false,
 		prevTitles: [],
+		error: false,
 	} ),
 	withSelect( ( select ) => {
 		const ab_tests = select( 'core/editor' ).getEditedPostAttribute( 'ab_tests' );
@@ -36,19 +38,21 @@ const withTestData = compose(
 		const saveTest = async data => {
 			setState( { isSaving: true } );
 
-			const response = await apiFetch( {
-				path: `/wp/v2/${ postType.rest_base }/${ post.id }` +
-					`?context=edit&_timestamp=${ Date.now() }`,
-				method: 'PATCH',
-				body: JSON.stringify( data ),
-			} );
-
-			console.log( response );
+			try {
+				await apiFetch( {
+					path: `/wp/v2/${ postType.rest_base }/${ post.id }` +
+						`?context=edit&_timestamp=${ Date.now() }`,
+					method: 'PATCH',
+					body: JSON.stringify( data ),
+				} );
+			} catch ( error ) {
+				setState( { error: error } );
+			}
 
 			setState( { isSaving: false } );
 		}
 
-		const updateTest = ( test = {}, titles = false, save = false ) => {
+		const updateTest = async ( test = {}, titles = false, save = false ) => {
 			const data = deepmerge( {
 				ab_tests,
 			}, {
@@ -61,14 +65,12 @@ const withTestData = compose(
 				data.ab_test_titles = titles;
 			}
 
-			dispatch( 'core/editor' ).editPost( data );
-
 			// Send the data to the API if we want to save it.
-			if ( ! save ) {
-				return;
+			if ( save ) {
+				await saveTest( data );
 			}
 
-			saveTest( data );
+			dispatch( 'core/editor' ).editPost( data );
 		};
 
 		const updateTitles = async ( titles, save = false ) => {
@@ -76,21 +78,19 @@ const withTestData = compose(
 				ab_test_titles: titles,
 			};
 
-			dispatch( 'core/editor' ).editPost( data );
-
 			// Send the data to the API if we want to save it.
-			if ( ! save ) {
-				return;
+			if ( save ) {
+				await saveTest( data );
 			}
 
-			saveTest( data );
+			dispatch( 'core/editor' ).editPost( data );
 		};
 
 		return {
 			updateTest,
 			updateTitles,
 			resetTest: message => {
-				if ( !window.confirm(
+				if ( ! window.confirm(
 					message || __( 'Are you sure you want to reset the test?', 'altis-ab-tests' )
 				) ) {
 					return;
