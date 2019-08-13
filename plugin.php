@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Altis Experiments
  * Description: A companion plugin to Altis Analytics that provides a web experimentation framework.
- * Version: 1.1.0
+ * Version: 2.0.0
  * Author: Human Made Limited
  * Author URL: https://humanmade.com/
  */

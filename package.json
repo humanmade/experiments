@@ -1,6 +1,6 @@
 {
   "name": "altis-experiments",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Web experimentation tools for Altis",
   "repository": "https://github.com/humanmade/ab-tests",
   "main": "src/experiments.js",
