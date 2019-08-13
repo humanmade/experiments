@@ -58,7 +58,10 @@ const Settings = props => {
 	};
 	const startTest = () => {
 		setState( { prevTitles: titles } );
-		updateTest( { started: true, paused: false }, titles, true );
+		updateTest( {
+			started: true,
+			paused: false,
+		}, titles, true );
 	};
 	const resetTitles = () => {
 		updateTitles( prevTitles );

@@ -1,9 +1,9 @@
 /* global wp */
+import React from 'react';
 import styled from 'styled-components';
 import _Duration from './duration';
 import _PanelRow from './panel-row';
 import _PluginIcon from './plugin-icon';
-
 
 const {
 	Button: DefaultButton,

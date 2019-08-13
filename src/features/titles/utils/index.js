@@ -1,4 +1,4 @@
-/* global wp, moment */
+/* global moment */
 
 export const getLetter = index => ( 'abcdefghijklmnopqrstuvwxyz'.toUpperCase() )[ Math.max( 0, Math.min( index, 26 ) ) ];
 

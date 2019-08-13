@@ -90,7 +90,7 @@ function init() {
 					'ID' => $post_id,
 					'post_title' => $title,
 				] );
-			}
+			},
 		]
 	);
 }

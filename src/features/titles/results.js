@@ -112,8 +112,8 @@ export const ResultsWithData = compose(
 				dispatch( 'core/editor' ).editPost( {
 					title: props.titles[ 0 ],
 				} );
-			}
-		}
+			},
+		};
 	} )
 )( Results );
 

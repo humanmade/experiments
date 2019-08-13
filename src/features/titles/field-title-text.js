@@ -110,7 +110,7 @@ export const TitleTextField = props => {
 							placeholder={ __( 'Enter another title here.', 'altis-experiments' ) }
 							value={ title }
 							readOnly={ ! isEditable }
-							rows={3}
+							rows={ 3 }
 						/>
 						<Info>
 							{ variant.size > 0 && (

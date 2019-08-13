@@ -663,7 +663,6 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 		return;
 	}
 
-
 	// Process event filter.
 	if ( is_callable( $test['query_filter'] ) ) {
 		$query_filter = call_user_func_array( $test['query_filter'], [ $test_id, $post_id ] );

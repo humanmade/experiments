@@ -12,7 +12,7 @@ const withTestData = compose(
 		prevTitles: [],
 		error: false,
 	} ),
-	withSelect( ( select ) => {
+	withSelect( select => {
 		const ab_tests = select( 'core/editor' ).getEditedPostAttribute( 'ab_tests' );
 		const test = ab_tests.titles;
 		const post = select( 'core/editor' ).getCurrentPost();
