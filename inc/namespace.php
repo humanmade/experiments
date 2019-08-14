@@ -34,6 +34,9 @@ function setup() {
 	// Hook cron task.
 	add_action( 'altis_post_ab_test_cron', __NAMESPACE__ . '\\handle_post_ab_test_cron', 10, 2 );
 
+	// Register notifications.
+	add_action( 'altis.experiments.test.ended', __NAMESPACE__ . '\\send_post_ab_test_notification', 10, 2 );
+
 	/**
 	 * Enable Title AB Tests.
 	 *
@@ -74,7 +77,7 @@ function enqueue_scripts() {
  * javascript isn't running.
  */
 function output_styles() {
-	echo '<style>test-variant + test-variant { display: none; visibility: hidden; }</style>';
+	echo '<style>test-variant { display: none; visibility: hidden; }</style>';
 }
 
 /**
@@ -107,6 +110,7 @@ function register_post_ab_tests_rest_fields() {
 			$response = [];
 			foreach ( array_keys( get_post_ab_tests() ) as $test_id ) {
 				$response[ $test_id ] = [
+					'started'            => is_ab_test_started_for_post( $test_id, $post['id'] ),
 					'start_time'         => get_ab_test_start_time_for_post( $test_id, $post['id'] ),
 					'end_time'           => get_ab_test_end_time_for_post( $test_id, $post['id'] ),
 					'traffic_percentage' => get_ab_test_traffic_percentage_for_post( $test_id, $post['id'] ),
@@ -118,6 +122,9 @@ function register_post_ab_tests_rest_fields() {
 		},
 		'update_callback' => function ( $value, WP_Post $post ) {
 			foreach ( $value as $test_id => $test ) {
+				if ( isset( $test['started'] ) ) {
+					update_is_ab_test_started_for_post( $test_id, $post->ID, $test['started'] );
+				}
 				if ( isset( $test['start_time'] ) ) {
 					update_ab_test_start_time_for_post( $test_id, $post->ID, $test['start_time'] );
 				}
@@ -138,6 +145,9 @@ function register_post_ab_tests_rest_fields() {
 				'.*' => [
 					'type' => 'object',
 					'properties' => [
+						'started' => [
+							'type' => 'boolean',
+						],
 						'start_time' => [
 							'type' => 'integer',
 						],
@@ -175,25 +185,29 @@ function register_post_ab_tests_rest_fields() {
 									'items' => [
 										'type' => 'object',
 										'properties' => [
+											'value' => [
+												'type' => [ 'number', 'string' ],
+												'description' => __( 'Variant value', 'altis-experiments' ),
+											],
 											'size' => [
 												'type' => 'integer',
 												'default' => 0,
-												'description' => __( 'Variant sample size', 'altis-ab-tests' ),
+												'description' => __( 'Variant sample size', 'altis-experiments' ),
 											],
 											'hits' => [
 												'type' => 'integer',
 												'default' => 0,
-												'description' => __( 'Variant conversion count', 'altis-ab-tests' ),
+												'description' => __( 'Variant conversion count', 'altis-experiments' ),
 											],
 											'rate' => [
 												'type' => 'number',
 												'default' => 0,
-												'description' => __( 'Variant conversion rate', 'altis-ab-tests' ),
+												'description' => __( 'Variant conversion rate', 'altis-experiments' ),
 											],
 											'p' => [
 												'type' => 'number',
 												'default' => 1,
-												'description' => __( 'Variant p-value', 'altis-ab-tests' ),
+												'description' => __( 'Variant p-value', 'altis-experiments' ),
 											],
 										],
 									],
@@ -213,10 +227,19 @@ function register_post_ab_tests_rest_fields() {
  * @param string $test_id
  * @param array $options
  *     $options = [
+ *       'label' => (string) A human readable name for the test.
  *       'rest_api_variants_field' => (string) REST API field name to return variants on.
  *       'rest_api_variants_type' => (string) REST API field data type.
  *       'goal' => (string) The event handler.
  *       'variant_callback' => (callable) Callback for providing the variant output.
+ *                             Arguments:
+ *                               mixed $value The stored variant value.
+ *                               int $post_id The post ID.
+ *                               array $args Optional arguments passed to `output_ab_test_html_for_post()`
+ *       'winner_callback' => (callable) Callback for modifying the post with the winning variant value.
+ *                            Arguments:
+ *                              int $post_id The post ID.
+ *                              mixed $value The stored variant value.
  *       'query_filter' => (array|callable) Elasticsearch bool filter to narrow down overall result set.
  *       'goal_filter' => (array|callable) Elasticsearch bool filter to determine conversion events.
  *     ]
@@ -225,11 +248,15 @@ function register_post_ab_test( string $test_id, array $options ) {
 	global $post_ab_tests;
 
 	$options = wp_parse_args( $options, [
+		'label' => $test_id,
 		'rest_api_variants_field' => 'ab_test_' . $test_id,
 		'rest_api_variants_type' => 'string',
 		'goal' => 'click',
 		'variant_callback' => function ( $value, int $post_id, array $args ) {
 			return $value;
+		},
+		'winner_callback' => function ( int $post_id, $value ) {
+			// Default no-op.
 		},
 		'query_filter' => [],
 		'goal_filter' => [],
@@ -256,9 +283,64 @@ function register_post_ab_test( string $test_id, array $options ) {
 		]
 	);
 
+	// Bind winner_callback.
+	add_action( "altis.experiments.test.winner_found.{$test_id}", $options['winner_callback'], 10, 2 );
+
 	// Set up background task.
 	if ( ! wp_next_scheduled( 'altis_post_ab_test_cron', [ $test_id ] ) ) {
 		wp_schedule_event( time(), 'hourly', 'altis_post_ab_test_cron', [ $test_id ] );
+	}
+}
+
+/**
+ * Dispatches an email notification with a link to the post edit screen.
+ *
+ * @param string $test_id
+ * @param integer $post_id
+ */
+function send_post_ab_test_notification( string $test_id, int $post_id ) {
+	$test = get_post_ab_test( $test_id );
+
+	// Get post and post author.
+	$post = get_post( $post_id );
+
+	$subject = sprintf(
+		// translators: %1$s = test name, %2$s = post title.
+		__( 'Your test %1$s on "%2$s" has ended', 'altis-experiments' ),
+		$test['label'],
+		$post->post_title
+	);
+	$message = sprintf(
+		// translators: %s is replaced by an link to edit the post.
+		__( "Click the link below to view the results:\n\n%s", 'altis-experiments' ),
+		get_edit_post_link( $post_id, 'db' ) . '#experiments-' . $test_id
+	);
+
+	/**
+	 * Filter the recipients list for the test results.
+	 *
+	 * @param array $recipients List of user IDs.
+	 * @param string $test_id
+	 * @param int $post_id
+	 */
+	$recipients = apply_filters(
+		'altis.experiments.test.notification.recipients',
+		[ $post->post_author ],
+		$test_id,
+		$post_id
+	);
+
+	foreach ( $recipients as $recipient ) {
+		$user = get_user_by( 'id', $recipient );
+		if ( ! $user || is_wp_error( $user ) ) {
+			continue;
+		}
+
+		wp_mail(
+			$user->get( 'email' ),
+			$subject,
+			$message
+		);
 	}
 }
 
@@ -330,6 +412,17 @@ function get_ab_test_end_time_for_post( string $test_id, int $post_id ) : int {
 }
 
 /**
+ * Get whether the test has been started for a given post.
+ *
+ * @param string $test_id
+ * @param string $post_id
+ * @return bool
+ */
+function is_ab_test_started_for_post( string $test_id, int $post_id ) : bool {
+	return (bool) get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_started', true );
+}
+
+/**
  * Get the percentage of traffic to run the test for.
  *
  * @param string $test_id
@@ -363,6 +456,17 @@ function is_ab_test_paused_for_post( string $test_id, int $post_id ) : bool {
 }
 
 /**
+ * Check if a given test has ended for a post.
+ *
+ * @param string $test_id
+ * @param string $post_id
+ * @return bool
+ */
+function has_ab_test_ended_for_post( string $test_id, int $post_id ) : bool {
+	return ( get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_ended', true ) ?: 'false' ) !== 'false';
+}
+
+/**
  * Update the variants for a test on a given post.
  *
  * @param string $test_id
@@ -389,6 +493,7 @@ function update_ab_test_variants_for_post( string $test_id, int $post_id, array 
  *
  * @param string $test_id
  * @param string $post_id
+ * @param int $date
  */
 function update_ab_test_start_time_for_post( string $test_id, int $post_id, int $date ) {
 	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_start_time', $date );
@@ -399,9 +504,26 @@ function update_ab_test_start_time_for_post( string $test_id, int $post_id, int 
  *
  * @param string $test_id
  * @param string $post_id
+ * @param int $date
  */
 function update_ab_test_end_time_for_post( string $test_id, int $post_id, int $date ) {
 	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_end_time', $date );
+}
+
+/**
+ * Update the whather the test has been started for a given post.
+ *
+ * @param string $test_id
+ * @param string $post_id
+ * @param bool $is_started
+ */
+function update_is_ab_test_started_for_post( string $test_id, int $post_id, bool $is_started ) {
+	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_started', $is_started );
+
+	// Remove test ended flag if it hasn't been started yet.
+	if ( ! $is_started ) {
+		update_has_ab_test_ended_for_post( $test_id, $post_id, false );
+	}
 }
 
 /**
@@ -409,6 +531,7 @@ function update_ab_test_end_time_for_post( string $test_id, int $post_id, int $d
  *
  * @param string $test_id
  * @param string $post_id
+ * @param int $percent
  */
 function update_ab_test_traffic_percentage_for_post( string $test_id, int $post_id, int $percent ) {
 	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_traffic_percentage', $percent );
@@ -419,6 +542,7 @@ function update_ab_test_traffic_percentage_for_post( string $test_id, int $post_
  *
  * @param string $test_id
  * @param string $post_id
+ * @param array $data
  */
 function update_ab_test_results_for_post( string $test_id, int $post_id, array $data ) {
 	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_results', $data );
@@ -429,10 +553,21 @@ function update_ab_test_results_for_post( string $test_id, int $post_id, array $
  *
  * @param string $test_id
  * @param string $post_id
- * @return bool
+ * @param bool $is_paused
  */
 function update_is_ab_test_paused_for_post( string $test_id, int $post_id, bool $is_paused ) {
 	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_paused', $is_paused ? 'true' : 'false' );
+}
+
+/**
+ * Check if a given test has ended for a post.
+ *
+ * @param string $test_id
+ * @param string $post_id
+ * @param bool $has_ended
+ */
+function update_has_ab_test_ended_for_post( string $test_id, int $post_id, bool $has_ended ) {
+	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_ended', $has_ended ? 'true' : 'false' );
 }
 
 /**
@@ -444,10 +579,27 @@ function update_is_ab_test_paused_for_post( string $test_id, int $post_id, bool 
  */
 function is_ab_test_running_for_post( string $test_id, int $post_id ) : bool {
 	$has_variants = (bool) get_ab_test_variants_for_post( $test_id, $post_id );
+	$is_started = (bool) is_ab_test_started_for_post( $test_id, $post_id );
 	$is_paused = (bool) is_ab_test_paused_for_post( $test_id, $post_id );
 	$start_time = (int) get_ab_test_start_time_for_post( $test_id, $post_id );
 	$end_time = (int) get_ab_test_end_time_for_post( $test_id, $post_id );
-	return $has_variants && ! $is_paused && $start_time <= milliseconds() && $end_time > milliseconds();
+	return $has_variants && $is_started && ! $is_paused && $start_time <= milliseconds() && $end_time > milliseconds();
+}
+
+/**
+ * Save completed results for the test to post meta for later reference.
+ *
+ * @param string $test_id
+ * @param string $post_id
+ * @param array $data
+ */
+function save_ab_test_results_for_post( string $test_id, int $post_id, array $data ) {
+	$data = wp_parse_args( $data, [
+		'timestamp' => milliseconds(),
+		'winner' => false,
+		'variants' => [],
+	] );
+	add_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_completed', $data );
 }
 
 /**
@@ -463,7 +615,7 @@ function output_ab_test_html_for_post( string $test_id, int $post_id, string $de
 	$test = get_post_ab_test( $test_id );
 	$variants = get_ab_test_variants_for_post( $test_id, $post_id );
 
-	// Check for winner and return that if present.
+	// Check for a winner and return that if present.
 	$results = get_ab_test_results_for_post( $test_id, $post_id );
 	if ( isset( $results['winner'] ) && $results['winner'] !== false ) {
 		if ( $results['winner'] === 0 ) {
@@ -490,9 +642,9 @@ function output_ab_test_html_for_post( string $test_id, int $post_id, string $de
 		post-id="<?php echo esc_attr( $post_id ); ?>"
 		traffic-percentage="<?php echo get_ab_test_traffic_percentage_for_post( $test_id, $post_id ); ?>"
 		goal="<?php echo esc_attr( $test['goal'] ); ?>"
-		variant-count="<?php echo intval( count( $variants ) + 1 ); ?>"
+		variant-count="<?php echo intval( count( $variants ) ); ?>"
 	>
-		<test-variant control="true"><?php echo $default_output; ?></test-variant>
+		<test-fallback><?php echo $default_output; ?></test-fallback>
 		<?php foreach ( $variants as $variant ) : ?>
 		<test-variant>
 			<?php echo call_user_func_array( $test['variant_callback'], [ $variant, $post_id, $args ] ); ?>
@@ -517,25 +669,18 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	// Get a unique ID for the test.
 	$test_id_with_post = $test_id . '_' . $post_id;
 
-	// Bail if test no longer running.
-	if ( ! is_ab_test_running_for_post( $test_id, $post_id ) ) {
-		if ( get_ab_test_end_time_for_post( $test_id, $post_id ) <= milliseconds() ) {
-			// Pause the test.
-			update_is_ab_test_paused_for_post( $test_id, $post_id, true );
+	// Get existing data for use with queries.
+	$data = get_ab_test_results_for_post( $test_id, $post_id );
 
-			/**
-			 * Dispatch action when test has ended.
-			 *
-			 * @param string $test_id The test ID.
-			 * @param string $post_id The post ID for the test.
-			 */
-			do_action( 'altis.ab_tests.ended', $test_id, $post_id );
+	// End if test no longer running.
+	if ( ! is_ab_test_running_for_post( $test_id, $post_id ) ) {
+		$should_end = get_ab_test_end_time_for_post( $test_id, $post_id ) <= milliseconds();
+		$has_ended = has_ab_test_ended_for_post( $test_id, $post_id );
+		if ( $should_end && ! $has_ended ) {
+			end_ab_test_for_post( $test_id, $post_id );
 		}
 		return;
 	}
-
-	// Get existing data for use with queries.
-	$data = get_ab_test_results_for_post( $test_id, $post_id );
 
 	// Process event filter.
 	if ( is_callable( $test['query_filter'] ) ) {
@@ -680,7 +825,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	// Sort buckets by variant ID.
 	$variants = get_ab_test_variants_for_post( $test_id, $post_id );
 	$new_aggs = $result['aggregations']['sterms#test']['buckets'] ?? [];
-	$sorted_aggs = array_fill( 0, count( $variants ) + 1, [] );
+	$sorted_aggs = array_fill( 0, count( $variants ), [] );
 
 	foreach ( $new_aggs as $aggregation ) {
 		$sorted_aggs[ $aggregation['key'] ] = $aggregation;
@@ -706,6 +851,8 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
  * @return array Array of winner ID, current winning variant ID and variant stats.
  */
 function analyse_ab_test_results( array $aggregations, string $test_id, int $post_id ) : array {
+	$variant_values = get_ab_test_variants_for_post( $test_id, $post_id );
+
 	// Track winning variant.
 	$winner = false;
 	$winning = false;
@@ -718,6 +865,7 @@ function analyse_ab_test_results( array $aggregations, string $test_id, int $pos
 		$rate = $size ? $hits / $size : 0;
 
 		$variants[ $id ] = [
+			'value' => $variant_values[ $id ],
 			'size' => $size,
 			'hits' => $hits,
 			'rate' => $rate,
@@ -745,16 +893,33 @@ function analyse_ab_test_results( array $aggregations, string $test_id, int $pos
 	// Find if a variant is winning, ie. reject null hypothesis.
 	if ( $winning !== false ) {
 		$winning_variant = $variants[ $winning ];
+		// Require 99% certainty.
 		if ( ! is_null( $winning_variant['p'] ) && $winning_variant['p'] < 0.01 ) {
 			$winner = $winning;
 
-			// Pause the test.
-			update_is_ab_test_paused_for_post( $test_id, $post_id, true );
+			// Store results safely.
+			save_ab_test_results_for_post( $test_id, $post_id, [
+				'winner' => $winner,
+				'variants' => $variants,
+			] );
+
+			// End the test.
+			end_ab_test_for_post( $test_id, $post_id );
 
 			/**
 			 * Dispatch action when winner found.
+			 *
+			 * @param string $test_id
+			 * @param int $post_id
 			 */
-			do_action( 'altis.ab_tests.winner_found', $test_id, $post_id );
+			do_action( 'altis.experiments.test.winner_found', $test_id, $post_id, $winning_variant['value'] );
+
+			/**
+			 * Dispatch action when winner found for test.
+			 *
+			 * @param int $post_id
+			 */
+			do_action( "altis.experiments.test.winner_found.{$test_id}", $post_id, $winning_variant['value'] );
 		}
 	}
 
@@ -763,4 +928,47 @@ function analyse_ab_test_results( array $aggregations, string $test_id, int $pos
 		'winner' => $winner,
 		'variants' => $variants,
 	];
+}
+
+/**
+ * End the test for the post.
+ *
+ * @uses do_action( 'altis.experiments.test.ended', $test_id, $post_id );
+ * @uses do_action( "altis.experiments.test.ended.{$test_id}", $post_id );
+ *
+ * @param string $test_id
+ * @param int $post_id
+ */
+function end_ab_test_for_post( string $test_id, int $post_id ) {
+
+	// Check ended flag.
+	if ( has_ab_test_ended_for_post( $test_id, $post_id ) ) {
+		return;
+	}
+
+	// Pause the test.
+	update_is_ab_test_paused_for_post( $test_id, $post_id, true );
+
+	// End the test.
+	update_has_ab_test_ended_for_post( $test_id, $post_id, true );
+
+	// Set end time to now.
+	update_ab_test_end_time_for_post( $test_id, $post_id, milliseconds() );
+
+	/**
+	 * Dispatch action when test has ended.
+	 *
+	 * @param string $test_id The test ID.
+	 * @param string $post_id The post ID for the test.
+	 * @param array $data The test results so far.
+	 */
+	do_action( 'altis.experiments.test.ended', $test_id, $post_id );
+
+	/**
+	 * Dispatch action when a test of this type has ended.
+	 *
+	 * @param string $post_id The post ID for the test.
+	 * @param array $data The test results so far.
+	 */
+	do_action( "altis.experiments.test.ended.{$test_id}", $post_id );
 }

@@ -46,6 +46,7 @@ function admin_scripts( string $hook ) {
 			'wp-components',
 			'wp-core-data',
 			'wp-edit-post',
+			'moment',
 		]
 	);
 }
@@ -72,6 +73,7 @@ function init() {
 	register_post_ab_test(
 		'titles',
 		[
+			'label' => __( 'Titles', 'altis-experiments' ),
 			'goal' => 'click',
 			// Exclude all events from the target post page.
 			'query_filter' => function ( $test_id, $post_id ) : array {
@@ -81,6 +83,13 @@ function init() {
 						[ 'prefix' => [ 'attributes.url.keyword' => $url ] ],
 					],
 				];
+			},
+			// Update the actual post title.
+			'winner_callback' => function ( int $post_id, string $title ) {
+				wp_update_post( [
+					'ID' => $post_id,
+					'post_title' => $title,
+				] );
 			},
 		]
 	);

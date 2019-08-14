@@ -11,6 +11,17 @@
 	}
 
 	/**
+	 * Custom test fallback element.
+	 */
+	class TestFallback extends HTMLElement {
+		constructor() {
+			super();
+			const root = this.attachShadow( { mode: 'open' } );
+			root.innerHTML = '<slot></slot>';
+		}
+	}
+
+	/**
 	 * Custom variant element.
 	 */
 	class TestVariant extends HTMLElement {
@@ -61,7 +72,7 @@
 		connectedCallback() {
 			// Extract test set by URL parameters.
 			const regex = new RegExp( `(utm_campaign|set_test)=test_${ this.testIdWithPost }:(\\d+)`, 'i' );
-			const url_test = window.location.search.match( regex );
+			const url_test = unescape( window.location.search ).match( regex );
 			if ( url_test ) {
 				this.addTestForUser( { [ this.testIdWithPost ]: parseInt( url_test[ 2 ], 10 ) } );
 			}
@@ -118,11 +129,25 @@
 			// Get the slot element.
 			const slot = this.shadowRoot.querySelector( 'slot' );
 			slot.addEventListener( 'slotchange', () => {
+				if ( initialised ) {
+					return;
+				}
+
+				let fallback = Array.from( slot.assignedElements() )
+					.filter( node => node.nodeName === 'TEST-FALLBACK' );
+
+				// Use fallback if we're not in the test.
+				if ( fallback.length > 0 && variantId === false ) {
+					element.outerHTML = fallback[0].innerHTML;
+					initialised = true;
+					return;
+				}
+
 				let variants = Array.from( slot.assignedElements() )
 					.filter( node => node.nodeName === 'TEST-VARIANT' );
 
 				// Wait for all our variants to be available.
-				if ( variants.length !== variantCount && ! initialised ) {
+				if ( variants.length !== variantCount ) {
 					return;
 				}
 
@@ -264,6 +289,7 @@
 	}, [ 'a' ] );
 
 	// Define custom elements.
+	window.customElements.define( 'test-fallback', TestFallback );
 	window.customElements.define( 'test-variant', TestVariant );
 	window.customElements.define( 'ab-test', ABTest );
 

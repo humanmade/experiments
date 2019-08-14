@@ -45,7 +45,7 @@ const sharedConfig = {
 	},
 	plugins: [
 		new EnvironmentPlugin( {
-			SC_ATTR: 'altis-ab-tests',
+			SC_ATTR: 'altis-experiments',
 		} ),
 	],
 	devtool:
@@ -57,6 +57,7 @@ const sharedConfig = {
 		'wp': 'wp',
 		'react': 'React',
 		'react-dom': 'ReactDOM',
+		'moment': 'moment',
 	},
 };
 
