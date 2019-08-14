@@ -5,7 +5,11 @@ const Duration = props => {
 	const { time = 0, interval = 60000 } = props;
 	const [ duration, setDuration ] = useState( time );
 
-	interval > 0 && useEffect( () => {
+	useEffect( () => {
+		if ( ! interval ) {
+			return;
+		}
+
 		const timer = setInterval( () => {
 			setDuration( duration - interval );
 		}, interval );

@@ -30,11 +30,16 @@ Sets up the test.
   - `label <string>`: A human readable label for the test.
   - `rest_api_variants_field <string>`: The field name to make variants available at.
   - `rest_api_variants_type <string>`:  The data type of the variants.
-  - `goal <string>`: The conversion goal event name, eg "click".
+  - `goal <string>`: The conversion goal event name, eg "click" or "click:.selector a".
   - `goal_filter <string | callable>`: Elasticsearch bool query to filter goal results. If a callable is passed it receives the test ID and post ID as arguments.
-  - `query_filter <string | callable>`: Elasticsearch bool query to filter total events being queried.
-  - `variant_callback <callable>`: An optional callback used to render variants based. Recieves the variant value, post ID and an optional array of data as arguments. By default passes the variant value through directly.
-  - `winner_callback <callable>`: An optional callback used to perform updates to the post when a winner is found. Recieves the winning variant value and post ID as arguments. Default is no-op.
+  - `query_filter <string | callable>`: Elasticsearch bool query to filter total events being queried. If a callable is passed it receives the test ID and post ID as arguments.
+  - `variant_callback <callable>`: An optional callback used to render variants based. Arguments:
+    - `$value <mixed>`: The variant value.
+	- `$post_id <int>`: The post ID.
+	- `$args <array>`: Optional args passed to `output_ab_test_html_for_post()`.
+  - `winner_callback <callable>`: An optional callback used to perform updates to the post when a winner is found. Defaults to no-op. Arguments:
+    - `$post_id <int>`: The post ID
+	- `$value <mixed>`: The winning variant value.
 
 **`output_ab_test_html_for_post( string $test_id, int $post_id, string $default_content, array $args = [] )`**
 
@@ -42,7 +47,7 @@ Returns the AB Test markup for client side processing.
 
 - `$test_id`: A unique ID for the test.
 - `$post_id`: The post ID for the test.
-- `$default_content`: The default content for the control test.
+- `$default_content`: The default content for users not in the test.
 - `$args`: An optional array of data to pass through to `variant_callback`.
 
 ```php

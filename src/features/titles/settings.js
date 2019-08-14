@@ -1,10 +1,5 @@
 /* global wp */
 import React, { Fragment } from 'react';
-import DateRangeField from './field-date-range';
-import TitleTextField from './field-title-text';
-import TrafficPercentageField from './field-traffic-percentage';
-import withTestData from './with-test-data';
-
 import {
 	Button,
 	CenteredButton,
@@ -14,12 +9,13 @@ import {
 	PanelRow,
 	Warning,
 } from './components';
+import DateRangeField from './components/field-date-range';
+import TitleTextField from './components/field-title-text';
+import TrafficPercentageField from './components/field-traffic-percentage';
+import { DEFAULT_TEST } from './data/shapes';
+import withTestData from './data/with-test-data';
+import { arrayEquals } from './utils';
 
-import {
-	arrayEquals,
-} from './utils';
-
-const { compose } = wp.compose;
 const { __ } = wp.i18n;
 
 const Settings = props => {
@@ -38,10 +34,10 @@ const Settings = props => {
 	const {
 		paused,
 		started,
-		start_time: startTime = Date.now(),
-		end_time: endTime = Date.now() + ( 30 * 24 * 60 * 60 * 1000 ),
+		start_time: startTime,
+		end_time: endTime,
 		traffic_percentage: trafficPercentage,
-		results = {},
+		results,
 	} = test;
 	const {
 		variants = [],
@@ -173,8 +169,8 @@ const Settings = props => {
 	);
 };
 
-const SettingsWithData = compose(
-	withTestData,
-)( Settings );
+Settings.defaultProps = {
+	test: DEFAULT_TEST,
+};
 
-export default SettingsWithData;
+export default withTestData( Settings );

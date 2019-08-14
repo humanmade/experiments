@@ -1,9 +1,8 @@
 /* global wp */
 import React from 'react';
-import withTestData from '../with-test-data';
+import withTestData from '../data/with-test-data';
 import styled from 'styled-components';
 
-const { compose } = wp.compose;
 const { __ } = wp.i18n;
 
 const Icon = styled.span.attrs( props => ( {
@@ -36,8 +35,4 @@ const PluginIcon = props => {
 	);
 };
 
-const PluginIconWithData = compose(
-	withTestData
-)( PluginIcon );
-
-export default PluginIconWithData;
+export default withTestData( PluginIcon );

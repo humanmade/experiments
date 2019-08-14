@@ -1,9 +1,9 @@
 /* global wp */
 import React from 'react';
 import styled from 'styled-components';
-import _Duration from './duration';
-import _PanelRow from './panel-row';
-import _PluginIcon from './plugin-icon';
+export { default as Duration } from './duration';
+export { default as PanelRow} from './panel-row';
+export { default as PluginIcon } from './plugin-icon';
 
 const {
 	Button: DefaultButton,
@@ -12,8 +12,6 @@ const {
 } = wp.components;
 
 export const Button = DefaultButton;
-
-export const Duration = _Duration;
 
 export const Panel = styled( DefaultPanel )`
 	.components-panel__body-title {
@@ -28,10 +26,6 @@ export const Panel = styled( DefaultPanel )`
 		}
 	}
 `;
-
-export const PanelRow = _PanelRow;
-
-export const PluginIcon = _PluginIcon;
 
 export const Notice = styled.p`
 	color: #6e7b92;

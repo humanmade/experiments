@@ -36,7 +36,6 @@ function setup() {
 
 	// Register notifications.
 	add_action( 'altis.experiments.test.ended', __NAMESPACE__ . '\\send_post_ab_test_notification', 10, 2 );
-	add_action( 'altis.experiments.test.winner_found', __NAMESPACE__ . '\\send_post_ab_test_notification', 10, 2 );
 
 	/**
 	 * Enable Title AB Tests.
@@ -233,7 +232,14 @@ function register_post_ab_tests_rest_fields() {
  *       'rest_api_variants_type' => (string) REST API field data type.
  *       'goal' => (string) The event handler.
  *       'variant_callback' => (callable) Callback for providing the variant output.
+ *                             Arguments:
+ *                               mixed $value The stored variant value.
+ *                               int $post_id The post ID.
+ *                               array $args Optional arguments passed to `output_ab_test_html_for_post()`
  *       'winner_callback' => (callable) Callback for modifying the post with the winning variant value.
+ *                            Arguments:
+ *                              int $post_id The post ID.
+ *                              mixed $value The stored variant value.
  *       'query_filter' => (array|callable) Elasticsearch bool filter to narrow down overall result set.
  *       'goal_filter' => (array|callable) Elasticsearch bool filter to determine conversion events.
  *     ]
@@ -249,7 +255,7 @@ function register_post_ab_test( string $test_id, array $options ) {
 		'variant_callback' => function ( $value, int $post_id, array $args ) {
 			return $value;
 		},
-		'winner_callback' => function ( $value, int $post_id ) {
+		'winner_callback' => function ( int $post_id, $value ) {
 			// Default no-op.
 		},
 		'query_filter' => [],
@@ -277,6 +283,9 @@ function register_post_ab_test( string $test_id, array $options ) {
 		]
 	);
 
+	// Bind winner_callback.
+	add_action( "altis.experiments.test.winner_found.{$test_id}", $options['winner_callback'], 10, 2 );
+
 	// Set up background task.
 	if ( ! wp_next_scheduled( 'altis_post_ab_test_cron', [ $test_id ] ) ) {
 		wp_schedule_event( time(), 'hourly', 'altis_post_ab_test_cron', [ $test_id ] );
@@ -297,7 +306,7 @@ function send_post_ab_test_notification( string $test_id, int $post_id ) {
 
 	$subject = sprintf(
 		// translators: %1$s = test name, %2$s = post title.
-		__( 'Your test %1$s on "%2$s" has finished', 'altis-experiments' ),
+		__( 'Your test %1$s on "%2$s" has ended', 'altis-experiments' ),
 		$test['label'],
 		$post->post_title
 	);
@@ -637,28 +646,10 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	// Get existing data for use with queries.
 	$data = get_ab_test_results_for_post( $test_id, $post_id );
 
-	// Bail if test no longer running.
+	// End if test no longer running.
 	if ( ! is_ab_test_running_for_post( $test_id, $post_id ) ) {
 		if ( get_ab_test_end_time_for_post( $test_id, $post_id ) <= milliseconds() ) {
-			// Pause the test.
-			update_is_ab_test_paused_for_post( $test_id, $post_id, true );
-
-			/**
-			 * Dispatch action when test has ended.
-			 *
-			 * @param string $test_id The test ID.
-			 * @param string $post_id The post ID for the test.
-			 * @param array $data The test results so far.
-			 */
-			do_action( 'altis.experiments.test.ended', $test_id, $post_id );
-
-			/**
-			 * Dispatch action when a test of this type has ended.
-			 *
-			 * @param string $post_id The post ID for the test.
-			 * @param array $data The test results so far.
-			 */
-			do_action( "altis.experiments.test.ended.{$test_id}", $post_id );
+			end_ab_test_for_post( $test_id, $post_id );
 		}
 		return;
 	}
@@ -879,17 +870,14 @@ function analyse_ab_test_results( array $aggregations, string $test_id, int $pos
 		if ( ! is_null( $winning_variant['p'] ) && $winning_variant['p'] < 0.01 ) {
 			$winner = $winning;
 
-			// Pause the test.
-			update_is_ab_test_paused_for_post( $test_id, $post_id, true );
-
-			// Update the end date.
-			update_ab_test_end_time_for_post( $test_id, $post_id, milliseconds() );
-
 			// Store results safely.
 			save_ab_test_results_for_post( $test_id, $post_id, [
 				'winner' => $winner,
 				'variants' => $variants,
 			] );
+
+			// End the test.
+			end_ab_test_for_post( $test_id, $post_id );
 
 			/**
 			 * Dispatch action when winner found.
@@ -897,21 +885,14 @@ function analyse_ab_test_results( array $aggregations, string $test_id, int $pos
 			 * @param string $test_id
 			 * @param int $post_id
 			 */
-			do_action( 'altis.experiments.test.winner_found', $test_id, $post_id );
+			do_action( 'altis.experiments.test.winner_found', $test_id, $post_id, $winning_variant['value'] );
 
 			/**
 			 * Dispatch action when winner found for test.
 			 *
 			 * @param int $post_id
 			 */
-			do_action( "altis.experiments.test.winner_found.{$test_id}", $post_id );
-
-			/**
-			 * Run winner callback.
-			 */
-			if ( isset( $test['winner_callback'] ) && is_callable( $test['winner_callback'] ) ) {
-				call_user_func_array( $test['winner_callback'], [ $winning_variant['value'], $post_id ] );
-			}
+			do_action( "altis.experiments.test.winner_found.{$test_id}", $post_id, $winning_variant['value'] );
 		}
 	}
 
@@ -920,4 +901,39 @@ function analyse_ab_test_results( array $aggregations, string $test_id, int $pos
 		'winner' => $winner,
 		'variants' => $variants,
 	];
+}
+
+/**
+ * End the test for the post.
+ *
+ * @uses do_action( 'altis.experiments.test.ended', $test_id, $post_id );
+ * @uses do_action( "altis.experiments.test.ended.{$test_id}", $post_id );
+ *
+ * @param string $test_id
+ * @param int $post_id
+ */
+function end_ab_test_for_post( string $test_id, int $post_id ) {
+
+	// Pause the test.
+	update_is_ab_test_paused_for_post( $test_id, $post_id, true );
+
+	// Set end time to now.
+	update_ab_test_end_time_for_post( $test_id, $post_id, milliseconds() );
+
+	/**
+	 * Dispatch action when test has ended.
+	 *
+	 * @param string $test_id The test ID.
+	 * @param string $post_id The post ID for the test.
+	 * @param array $data The test results so far.
+	 */
+	do_action( 'altis.experiments.test.ended', $test_id, $post_id );
+
+	/**
+	 * Dispatch action when a test of this type has ended.
+	 *
+	 * @param string $post_id The post ID for the test.
+	 * @param array $data The test results so far.
+	 */
+	do_action( "altis.experiments.test.ended.{$test_id}", $post_id );
 }

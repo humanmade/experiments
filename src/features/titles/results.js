@@ -1,6 +1,6 @@
 /* global wp */
 import React, { Fragment } from 'react';
-import withTestData from './with-test-data';
+import withTestData from './data/with-test-data';
 import {
 	Button,
 	CenteredButton,

@@ -85,7 +85,7 @@ function init() {
 				];
 			},
 			// Update the actual post title.
-			'winner_callback' => function ( string $title, int $post_id ) {
+			'winner_callback' => function ( int $post_id, string $title ) {
 				wp_update_post( [
 					'ID' => $post_id,
 					'post_title' => $title,
