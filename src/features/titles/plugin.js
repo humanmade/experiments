@@ -26,15 +26,10 @@ const Plugin = props => {
 	} = test;
 	const { winner } = results;
 
-	const classNames = [];
-
-	if ( started ) {
-		classNames.push( 'is-started' );
-	}
-
-	if ( paused ) {
-		classNames.push( 'is-paused' );
-	}
+	const classNames = [
+		started && 'is-started',
+		paused && 'is-paused',
+	].filter( Boolean ).join( ' ' );
 
 	const hasEnded = endTime < Date.now();
 
@@ -57,7 +52,7 @@ const Plugin = props => {
 			>
 				<Panel>
 					<PanelBody
-						className={ classNames.join( ' ' ) }
+						className={ classNames }
 						title={ __( 'Post Titles', 'altis-experiments' ) }
 						icon={ paused ? 'controls-pause' : 'chart-line' }
 						initialOpen={ true }

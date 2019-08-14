@@ -35,11 +35,11 @@ Sets up the test.
   - `query_filter <string | callable>`: Elasticsearch bool query to filter total events being queried. If a callable is passed it receives the test ID and post ID as arguments.
   - `variant_callback <callable>`: An optional callback used to render variants based. Arguments:
     - `$value <mixed>`: The variant value.
-	- `$post_id <int>`: The post ID.
-	- `$args <array>`: Optional args passed to `output_ab_test_html_for_post()`.
+    - `$post_id <int>`: The post ID.
+    - `$args <array>`: Optional args passed to `output_ab_test_html_for_post()`.
   - `winner_callback <callable>`: An optional callback used to perform updates to the post when a winner is found. Defaults to no-op. Arguments:
     - `$post_id <int>`: The post ID
-	- `$value <mixed>`: The winning variant value.
+    - `$value <mixed>`: The winning variant value.
 
 **`output_ab_test_html_for_post( string $test_id, int $post_id, string $default_content, array $args = [] )`**
 
