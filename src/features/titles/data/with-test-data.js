@@ -7,6 +7,8 @@ const { withSelect, withDispatch } = wp.data;
 const { compose, withState } = wp.compose;
 const { __ } = wp.i18n;
 
+const overwriteMerge = ( dest, source ) => source;
+
 const dispatchHandler = ( dispatch, props ) => {
 	const {
 		ab_tests,
@@ -36,6 +38,8 @@ const dispatchHandler = ( dispatch, props ) => {
 		const data = {
 			ab_tests: deepmerge( ab_tests, {
 				titles: test,
+			}, {
+				arrayMerge: overwriteMerge,
 			} ),
 		};
 
