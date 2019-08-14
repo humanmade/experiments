@@ -304,7 +304,7 @@ function send_post_ab_test_notification( string $test_id, int $post_id ) {
 	$message = sprintf(
 		// translators: %s is replaced by an link to edit the post.
 		__( "Click the link below to view the results:\n\n%s", 'altis-experiments' ),
-		get_edit_post_link( $post_id ) . '#experiments-' . $test_id
+		get_edit_post_link( $post_id, 'db' ) . '#experiments-' . $test_id
 	);
 
 	/**
