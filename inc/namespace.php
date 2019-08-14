@@ -456,6 +456,17 @@ function is_ab_test_paused_for_post( string $test_id, int $post_id ) : bool {
 }
 
 /**
+ * Check if a given test has ended for a post.
+ *
+ * @param string $test_id
+ * @param string $post_id
+ * @return bool
+ */
+function has_ab_test_ended_for_post( string $test_id, int $post_id ) : bool {
+	return ( get_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_ended', true ) ?: 'false' ) !== 'false';
+}
+
+/**
  * Update the variants for a test on a given post.
  *
  * @param string $test_id
@@ -508,6 +519,11 @@ function update_ab_test_end_time_for_post( string $test_id, int $post_id, int $d
  */
 function update_is_ab_test_started_for_post( string $test_id, int $post_id, bool $is_started ) {
 	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_started', $is_started );
+
+	// Remove test ended flag if it hasn't been started yet.
+	if ( ! $is_started ) {
+		update_has_ab_test_ended_for_post( $test_id, $post_id, false );
+	}
 }
 
 /**
@@ -538,10 +554,20 @@ function update_ab_test_results_for_post( string $test_id, int $post_id, array $
  * @param string $test_id
  * @param string $post_id
  * @param bool $is_paused
- * @return bool
  */
 function update_is_ab_test_paused_for_post( string $test_id, int $post_id, bool $is_paused ) {
 	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_paused', $is_paused ? 'true' : 'false' );
+}
+
+/**
+ * Check if a given test has ended for a post.
+ *
+ * @param string $test_id
+ * @param string $post_id
+ * @param bool $has_ended
+ */
+function update_has_ab_test_ended_for_post( string $test_id, int $post_id, bool $has_ended ) {
+	update_post_meta( $post_id, '_altis_ab_test_' . $test_id . '_ended', $has_ended ? 'true' : 'false' );
 }
 
 /**
@@ -648,7 +674,9 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 
 	// End if test no longer running.
 	if ( ! is_ab_test_running_for_post( $test_id, $post_id ) ) {
-		if ( get_ab_test_end_time_for_post( $test_id, $post_id ) <= milliseconds() ) {
+		$should_end = get_ab_test_end_time_for_post( $test_id, $post_id ) <= milliseconds();
+		$has_ended = has_ab_test_ended_for_post( $test_id, $post_id );
+		if ( $should_end && ! $has_ended ) {
 			end_ab_test_for_post( $test_id, $post_id );
 		}
 		return;
@@ -823,7 +851,6 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
  * @return array Array of winner ID, current winning variant ID and variant stats.
  */
 function analyse_ab_test_results( array $aggregations, string $test_id, int $post_id ) : array {
-	$test = get_post_ab_test( $test_id );
 	$variant_values = get_ab_test_variants_for_post( $test_id, $post_id );
 
 	// Track winning variant.
@@ -914,8 +941,16 @@ function analyse_ab_test_results( array $aggregations, string $test_id, int $pos
  */
 function end_ab_test_for_post( string $test_id, int $post_id ) {
 
+	// Check ended flag.
+	if ( has_ab_test_ended_for_post( $test_id, $post_id ) ) {
+		return;
+	}
+
 	// Pause the test.
 	update_is_ab_test_paused_for_post( $test_id, $post_id, true );
+
+	// End the test.
+	update_has_ab_test_ended_for_post( $test_id, $post_id, true );
 
 	// Set end time to now.
 	update_ab_test_end_time_for_post( $test_id, $post_id, milliseconds() );
