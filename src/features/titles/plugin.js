@@ -24,7 +24,7 @@ const Plugin = props => {
 		results,
 		end_time: endTime,
 	} = test;
-	const { winner } = results;
+	const { winner = false } = results;
 
 	const classNames = [
 		started && 'is-started',
