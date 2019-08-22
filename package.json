@@ -20,7 +20,6 @@
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-react": "^7.0.0",
     "@babel/runtime": "^7.4.5",
-    "@webcomponents/shadydom": "^1.6.0",
     "@wordpress/babel-preset-default": "^4.3.0",
     "babel-loader": "^8.0.6",
     "deepmerge": "^4.0.0",

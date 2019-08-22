@@ -634,6 +634,10 @@ function output_ab_test_html_for_post( string $test_id, int $post_id, string $de
 		return $default_output;
 	}
 
+	$variant_output = array_map( function ( $variant ) use ( $test, $post_id, $args ) {
+		return call_user_func_array( $test['variant_callback'], [ $variant, $post_id, $args ] );
+	}, $variants );
+
 	// Generate AB Test markup.
 	ob_start();
 	?>
@@ -642,14 +646,10 @@ function output_ab_test_html_for_post( string $test_id, int $post_id, string $de
 		post-id="<?php echo esc_attr( $post_id ); ?>"
 		traffic-percentage="<?php echo get_ab_test_traffic_percentage_for_post( $test_id, $post_id ); ?>"
 		goal="<?php echo esc_attr( $test['goal'] ); ?>"
-		variant-count="<?php echo intval( count( $variants ) ); ?>"
+		fallback="<?php echo esc_attr( $default_output ); ?>"
+		variants="<?php echo esc_attr( wp_json_encode( $variant_output, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ); ?>"
 	>
-		<test-fallback><?php echo $default_output; ?></test-fallback>
-		<?php foreach ( $variants as $variant ) : ?>
-		<test-variant>
-			<?php echo call_user_func_array( $test['variant_callback'], [ $variant, $post_id, $args ] ); ?>
-		</test-variant>
-		<?php endforeach; ?>
+		<?php echo $default_output; ?>
 	</ab-test>
 	<?php
 	return ob_get_clean();
