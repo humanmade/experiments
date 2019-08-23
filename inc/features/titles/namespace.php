@@ -19,6 +19,7 @@ use function Altis\Experiments\register_post_ab_test;
 function setup() {
 	add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\admin_scripts' );
 	add_action( 'init', __NAMESPACE__ . '\\init' );
+	add_action( 'init', __NAMESPACE__ . '\\register_default_post_type_support', 9 );
 }
 
 /**
@@ -31,7 +32,10 @@ function admin_scripts( string $hook ) {
 		return;
 	}
 
-	if ( ! in_array( get_current_screen()->post_type, get_post_types( [ 'public' => true ] ), true ) ) {
+	// Get supported post types.
+	$supported_post_types = get_post_types_by_support( 'altis.experiments.titles' );
+
+	if ( ! in_array( get_current_screen()->post_type, $supported_post_types, true ) ) {
 		return;
 	}
 
@@ -49,6 +53,27 @@ function admin_scripts( string $hook ) {
 			'moment',
 		]
 	);
+}
+
+/**
+ * Sets up the default post type support for title A/B tests.
+ *
+ * @uses apply_filters( 'altis.experiments.features.titles.post_types', [] )
+ */
+function register_default_post_type_support() {
+	/**
+	 * Filters the default post types supported by experiments.
+	 *
+	 * @param array $post_types Supported post types for title AB tests.
+	 */
+	$post_types = apply_filters( 'altis.experiments.features.titles.post_types', [
+		'post',
+		'page',
+	] );
+
+	foreach ( $post_types as $post_type ) {
+		add_post_type_support( $post_type, 'altis.experiments.titles' );
+	}
 }
 
 /**
@@ -91,6 +116,7 @@ function init() {
 					'post_title' => $title,
 				] );
 			},
+			'post_types' => get_post_types_by_support( 'altis.experiments.titles' ),
 		]
 	);
 }
