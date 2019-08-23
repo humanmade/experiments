@@ -26,7 +26,6 @@ function setup() {
 
 	// Load analytics scripts early.
 	add_action( 'altis.analytics.enqueue_scripts', __NAMESPACE__ . '\\enqueue_scripts' );
-	add_action( 'altis.analytics.enqueue_scripts', __NAMESPACE__ . '\\output_styles' );
 
 	// Register REST Fields.
 	add_action( 'rest_api_init', __NAMESPACE__ . '\\register_post_ab_tests_rest_fields' );
@@ -60,24 +59,6 @@ function enqueue_scripts() {
 			'altis-analytics',
 		]
 	);
-	wp_add_inline_script(
-		'altis-experiments',
-		sprintf(
-			'var Altis = Altis || {}; Altis.Analytics = Altis.Analytics || {}; Altis.Analytics.Experiments = %s;',
-			wp_json_encode( [
-				'BuildURL' => plugins_url( 'build/', ROOT_DIR . '/plugin.php' ),
-			] )
-		),
-		'before'
-	);
-}
-
-/**
- * Default CSS styles hide all but the first test-variant element when
- * javascript isn't running.
- */
-function output_styles() {
-	echo '<style>test-variant { display: none; visibility: hidden; }</style>';
 }
 
 /**
@@ -105,10 +86,21 @@ function get_post_ab_test( string $test_id ) : array {
  * Register the rest api field for all the tests on a post.
  */
 function register_post_ab_tests_rest_fields() {
-	register_rest_field( 'post', 'ab_tests', [
-		'get_callback' => function ( $post ) {
+	$post_types = get_post_types( [
+		'show_in_rest' => true,
+	] );
+
+	register_rest_field( $post_types, 'ab_tests', [
+		'get_callback' => function ( array $post ) {
 			$response = [];
 			foreach ( array_keys( get_post_ab_tests() ) as $test_id ) {
+				$test_config = get_post_ab_test( $test_id );
+
+				// Skip this test for unsupported types.
+				if ( ! in_array( $post['type'], $test_config['post_types'], true ) ) {
+					continue;
+				}
+
 				$response[ $test_id ] = [
 					'started'            => is_ab_test_started_for_post( $test_id, $post['id'] ),
 					'start_time'         => get_ab_test_start_time_for_post( $test_id, $post['id'] ),
@@ -118,10 +110,17 @@ function register_post_ab_tests_rest_fields() {
 					'results'            => (object) get_ab_test_results_for_post( $test_id, $post['id'] ),
 				];
 			}
-			return $response;
+			return (object) $response;
 		},
 		'update_callback' => function ( $value, WP_Post $post ) {
 			foreach ( $value as $test_id => $test ) {
+				$test_config = get_post_ab_test( $test_id );
+
+				// Skip this test for unsupported types.
+				if ( ! in_array( $post->post_type, $test_config['post_types'], true ) ) {
+					continue;
+				}
+
 				if ( isset( $test['started'] ) ) {
 					update_is_ab_test_started_for_post( $test_id, $post->ID, $test['started'] );
 				}
@@ -242,6 +241,7 @@ function register_post_ab_tests_rest_fields() {
  *                              mixed $value The stored variant value.
  *       'query_filter' => (array|callable) Elasticsearch bool filter to narrow down overall result set.
  *       'goal_filter' => (array|callable) Elasticsearch bool filter to determine conversion events.
+ *       'post_types' => (array) List of supported post types for the test, default to `post` and `page`.
  *     ]
  */
 function register_post_ab_test( string $test_id, array $options ) {
@@ -260,12 +260,16 @@ function register_post_ab_test( string $test_id, array $options ) {
 		},
 		'query_filter' => [],
 		'goal_filter' => [],
+		'post_types' => [
+			'post',
+			'page',
+		],
 	] );
 
 	$post_ab_tests[ $test_id ] = $options;
 
 	register_rest_field(
-		'post',
+		$options['post_types'],
 		$options['rest_api_variants_field'],
 		[
 			'get_callback' => function ( $post ) use ( $test_id ) : array {
@@ -351,9 +355,11 @@ function send_post_ab_test_notification( string $test_id, int $post_id ) {
  * @param integer $page
  */
 function handle_post_ab_test_cron( string $test_id, int $page = 1 ) {
+	$test = get_post_ab_test( $test_id );
+
 	$posts_per_page = 50;
 	$posts = new WP_Query( [
-		'post_type' => get_post_types( [ 'public' => true ] ),
+		'post_type' => $test['post_types'],
 		'fields' => 'ids',
 		'post_status' => 'publish',
 		'posts_per_page' => $posts_per_page,
@@ -613,6 +619,13 @@ function save_ab_test_results_for_post( string $test_id, int $post_id, array $da
  */
 function output_ab_test_html_for_post( string $test_id, int $post_id, string $default_output, array $args = [] ) : string {
 	$test = get_post_ab_test( $test_id );
+
+	// Check post type is supported.
+	if ( ! in_array( get_post_type( $post_id ), $test['post_types'], true ) ) {
+		return $default_output;
+	}
+
+	// Get variant data.
 	$variants = get_ab_test_variants_for_post( $test_id, $post_id );
 
 	// Check for a winner and return that if present.

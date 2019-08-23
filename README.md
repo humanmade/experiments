@@ -17,6 +17,12 @@ It is enabled by default but can be disabled using the following filter:
 add_filter( 'altis.experiments.features.titles', '__return_false' );
 ```
 
+Posts and pages are supported by default however you can add support for custom post types using the following code in a plugin or your theme's `functions.php`:
+
+```php
+add_post_type_support( 'events', 'altis.experiments.titles' );
+```
+
 ## Usage
 
 The plugin provides a programmatic API to register custom AB Tests for post data:
@@ -40,6 +46,7 @@ Sets up the test.
   - `winner_callback <callable>`: An optional callback used to perform updates to the post when a winner is found. Defaults to no-op. Arguments:
     - `$post_id <int>`: The post ID
     - `$value <mixed>`: The winning variant value.
+  - `post_types <array>`: An array of supported post types for the test.
 
 **`output_ab_test_html_for_post( string $test_id, int $post_id, string $default_content, array $args = [] )`**
 

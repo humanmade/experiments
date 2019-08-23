@@ -98,7 +98,7 @@ const withTestData = compose(
 			originalTitles: select( 'core/editor' ).getCurrentPostAttribute( 'ab_test_titles' ) || [],
 			post: select( 'core/editor' ).getCurrentPost(),
 			postType: select( 'core' ).getPostType( currentPostType ),
-			test: select( 'core/editor' ).getEditedPostAttribute( 'ab_tests' ).titles,
+			test: select( 'core/editor' ).getEditedPostAttribute( 'ab_tests' ).titles || DEFAULT_TEST,
 			title: select( 'core/editor' ).getEditedPostAttribute( 'title' ) || '',
 			titles: select( 'core/editor' ).getEditedPostAttribute( 'ab_test_titles' ) || [],
 		};
