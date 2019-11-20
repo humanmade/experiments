@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.4
+
+- Prevent setting cron task during installation
+
 ## v2.0.3
 
 - Add post type support for tests #16
