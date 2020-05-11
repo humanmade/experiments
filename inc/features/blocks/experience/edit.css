@@ -1,0 +1,46 @@
+/**
+ * Experience block editor CSS.
+ */
+
+.altis-experience-block-header {
+	text-transform: uppercase;
+	font-variant: small-caps;
+	font-size: 16px;
+	font-weight: bold;
+	background: repeating-linear-gradient(
+		45deg,
+		rgba(0, 0, 0, .05),
+		rgba(0, 0, 0, .05) 10px,
+		rgba(0, 0, 0, 0) 10px,
+		rgba(0, 0, 0, 0) 20px
+	);
+	padding: 14px;
+	margin: 0 -14px -28px;
+	position: relative;
+	top: -14px;
+}
+
+.altis-variant-toolbar .components-button.is-link {
+	padding-right: 10px;
+	padding-left: 10px;
+}
+
+.altis-variant-toolbar--active .components-button.is-link {
+	font-weight: 700;
+	color: inherit;
+	text-decoration: none;
+	padding-left: 2px;
+}
+
+.audience-picker-control .audience-picker-control__value {
+	margin-top: 6px;
+	margin-bottom: 4px;
+}
+
+.wp-block[data-type="altis/experience-block-variant"] {
+	max-width: none;
+}
+
+.wp-block[data-type="altis/experience-block-variant"] .wp-block {
+	max-width: none;
+}

@@ -226,8 +226,66 @@ Test.registerGoal( 'click', ( element, record ) => {
 	} );
 }, [ 'a' ] );
 
+class ExperienceBlock extends HTMLElement {
+
+	exprience = null;
+
+	get clientId() {
+		return this.getAttribute( 'client-id' );
+	}
+
+	constructor() {
+		super();
+	}
+
+	connectedCallback() {
+		// Set default styles.
+		this.attachShadow( { mode: 'open' } );
+		this.shadowRoot.innerHTML = `
+			<style>
+				:host {
+					display: block;
+				}
+			</style>
+			<slot></slot>
+		`;
+
+		// Update the component content.
+		this.setContent();
+
+		// Attach a listener to update the content when audiences are changed.
+		window.Altis.Analytics.on( 'updateAudiences', this.setContent );
+	}
+
+	setContent() {
+		const audiences = window.Altis.Analytics.getAudiences();
+
+		// Get associated templates.
+		const templates = document.querySelectorAll( `template[data-parent-id="${ this.clientId }"]` );
+
+		// Find a matching template.
+		for ( const index in templates ) {
+			const template = templates[ index ];
+			if ( audiences.indexOf( Number( template.dataset.audience ) ) >= 0 ) {
+				const experience = template.content.cloneNode( true );
+				if ( this.experience ) {
+					this.replaceChild( experience, this.experience );
+				} else {
+					this.appendChild( experience );
+				}
+
+				// Keep a reference ot the node for easier replacement later.
+				this.experience = experience;
+				break;
+			}
+		}
+	}
+
+}
+
 // Define custom elements.
 window.customElements.define( 'ab-test', ABTest );
+window.customElements.define( 'experience-block', ExperienceBlock );
 
 // Expose ABTest methods.
 window.Altis.Analytics.Experiments = Object.assign( {}, window.Altis.Analytics.Experiments || {}, {

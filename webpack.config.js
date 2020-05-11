@@ -8,6 +8,8 @@ const sharedConfig = {
 	mode: mode,
 	entry: {
 		'features/titles': path.resolve( __dirname, 'src/features/titles/index.js' ),
+		'features/blocks/experience': path.resolve( __dirname, 'inc/features/blocks/experience/index.js' ),
+		'features/blocks/variant': path.resolve( __dirname, 'inc/features/blocks/variant/index.js' ),
 		experiments: path.resolve( __dirname, 'src/experiments.js' ),
 	},
 	output: {

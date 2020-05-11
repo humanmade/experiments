@@ -46,6 +46,17 @@ function setup() {
 		require_once ROOT_DIR . '/inc/features/titles/namespace.php';
 		Features\Titles\setup();
 	}
+
+	/**
+	 * Enable Experience Blocks.
+	 *
+	 * @param bool $enabled Whether to enable this feature or not.
+	 */
+	$blocks_feature = apply_filters( 'altis.experiments.features.blocks', true );
+	if ( $blocks_feature ) {
+		require_once ROOT_DIR . '/inc/features/blocks/namespace.php';
+		Features\Blocks\setup();
+	}
 }
 
 /**

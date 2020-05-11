@@ -1,0 +1,22 @@
+{
+    "name": "altis/experience-block-variant",
+    "settings": {
+        "category": "layout",
+        "icon": "lightbulb",
+        "parent": [ "altis/experience-block" ],
+        "supports": {
+            "reusable": false,
+            "html": false,
+            "lightBlockWrapper": true,
+            "inserter": false
+        },
+        "attributes": {
+            "parentId": {
+                "type": "string"
+            },
+            "audience": {
+                "type": "number"
+            }
+        }
+    }
+}
