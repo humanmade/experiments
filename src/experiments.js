@@ -224,8 +224,6 @@ Test.registerGoal( 'click', ( element, record ) => {
 
 class ExperienceBlock extends HTMLElement {
 
-	exprience = null;
-
 	get clientId() {
 		return this.getAttribute( 'client-id' );
 	}
@@ -256,26 +254,21 @@ class ExperienceBlock extends HTMLElement {
 		const templates = document.querySelectorAll( `template[data-parent-id="${ this.clientId }"]` );
 
 		// Find a matching template.
-		for ( const index in templates ) {
+		for ( let index = 0; index < templates.length; index++ ) {
 			const template = templates[ index ];
-			if ( audiences.indexOf( Number( template.dataset.audience ) ) >= 0 ) {
+			const audience = Number( template.dataset.audience );
+			if ( audiences.indexOf( audience ) >= 0 ) {
 				const experience = template.content.cloneNode( true );
-				if ( this.experience ) {
-					this.replaceChild( experience, this.experience );
-				} else {
-					this.appendChild( experience );
-				}
+				this.innerHTML = '';
+				this.appendChild( experience );
 
 				// Log an event for tracking views and audience.
 				window.Altis.Analytics.record( 'experienceView', {
 					attributes: {
 						clientId: this.clientId,
-						audience: template.dataset.audience,
+						audience: audience,
 					},
 				} );
-
-				// Keep a reference ot the node for easier replacement later.
-				this.experience = experience;
 				break;
 			}
 		}
