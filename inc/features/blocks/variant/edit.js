@@ -28,11 +28,11 @@ const Edit = ( {
 export default compose(
 	withSelect( ( select, ownProps ) => {
 		const { clientId } = ownProps;
-		const { getBlockOrder } = select( 'core/block-editor' )
+		const { getBlockOrder } = select( 'core/block-editor' );
 
 		return {
 			hasChildBlocks: () => getBlockOrder( clientId ).length > 0,
-		}
+		};
 	} ),
 	withDispatch( ( dispatch, ownProps, registry ) => {
 		const { clientId } = ownProps;
@@ -45,5 +45,5 @@ export default compose(
 		return {
 			selectParent: () => selectBlock( rootClientId ),
 		};
-	} )
+	} ),
 )( Edit );

@@ -1,11 +1,11 @@
 import React from 'react';
+import classnames from 'classnames';
+import scrollIntoView from 'dom-scroll-into-view';
 
 /**
  * External dependencies
  */
 const { throttle, isFunction } = window._;
-import classnames from 'classnames';
-import scrollIntoView from 'dom-scroll-into-view';
 
 /**
  * WordPress dependencies
@@ -27,7 +27,7 @@ const { isURL } = wp.url;
 // Since URLInput is rendered in the context of other inputs, but should be
 // considered a separate modal node, prevent keyboard events from propagating
 // as being considered from the input.
-const stopEventPropagation = ( event ) => event.stopPropagation();
+const stopEventPropagation = event => event.stopPropagation();
 
 class URLInput extends Component {
 	constructor( props ) {
@@ -43,7 +43,7 @@ class URLInput extends Component {
 		this.inputRef = createRef();
 		this.updateSuggestions = throttle(
 			this.updateSuggestions.bind( this ),
-			200
+			200,
 		);
 
 		this.suggestionNodes = [];
@@ -75,7 +75,7 @@ class URLInput extends Component {
 				this.autocompleteRef.current,
 				{
 					onlyScrollIfNeeded: true,
-				}
+				},
 			);
 
 			this.props.setTimeout( () => {
@@ -103,7 +103,7 @@ class URLInput extends Component {
 	}
 
 	bindSuggestionNode( index ) {
-		return ( ref ) => {
+		return ref => {
 			this.suggestionNodes[ index ] = ref;
 		};
 	}
@@ -164,7 +164,7 @@ class URLInput extends Component {
 		} );
 
 		request
-			.then( ( suggestions ) => {
+			.then( suggestions => {
 				// A fetch Promise doesn't have an abort option. It's mimicked by
 				// comparing the request reference in on the instance, which is
 				// reset or deleted on subsequent requests or unmounting.
@@ -177,23 +177,23 @@ class URLInput extends Component {
 					loading: false,
 				} );
 
-				if ( !! suggestions.length ) {
+				if ( suggestions.length ) {
 					this.props.debouncedSpeak(
 						sprintf(
 							/* translators: %s: number of results. */
 							_n(
 								'%d result found, use up and down arrow keys to navigate.',
 								'%d results found, use up and down arrow keys to navigate.',
-								suggestions.length
+								suggestions.length,
 							),
-							suggestions.length
+							suggestions.length,
 						),
-						'assertive'
+						'assertive',
 					);
 				} else {
 					this.props.debouncedSpeak(
 						__( 'No results.' ),
-						'assertive'
+						'assertive',
 					);
 				}
 				this.isUpdatingSuggestions = false;
@@ -258,7 +258,7 @@ class URLInput extends Component {
 				// When UP is pressed, if the caret is at the start of the text, move it to the 0
 				// position.
 				case UP: {
-					if ( 0 !== event.target.selectionStart ) {
+					if ( event.target.selectionStart !== 0 ) {
 						event.stopPropagation();
 						event.preventDefault();
 
@@ -279,11 +279,12 @@ class URLInput extends Component {
 						// Set the input caret to the last position
 						event.target.setSelectionRange(
 							this.props.value.length,
-							this.props.value.length
+							this.props.value.length,
 						);
 					}
 					break;
 				}
+				// no default
 			}
 
 			return;
@@ -333,6 +334,7 @@ class URLInput extends Component {
 				}
 				break;
 			}
+			// no default
 		}
 	}
 
@@ -356,7 +358,7 @@ class URLInput extends Component {
 			disableSuggestions,
 			__experimentalShowInitialSuggestions = false,
 		},
-		{ showSuggestions }
+		{ showSuggestions },
 	) {
 		let shouldShowSuggestions = showSuggestions;
 
@@ -441,6 +443,7 @@ class URLInput extends Component {
 					placeholder={ placeholder }
 					onKeyDown={ this.onKeyDown }
 					role="combobox"
+					aria-controls={ suggestionsListboxId }
 					aria-expanded={ showSuggestions }
 					aria-autocomplete="list"
 					aria-owns={ suggestionsListboxId }
@@ -472,43 +475,42 @@ class URLInput extends Component {
 				{ ! isFunction( renderSuggestions ) &&
 					showSuggestions &&
 					!! suggestions.length && (
-						<Popover
-							position="bottom"
-							noArrow
-							focusOnMount={ false }
+					<Popover
+						position="bottom"
+						noArrow
+						focusOnMount={ false }
+					>
+						<div
+							{ ...suggestionsListProps }
+							className={ classnames(
+								'block-editor-url-input__suggestions',
+								`${ className }__suggestions`,
+							) }
 						>
-							<div
-								{ ...suggestionsListProps }
-								className={ classnames(
-									'block-editor-url-input__suggestions',
-									`${ className }__suggestions`
-								) }
-							>
-								{ suggestions.map( ( suggestion, index ) => (
-									<Button
-										{ ...buildSuggestionItemProps(
-											suggestion,
-											index
-										) }
-										key={ suggestion.id }
-										className={ classnames(
-											'block-editor-url-input__suggestion',
-											{
-												'is-selected':
+							{ suggestions.map( ( suggestion, index ) => (
+								<Button
+									{ ...buildSuggestionItemProps(
+										suggestion,
+										index,
+									) }
+									key={ suggestion.id }
+									className={ classnames(
+										'block-editor-url-input__suggestion',
+										{
+											'is-selected':
 													index ===
 													selectedSuggestion,
-											}
-										) }
-										onClick={ () =>
-											this.handleOnClick( suggestion )
-										}
-									>
-										{ suggestion.title }
-									</Button>
-								) ) }
-							</div>
-						</Popover>
-					) }
+										},
+									) }
+									onClick={ () =>
+										this.handleOnClick( suggestion ) }
+								>
+									{ suggestion.title }
+								</Button>
+							) ) }
+						</div>
+					</Popover>
+				) }
 
 				{ children }
 			</BaseControl>
@@ -535,5 +537,5 @@ export default compose(
 			__experimentalFetchLinkSuggestions: getSettings()
 				.__experimentalFetchLinkSuggestions,
 		};
-	} )
+	} ),
 )( URLInput );

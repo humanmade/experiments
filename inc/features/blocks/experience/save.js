@@ -6,6 +6,6 @@ const Save = () => {
 	return (
 		<InnerBlocks.Content />
 	);
-}
+};
 
 export default Save;

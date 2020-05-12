@@ -71,13 +71,13 @@ const Edit = ( {
 								title: __( 'Remove this variant', 'altis-experiments' ),
 								isActive: false,
 								onClick: () => {
-									if ( !window.confirm( __( 'Are you sure you want to remove this variant?', 'altis-experiments' ) ) ) {
+									if ( ! window.confirm( __( 'Are you sure you want to remove this variant?', 'altis-experiments' ) ) ) {
 										return;
 									}
 									setVariant( variants[ 0 ].clientId );
 									removeVariant( variant.clientId );
 								},
-							}
+							},
 						];
 
 					return (
@@ -105,7 +105,7 @@ const Edit = ( {
 								const variantClientId = addVariant();
 								setVariant( variantClientId );
 							},
-						}
+						},
 					] }
 				/>
 			</BlockControls>
@@ -138,7 +138,7 @@ const Edit = ( {
 					[data-block="${ clientId }"] #block-${ activeVariant } {
 						display: block;
 					}
-				`
+				`,
 			} } />
 			<div className={ className }>
 				<div className="altis-experience-block-header">
@@ -210,7 +210,7 @@ export default compose(
 			setVariantAttributes( variantClientId, attributes ) {
 				const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 				updateBlockAttributes( variantClientId, attributes );
-			}
+			},
 		};
-	} )
+	} ),
 )( Edit );

@@ -1,4 +1,3 @@
-/* global wp */
 import React from 'react';
 import withTestData from '../data/with-test-data';
 import styled from 'styled-components';

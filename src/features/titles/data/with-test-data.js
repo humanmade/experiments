@@ -1,4 +1,3 @@
-/* global wp */
 import deepmerge from 'deepmerge';
 import { DEFAULT_TEST } from './shapes';
 
@@ -32,7 +31,7 @@ const dispatchHandler = ( dispatch, props ) => {
 		}
 
 		setState( { isSaving: false } );
-	}
+	};
 
 	const updateTest = async ( test = {}, titles = false, save = false ) => {
 		const data = {
@@ -103,7 +102,7 @@ const withTestData = compose(
 			titles: select( 'core/editor' ).getEditedPostAttribute( 'ab_test_titles' ) || [],
 		};
 	} ),
-	withDispatch( dispatchHandler )
+	withDispatch( dispatchHandler ),
 );
 
 export default withTestData;

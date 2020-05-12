@@ -41,7 +41,7 @@ const fetchSuggestions = async ( search, { perPage = 20 } = {} ) => {
  */
 const fetchAudience = async ( id, callback ) => {
 	const post = await apiFetch( {
-		path: `/wp/v2/audiences/${ id }`
+		path: `/wp/v2/audiences/${ id }`,
 	} );
 
 	const audience = {
@@ -55,7 +55,7 @@ const fetchAudience = async ( id, callback ) => {
 	callback && callback( audience );
 
 	return audience;
-}
+};
 
 const AudiencePicker = props => {
 	const [ value, setValue ] = useState( '' );
@@ -126,6 +126,6 @@ const AudiencePicker = props => {
 			) }
 		</URLInput>
 	);
-}
+};
 
 export default AudiencePicker;

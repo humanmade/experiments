@@ -1,4 +1,3 @@
-/* global wp */
 import Plugin from './plugin';
 import { PluginIcon } from './components';
 

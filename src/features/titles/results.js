@@ -1,4 +1,3 @@
-/* global wp */
 import React, { Fragment } from 'react';
 import withTestData from './data/with-test-data';
 import {
@@ -84,7 +83,7 @@ export const Results = props => {
 								</Fragment>
 							) }
 						</Variant>
-					)
+					);
 				} ) }
 			</PanelRow>
 			<PanelRow>
@@ -114,7 +113,7 @@ export const ResultsWithData = compose(
 				} );
 			},
 		};
-	} )
+	} ),
 )( Results );
 
 export default ResultsWithData;
