@@ -430,32 +430,34 @@ class URLInput extends Component {
 					'has-border': hasBorder,
 				} ) }
 			>
-				<input
-					className="block-editor-url-input__input"
-					autoFocus={ autoFocus }
-					type="text"
-					aria-label={ __( 'URL' ) }
-					required
-					value={ value }
-					onChange={ this.onChange }
-					onFocus={ this.onFocus }
-					onInput={ stopEventPropagation }
-					placeholder={ placeholder }
-					onKeyDown={ this.onKeyDown }
-					role="combobox"
-					aria-controls={ suggestionsListboxId }
-					aria-expanded={ showSuggestions }
-					aria-autocomplete="list"
-					aria-owns={ suggestionsListboxId }
-					aria-activedescendant={
-						selectedSuggestion !== null
-							? `${ suggestionOptionIdPrefix }-${ selectedSuggestion }`
-							: undefined
-					}
-					ref={ this.inputRef }
-				/>
+				<div style={{ position: 'relative' }}>
+					<input
+						className="block-editor-url-input__input"
+						autoFocus={ autoFocus }
+						type="text"
+						aria-label={ __( 'URL' ) }
+						required
+						value={ value }
+						onChange={ this.onChange }
+						onFocus={ this.onFocus }
+						onInput={ stopEventPropagation }
+						placeholder={ placeholder }
+						onKeyDown={ this.onKeyDown }
+						role="combobox"
+						aria-controls={ suggestionsListboxId }
+						aria-expanded={ showSuggestions }
+						aria-autocomplete="list"
+						aria-owns={ suggestionsListboxId }
+						aria-activedescendant={
+							selectedSuggestion !== null
+								? `${ suggestionOptionIdPrefix }-${ selectedSuggestion }`
+								: undefined
+						}
+						ref={ this.inputRef }
+					/>
 
-				{ loading && <Spinner /> }
+					{ loading && <Spinner /> }
+				</div>
 
 				{ isFunction( renderSuggestions ) &&
 					showSuggestions &&
@@ -476,9 +478,11 @@ class URLInput extends Component {
 					showSuggestions &&
 					!! suggestions.length && (
 					<Popover
-						position="bottom"
+						className="block-editor-url-input__popover"
+						position="bottom left"
 						noArrow
 						focusOnMount={ false }
+						anchorRect={ this.inputRef.current.getBoundingClientRect() }
 					>
 						<div
 							{ ...suggestionsListProps }
@@ -486,6 +490,10 @@ class URLInput extends Component {
 								'block-editor-url-input__suggestions',
 								`${ className }__suggestions`,
 							) }
+							style={ {
+								width: this.inputRef.current.offsetWidth,
+								marginRight: '-100px',
+							} }
 						>
 							{ suggestions.map( ( suggestion, index ) => (
 								<Button

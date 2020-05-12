@@ -44,3 +44,7 @@
 .wp-block[data-type="altis/experience-block-variant"] .wp-block {
 	max-width: none;
 }
+
+.block-editor-url-input__popover {
+	margin-left: 100px;
+}
