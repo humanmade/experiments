@@ -266,6 +266,14 @@ class ExperienceBlock extends HTMLElement {
 					this.appendChild( experience );
 				}
 
+				// Log an event for tracking views and audience.
+				window.Altis.Analytics.record( 'experienceView', {
+					attributes: {
+						clientId: this.clientId,
+						audience: template.dataset.audience,
+					},
+				} );
+
 				// Keep a reference ot the node for easier replacement later.
 				this.experience = experience;
 				break;
