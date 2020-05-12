@@ -73,7 +73,7 @@ function render_block( array $attributes, ?string $inner_content = '' ) : string
 	}
 
 	return sprintf(
-		'%s<experience-block class="%s" client-id="%s" />',
+		'%s<experience-block class="%s" client-id="%s"></experience-block>',
 		$inner_content,
 		$class_name,
 		$client_id
