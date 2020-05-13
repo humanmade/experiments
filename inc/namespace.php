@@ -63,13 +63,19 @@ function setup() {
  * Queue up the tracker script and required configuration.
  */
 function enqueue_scripts() {
+	global $wp_scripts;
+
 	wp_enqueue_script(
 		'altis-experiments',
 		plugins_url( 'build/experiments.js', ROOT_DIR . '/plugin.php' ),
 		[
 			'altis-analytics',
-		]
+		],
+		'2020-05-12-01'
 	);
+
+	// Load async.
+	$wp_scripts->add_data( 'altis-experiments', 'async', true );
 }
 
 /**
