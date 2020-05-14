@@ -1,8 +1,8 @@
 import React, { Fragment, useState } from 'react';
-import AudiencePicker from './components/AudiencePicker';
+
+const { AudiencePicker } = Altis.Analytics.components;
 
 const {
-	// AlignmentToolbar,
 	BlockControls,
 	InnerBlocks,
 	InspectorControls,

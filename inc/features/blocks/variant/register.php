@@ -29,9 +29,8 @@ function enqueue_assets() {
 	wp_enqueue_script(
 		'altis-experiments-features-blocks-variant',
 		plugins_url( 'build/features/blocks/variant.js', ROOT_DIR . '/plugin.php' ),
-		[
-			'altis-experiments-features-blocks-experience',
-		]
+		[],
+		'2020-05-14-01'
 	);
 }
 

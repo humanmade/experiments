@@ -12,6 +12,8 @@ function setup() {
 	// Register blocks.
 	Experience\setup();
 	Variant\setup();
+
+	// Enqueue the audience UI JS in the editor.
 }
 
 function get_block_settings( string $name ) : ?array {
