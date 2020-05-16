@@ -147,7 +147,7 @@ const Edit = ( {
 								title={ __( 'Remove variant', 'altis-experiments' ) }
 								disabled={ variants.length < 2 }
 								onClick={ () => {
-									if ( !window.confirm( __( 'Are you sure you want to remove this variant?', 'altis-experiments' ) ) ) {
+									if ( ! window.confirm( __( 'Are you sure you want to remove this variant?', 'altis-experiments' ) ) ) {
 										return;
 									}
 									setVariant( variants[ Math.max( 0, activeVariantIndex - 1 ) ].clientId );
