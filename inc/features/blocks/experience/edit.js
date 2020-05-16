@@ -7,15 +7,16 @@ const {
 	InnerBlocks,
 	InspectorControls,
 } = wp.blockEditor;
-const { createBlock } = wp.blocks;
+const { createBlock, cloneBlock } = wp.blocks;
 const {
 	Button,
+	IconButton,
 	PanelBody,
 	Toolbar,
 } = wp.components;
 const { compose } = wp.compose;
 const { withSelect, withDispatch } = wp.data;
-const { __ } = wp.i18n;
+const { sprintf, __ } = wp.i18n;
 
 /**
  * Only variants can be direct descendents so that we can generate
@@ -37,6 +38,8 @@ const Edit = ( {
 	attributes,
 	className,
 	clientId,
+	copyVariant,
+	isSelected,
 	removeVariant,
 	setAttributes,
 	setVariantAttributes,
@@ -62,52 +65,31 @@ const Edit = ( {
 	return (
 		<Fragment>
 			<BlockControls>
-				{ variants.map( ( variant, index ) => {
-					const controls = activeVariant !== variant.clientId
-						? []
-						: [
-							{
-								icon: 'trash',
-								title: __( 'Remove this variant', 'altis-experiments' ),
-								isActive: false,
-								onClick: () => {
-									if ( ! window.confirm( __( 'Are you sure you want to remove this variant?', 'altis-experiments' ) ) ) {
-										return;
-									}
-									setVariant( variants[ 0 ].clientId );
-									removeVariant( variant.clientId );
-								},
-							},
-						];
-
-					return (
-						<Toolbar
-							key={ `variant-toolbar-${ variant.clientId }` }
-							className={ `altis-variant-toolbar altis-variant-toolbar--${ activeVariant === variant.clientId ? 'active' : 'inactive' }` }
-							controls={ controls }
-						>
-							<Button
-								isLink
-								onClick={ () => setVariant( variant.clientId ) }
-							>
-								{ `${ __( 'Variant' ) } ${ index + 1 }` }
-							</Button>
-						</Toolbar>
-					);
-				} ) }
 				<Toolbar
+					className="altis-variants-toolbar"
 					controls={ [
 						{
 							icon: 'plus',
 							title: __( 'Add a variant', 'altis-experiments' ),
-							isActive: false,
+							className: 'altis-add-variant-button',
 							onClick: () => {
-								const variantClientId = addVariant();
-								setVariant( variantClientId );
+								const newClientId = addVariant();
+								setVariant( newClientId );
 							},
 						},
 					] }
-				/>
+				>
+					{ variants.map( ( variant, index ) => (
+						<Button
+							key={ `variant-select-${ variant.clientId }` }
+							className={ `altis-variant-button components-icon-button has-text ${ activeVariant === variant.clientId && 'is-active' }` }
+							title={ __( 'Select variant', 'altis-experiments' ) }
+							onClick={ () => setVariant( variant.clientId ) }
+						>
+							{ sprintf( __( 'Variant %d', 'altis-experiments' ), index + 1 ) }
+						</Button>
+					) ) }
+				</Toolbar>
 			</BlockControls>
 			<InspectorControls>
 				{ variants.map( ( variant, index ) => {
@@ -141,12 +123,39 @@ const Edit = ( {
 				`,
 			} } />
 			<div className={ className }>
-				<div className="altis-experience-block-header">
-					{ __( 'Experience Block', 'altis-experiments' ) }
-					{ ' ・ ' }
-					{ __( 'Variant', 'altis-experiments' ) }
-					{ ' ' }
-					{ activeVariantIndex + 1 }
+				<div className="wp-core-ui altis-experience-block-header">
+					<span className="altis-experience-block-header__title">
+						{ __( 'Experience Block', 'altis-experiments' ) }
+						{ ' ・ ' }
+						{ sprintf( __( 'Variant %d', 'altis-experiments' ), activeVariantIndex + 1 ) }
+					</span>
+					{ isSelected && (
+						<div className="altis-experience-block-header__toolbar">
+							<IconButton
+								icon='migrate'
+								title={ __( 'Copy variant', 'altis-experiments' ) }
+								disabled={ variants.length < 1 }
+								onClick={ () => {
+									const newClientId = copyVariant( activeVariant );
+									setVariant( newClientId );
+								} }
+							>
+								{ __( 'Copy', 'altis-experiments' ) }
+							</IconButton>
+							<IconButton
+								icon='trash'
+								title={ __( 'Remove variant', 'altis-experiments' ) }
+								disabled={ variants.length < 2 }
+								onClick={ () => {
+									if ( !window.confirm( __( 'Are you sure you want to remove this variant?', 'altis-experiments' ) ) ) {
+										return;
+									}
+									setVariant( variants[ Math.max( 0, activeVariantIndex - 1 ) ].clientId );
+									removeVariant( activeVariant );
+								} }
+							/>
+						</div>
+					) }
 				</div>
 				<InnerBlocks
 					allowedBlocks={ ALLOWED_BLOCKS }
@@ -192,6 +201,29 @@ export default compose(
 				replaceInnerBlocks( clientId, innerBlocks );
 
 				// Return new client ID to enable selection.
+				return newVariant.clientId;
+			},
+			copyVariant( variantClientId ) {
+				const { replaceInnerBlocks } = dispatch( 'core/block-editor' );
+				const {
+					getBlock,
+					getBlocks,
+					getBlockRootClientId,
+				} = registry.select( 'core/block-editor' );
+
+				const fromVariant = getBlock( variantClientId );
+				const newVariant = cloneBlock( fromVariant );
+
+				const experienceBlockClientId = getBlockRootClientId( variantClientId );
+				const variantBlocks = getBlocks( experienceBlockClientId );
+
+				const innerBlocks = [
+					...variantBlocks,
+					newVariant,
+				];
+
+				replaceInnerBlocks( experienceBlockClientId, innerBlocks );
+
 				return newVariant.clientId;
 			},
 			removeVariant( variantClientId ) {
