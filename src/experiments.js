@@ -253,25 +253,44 @@ class ExperienceBlock extends HTMLElement {
 		// Get associated templates.
 		const templates = document.querySelectorAll( `template[data-parent-id="${ this.clientId }"]` );
 
+		// Take the first fallback template if found.
+		let fallback = null;
+
+		// Track the audience for recording event later.
+		let audience = 0;
+
 		// Find a matching template.
 		for ( let index = 0; index < templates.length; index++ ) {
 			const template = templates[ index ];
-			const audience = Number( template.dataset.audience );
+			audience = Number( template.dataset.audience );
+			if ( audience === 0 && ! fallback ) {
+				fallback = template;
+			}
 			if ( audiences.indexOf( audience ) >= 0 ) {
+				// Unset fallback if we match an audience.
+				fallback = null;
+				// Populate experience block content.
 				const experience = template.content.cloneNode( true );
 				this.innerHTML = '';
 				this.appendChild( experience );
-
-				// Log an event for tracking views and audience.
-				window.Altis.Analytics.record( 'experienceView', {
-					attributes: {
-						clientId: this.clientId,
-						audience: audience,
-					},
-				} );
 				break;
 			}
 		}
+
+		// Set fallback content if one is available.
+		if ( fallback ) {
+			const experience = fallback.content.cloneNode( true );
+			this.innerHTML = '';
+			this.appendChild( experience );
+		}
+
+		// Log an event for tracking views and audience.
+		window.Altis.Analytics.record( 'experienceView', {
+			attributes: {
+				clientId: this.clientId,
+				audience: audience,
+			},
+		} );
 	}
 
 }

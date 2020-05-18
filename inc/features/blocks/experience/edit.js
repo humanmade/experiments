@@ -39,6 +39,7 @@ const Edit = ( {
 	className,
 	clientId,
 	copyVariant,
+	getAudience,
 	isSelected,
 	removeVariant,
 	setAttributes,
@@ -61,6 +62,22 @@ const Edit = ( {
 				parentId: clientId,
 			} );
 		} );
+	}
+
+	// Get the current variant name from the audience if available.
+	const getVariantName = ( index ) => {
+		const variant = variants[ index ];
+		if ( ! variant ) {
+			return sprintf( __( 'Variant %d', 'altis-experiments' ), index + 1 );
+		}
+		if ( ! variant.attributes.audience ) {
+			return __( 'Fallback', 'altis-experiments' );
+		}
+		const audience = getAudience( variant.attributes.audience );
+		if ( audience && audience.title && audience.title.rendered ) {
+			return audience.title.rendered;
+		}
+		return sprintf( __( 'Variant %d', 'altis-experiments' ), index + 1 );
 	}
 
 	return (
@@ -87,7 +104,7 @@ const Edit = ( {
 							title={ __( 'Select variant', 'altis-experiments' ) }
 							onClick={ () => setVariant( variant.clientId ) }
 						>
-							{ sprintf( __( 'Variant %d', 'altis-experiments' ), index + 1 ) }
+							{ getVariantName( index ) }
 						</Button>
 					) ) }
 				</Toolbar>
@@ -97,7 +114,7 @@ const Edit = ( {
 					return (
 						<PanelBody
 							key={ `variant-settings-${ variant.clientId }` }
-							title={ `${ __( 'Variant', 'altis-experiments' ) } ${ index + 1 }` }
+							title={ getVariantName( index ) }
 						>
 							<AudiencePicker
 								label={ __( 'Audience' ) }
@@ -109,6 +126,11 @@ const Edit = ( {
 									setVariantAttributes( variant.clientId, { audience: null } );
 								} }
 							/>
+							{ ! variant.attributes.audience && (
+								<p className="description">
+									{ __( 'If no audience is selected this content will be used as a fallback.', 'altis-analytics' ) }
+								</p>
+							) }
 						</PanelBody>
 					);
 				} ) }
@@ -128,7 +150,7 @@ const Edit = ( {
 					<span className="altis-experience-block-header__title">
 						{ __( 'Experience Block', 'altis-experiments' ) }
 						{ ' ・ ' }
-						{ sprintf( __( 'Variant %d', 'altis-experiments' ), activeVariantIndex + 1 ) }
+						{ getVariantName( activeVariantIndex ) }
 					</span>
 					{ isSelected && (
 						<div className="altis-experience-block-header__toolbar">
@@ -172,6 +194,7 @@ export default compose(
 	withSelect( ( select, ownProps ) => {
 		const { clientId } = ownProps;
 		const { getBlocks } = select( 'core/block-editor' );
+		const { getPost: getAudience } = select( 'audience' );
 
 		const innerBlocks = getBlocks( clientId );
 
@@ -187,6 +210,7 @@ export default compose(
 
 		return {
 			variants: innerBlocks,
+			getAudience,
 		};
 	} ),
 	withDispatch( ( dispatch, ownProps, registry ) => {
