@@ -295,11 +295,17 @@ class ExperienceBlock extends HTMLElement {
 
 }
 
-// Define custom elements.
-window.customElements.define( 'ab-test', ABTest );
-window.customElements.define( 'experience-block', ExperienceBlock );
+// Define custom elements when analytics has loaded.
+window.Altis.Analytics.onReady( () => {
+	window.customElements.define( 'ab-test', ABTest );
+	window.customElements.define( 'experience-block', ExperienceBlock );
+} );
 
 // Expose ABTest methods.
 window.Altis.Analytics.Experiments = Object.assign( {}, window.Altis.Analytics.Experiments || {}, {
 	registerGoal: Test.registerGoal,
 } );
+
+// Fire a ready event once userland API has been exported.
+const readyEvent = new CustomEvent( 'altis.experiments.ready' );
+window.dispatchEvent( readyEvent );
