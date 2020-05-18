@@ -52,7 +52,7 @@ function enqueue_assets() {
 		'altis-experiments-features-blocks-experience',
 		plugins_url( 'inc/features/blocks/experience/edit.css', ROOT_DIR . '/plugin.php' ),
 		[],
-		'2020-05-18-01'
+		'2020-05-18-02'
 	);
 }
 
