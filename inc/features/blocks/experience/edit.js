@@ -65,7 +65,7 @@ const Edit = ( {
 	}
 
 	// Get the current variant name from the audience if available.
-	const getVariantName = ( index ) => {
+	const getVariantName = index => {
 		const variant = variants[ index ];
 		if ( ! variant ) {
 			return sprintf( __( 'Variant %d', 'altis-experiments' ), index + 1 );
@@ -78,7 +78,7 @@ const Edit = ( {
 			return audience.title.rendered;
 		}
 		return sprintf( __( 'Variant %d', 'altis-experiments' ), index + 1 );
-	}
+	};
 
 	return (
 		<Fragment>
