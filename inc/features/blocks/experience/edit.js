@@ -47,7 +47,8 @@ const Edit = ( {
 } ) => {
 
 	// Track currently selected variant.
-	const [ activeVariant, setVariant ] = useState( variants[ 0 ].clientId );
+	const defaultVariantClientId = ( variants.length > 0 && variants[ 0 ].clientId ) || null;
+	const [ activeVariant, setVariant ] = useState( defaultVariantClientId );
 
 	// Track the active variant index to show in the title.
 	const activeVariantIndex = variants.findIndex( variant => variant.clientId === activeVariant );
@@ -173,6 +174,16 @@ export default compose(
 		const { getBlocks } = select( 'core/block-editor' );
 
 		const innerBlocks = getBlocks( clientId );
+
+		// Ensure at least one variant is present.
+		// Note TEMPLATE does not seem to have the desired effect every time.
+		if ( innerBlocks.length === 0 ) {
+			const initialVariant = createBlock( 'altis/experience-block-variant', {
+				parentId: clientId,
+				audience: null,
+			} );
+			innerBlocks.push( initialVariant );
+		}
 
 		return {
 			variants: innerBlocks,
