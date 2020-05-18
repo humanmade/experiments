@@ -3,12 +3,15 @@
  * Experience Block Server Side.
  *
  * @phpcs:ignoreFile HM.Files.FunctionFileName.WrongFile
+ *
+ * @package altis-experiments
  */
 
 namespace Altis\Experiments\Features\Blocks\Experience;
 
 use const Altis\Experiments\ROOT_DIR;
 use function Altis\Experiments\Features\Blocks\get_block_settings;
+use function Altis\Experiments\Utils\get_asset_url;
 
 const BLOCK = 'experience';
 
@@ -28,7 +31,7 @@ function setup() {
 function enqueue_assets() {
 	wp_enqueue_script(
 		'altis-experiments-features-blocks-experience',
-		plugins_url( 'build/features/blocks/experience.js', ROOT_DIR . '/plugin.php' ),
+		get_asset_url( 'features/blocks/experience.js' ),
 		[
 			'wp-plugins',
 			'wp-blocks',
@@ -40,13 +43,16 @@ function enqueue_assets() {
 			'altis-experiments-features-blocks-variant',
 			// Exports the audience UI modal component.
 			'altis-analytics-audience-ui',
-		]
+		],
+		null
 	);
 
 	// Queue up editor CSS.
 	wp_enqueue_style(
 		'altis-experiments-features-blocks-experience',
-		plugins_url( 'inc/features/blocks/experience/edit.css', ROOT_DIR . '/plugin.php' )
+		plugins_url( 'inc/features/blocks/experience/edit.css', ROOT_DIR . '/plugin.php' ),
+		[],
+		'2020-05-18-01'
 	);
 }
 

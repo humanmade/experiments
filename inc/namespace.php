@@ -3,7 +3,6 @@
  * AB Tests.
  *
  * @package altis-experiments
- *
  */
 
 namespace Altis\Experiments;
@@ -11,6 +10,7 @@ namespace Altis\Experiments;
 use function Altis\Analytics\Utils\merge_aggregates;
 use function Altis\Analytics\Utils\milliseconds;
 use function Altis\Analytics\Utils\query;
+use function Altis\Experiments\Utils\get_asset_url;
 use MathPHP\Probability\Distribution\Discrete;
 use WP_Post;
 use WP_Query;
@@ -67,11 +67,11 @@ function enqueue_scripts() {
 
 	wp_enqueue_script(
 		'altis-experiments',
-		plugins_url( 'build/experiments.js', ROOT_DIR . '/plugin.php' ),
+		get_asset_url( 'experiments.js' ),
 		[
 			'altis-analytics',
 		],
-		'2020-05-12-01'
+		null
 	);
 
 	// Load async.

@@ -7,9 +7,9 @@
 
 namespace Altis\Experiments\Features\Titles;
 
-use const Altis\Experiments\ROOT_DIR;
 use function Altis\Experiments\output_ab_test_html_for_post;
 use function Altis\Experiments\register_post_ab_test;
+use function Altis\Experiments\Utils\get_asset_url;
 
 /**
  * Bootstrap Title AB Tests Feature.
@@ -41,7 +41,7 @@ function admin_scripts( string $hook ) {
 
 	wp_enqueue_script(
 		'altis-experiments-features-titles',
-		plugins_url( 'build/features/titles.js', ROOT_DIR . '/plugin.php' ),
+		get_asset_url( 'features/titles.js' ),
 		[
 			'wp-plugins',
 			'wp-blocks',
@@ -51,7 +51,8 @@ function admin_scripts( string $hook ) {
 			'wp-core-data',
 			'wp-edit-post',
 			'moment',
-		]
+		],
+		null
 	);
 }
 

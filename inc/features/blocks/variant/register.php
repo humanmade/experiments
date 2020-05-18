@@ -3,12 +3,14 @@
  * Experience Block Server Side.
  *
  * @phpcs:ignoreFile HM.Files.FunctionFileName.WrongFile
+ *
+ * @package altis-experiments
  */
 
 namespace Altis\Experiments\Features\Blocks\Variant;
 
-use const Altis\Experiments\ROOT_DIR;
 use function Altis\Experiments\Features\Blocks\get_block_settings;
+use function Altis\Experiments\Utils\get_asset_url;
 
 const BLOCK = 'variant';
 
@@ -28,9 +30,9 @@ function setup() {
 function enqueue_assets() {
 	wp_enqueue_script(
 		'altis-experiments-features-blocks-variant',
-		plugins_url( 'build/features/blocks/variant.js', ROOT_DIR . '/plugin.php' ),
+		get_asset_url( 'features/blocks/variant.js' ),
 		[],
-		'2020-05-14-01'
+		null
 	);
 }
 
