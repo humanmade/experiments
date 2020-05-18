@@ -74,6 +74,18 @@ function enqueue_scripts() {
 		null
 	);
 
+	wp_add_inline_script(
+		'altis-experiments',
+		sprintf(
+			'window.Altis = window.Altis || {};' .
+			'window.Altis.Analytics = window.Altis.Analytics || {};' .
+			'window.Altis.Analytics.Experiments = window.Altis.Analytics.Experiments || {};' .
+			'window.Altis.Analytics.Experiments.BuildURL = %s;',
+			wp_json_encode( plugins_url( 'build', dirname( __FILE__ ) ) )
+		),
+		'before'
+	);
+
 	// Load async.
 	$wp_scripts->add_data( 'altis-experiments', 'async', true );
 }

@@ -34,6 +34,18 @@ function enqueue_assets() {
 		[],
 		null
 	);
+
+	wp_add_inline_script(
+		'altis-experiments-features-blocks-variant',
+		sprintf(
+			'window.Altis = window.Altis || {};' .
+			'window.Altis.Analytics = window.Altis.Analytics || {};' .
+			'window.Altis.Analytics.Experiments = window.Altis.Analytics.Experiments || {};' .
+			'window.Altis.Analytics.Experiments.BuildURL = %s;',
+			wp_json_encode( plugins_url( 'build', dirname( __FILE__, 4 ) ) )
+		),
+		'before'
+	);
 }
 
 /**

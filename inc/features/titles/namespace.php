@@ -54,6 +54,18 @@ function admin_scripts( string $hook ) {
 		],
 		null
 	);
+
+	wp_add_inline_script(
+		'altis-experiments-features-titles',
+		sprintf(
+			'window.Altis = window.Altis || {};' .
+			'window.Altis.Analytics = window.Altis.Analytics || {};' .
+			'window.Altis.Analytics.Experiments = window.Altis.Analytics.Experiments || {};' .
+			'window.Altis.Analytics.Experiments.BuildURL = %s;',
+			wp_json_encode( plugins_url( 'build', dirname( __FILE__, 3 ) ) )
+		),
+		'before'
+	);
 }
 
 /**
