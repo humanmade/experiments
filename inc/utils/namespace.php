@@ -7,16 +7,16 @@
 
 namespace Altis\Experiments\Utils;
 
-use const Altis\Experiments\ROOT_DIR;
+use Altis\Experiments;
 
 /**
  * Return asset file name based on generated manifest.json file.
  *
- * @param string $filename
- * @return string|false
+ * @param string $filename The entrpoint filename used in webpack.config.js.
+ * @return string|false The URL of the generated asset file.
  */
 function get_asset_url( string $filename ) {
-	$manifest_file = ROOT_DIR . '/build/manifest.json';
+	$manifest_file = Experiments\ROOT_DIR . '/build/manifest.json';
 
 	if ( ! file_exists( $manifest_file ) ) {
 		return false;
@@ -36,5 +36,5 @@ function get_asset_url( string $filename ) {
 		return $path;
 	}
 
-	return plugins_url( $manifest[ $filename ], ROOT_DIR . '/build/assets' );
+	return plugins_url( $manifest[ $filename ], Experiments\ROOT_DIR . '/build/assets' );
 }

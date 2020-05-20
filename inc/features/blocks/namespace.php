@@ -1,10 +1,15 @@
 <?php
 /**
  * Experience Block functions.
+ *
+ * @package altis-experiments
  */
 
 namespace Altis\Experiments\Features\Blocks;
 
+/**
+ * Include and set up Experience Blocks.
+ */
 function setup() {
 	require_once __DIR__ . '/experience/register.php';
 	require_once __DIR__ . '/variant/register.php';
@@ -12,10 +17,15 @@ function setup() {
 	// Register blocks.
 	Experience\setup();
 	Variant\setup();
-
-	// Enqueue the audience UI JS in the editor.
 }
 
+/**
+ * Reads and returns a block.json file to pass shared settings
+ * between JS and PHP to the register blocks functions.
+ *
+ * @param string $name The directory name of the block relative to this file.
+ * @return array|null The JSON data as an associative array or null on error.
+ */
 function get_block_settings( string $name ) : ?array {
 	$json_path = __DIR__ . '/' . $name . '/block.json';
 

@@ -9,14 +9,17 @@
 
 namespace Altis\Experiments\Features\Blocks\Experience;
 
-use const Altis\Experiments\ROOT_DIR;
-use function Altis\Experiments\Features\Blocks\get_block_settings;
-use function Altis\Experiments\Utils\get_asset_url;
+use Altis\Experiments;
+use Altis\Experiments\Features\Blocks;
+use Altis\Experiments\Utils;
 
 const BLOCK = 'experience';
 
+/**
+ * Registers the block type assets and server side rendering.
+ */
 function setup() {
-	$block_data = get_block_settings( BLOCK );
+	$block_data = Blocks\get_block_settings( BLOCK );
 
 	// Queue up JS files.
 	add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\enqueue_assets' );
@@ -28,10 +31,13 @@ function setup() {
 	] );
 }
 
+/**
+ * Enqueues the block assets.
+ */
 function enqueue_assets() {
 	wp_enqueue_script(
 		'altis-experiments-features-blocks-experience',
-		get_asset_url( 'features/blocks/experience.js' ),
+		Utils\get_asset_url( 'features/blocks/experience.js' ),
 		[
 			'wp-plugins',
 			'wp-blocks',
@@ -62,7 +68,7 @@ function enqueue_assets() {
 	// Queue up editor CSS.
 	wp_enqueue_style(
 		'altis-experiments-features-blocks-experience',
-		plugins_url( 'inc/features/blocks/experience/edit.css', ROOT_DIR . '/plugin.php' ),
+		plugins_url( 'inc/features/blocks/experience/edit.css', Experiments\ROOT_DIR . '/plugin.php' ),
 		[],
 		'2020-05-18-02'
 	);

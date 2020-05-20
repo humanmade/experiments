@@ -9,13 +9,16 @@
 
 namespace Altis\Experiments\Features\Blocks\Variant;
 
-use function Altis\Experiments\Features\Blocks\get_block_settings;
-use function Altis\Experiments\Utils\get_asset_url;
+use Altis\Experiments\Features\Blocks;
+use Altis\Experiments\Utils;
 
 const BLOCK = 'variant';
 
+/**
+ * Registers the block type assets and server side rendering.
+ */
 function setup() {
-	$block_data = get_block_settings( BLOCK );
+	$block_data = Blocks\get_block_settings( BLOCK );
 
 	// Queue up JS files.
 	add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\\enqueue_assets' );
@@ -27,10 +30,13 @@ function setup() {
 	] );
 }
 
+/**
+ * Enqueues the block assets.
+ */
 function enqueue_assets() {
 	wp_enqueue_script(
 		'altis-experiments-features-blocks-variant',
-		get_asset_url( 'features/blocks/variant.js' ),
+		Utils\get_asset_url( 'features/blocks/variant.js' ),
 		[],
 		null
 	);
