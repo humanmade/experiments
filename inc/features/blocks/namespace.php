@@ -11,12 +11,30 @@ namespace Altis\Experiments\Features\Blocks;
  * Include and set up Experience Blocks.
  */
 function setup() {
-	require_once __DIR__ . '/experience/register.php';
-	require_once __DIR__ . '/variant/register.php';
+	require_once __DIR__ . '/personalization/register.php';
+	require_once __DIR__ . '/personalization-variant/register.php';
 
 	// Register blocks.
-	Experience\setup();
-	Variant\setup();
+	Personalization\setup();
+	Personalization_Variant\setup();
+
+	// Register experience block category.
+	add_filter( 'block_categories', __NAMESPACE__ . '\\add_block_category', 9 );
+}
+
+/**
+ * Adds an experience block category to the block editor.
+ *
+ * @param array $categories Array of block editor block type categories.
+ * @return array The modified block categories array.
+ */
+function add_block_category( array $categories ) : array {
+	$categories[] = [
+		'slug' => 'altis-experience-blocks',
+		'title' => __( 'Experience Blocks', 'altis-experiments' ),
+	];
+
+	return $categories;
 }
 
 /**

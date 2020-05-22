@@ -1,9 +1,9 @@
 {
-    "name": "altis/experience-block-variant",
+    "name": "altis/personalization-variant",
     "settings": {
-        "category": "layout",
-        "icon": "lightbulb",
-        "parent": [ "altis/experience-block" ],
+        "category": "altis-experience-blocks",
+        "icon": "groups",
+        "parent": [ "altis/personalization" ],
         "supports": {
             "reusable": false,
             "html": false,

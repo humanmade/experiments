@@ -12,8 +12,8 @@ const sharedConfig = {
 	mode: mode,
 	entry: {
 		'features/titles': path.resolve( __dirname, 'src/features/titles/index.js' ),
-		'features/blocks/experience': path.resolve( __dirname, 'inc/features/blocks/experience/index.js' ),
-		'features/blocks/variant': path.resolve( __dirname, 'inc/features/blocks/variant/index.js' ),
+		'features/blocks/personalization': path.resolve( __dirname, 'inc/features/blocks/personalization/index.js' ),
+		'features/blocks/personalization-variant': path.resolve( __dirname, 'inc/features/blocks/personalization-variant/index.js' ),
 		experiments: path.resolve( __dirname, 'src/experiments.js' ),
 	},
 	output: {

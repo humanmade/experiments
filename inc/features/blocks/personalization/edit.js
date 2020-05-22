@@ -22,13 +22,13 @@ const { sprintf, __ } = wp.i18n;
  * Only variants can be direct descendents so that we can generate
  * usable markup.
  */
-const ALLOWED_BLOCKS = [ 'altis/experience-block-variant' ];
+const ALLOWED_BLOCKS = [ 'altis/personalization-variant' ];
 
 /**
  * Start with a default template of one variant.
  */
 const TEMPLATE = [
-	[ 'altis/experience-block-variant' ],
+	[ 'altis/personalization-variant' ],
 ];
 
 // Audience picker input.
@@ -137,7 +137,7 @@ const Edit = ( {
 			</InspectorControls>
 			<style dangerouslySetInnerHTML={ {
 				__html: `
-					[data-block="${ clientId }"] [data-type="altis/experience-block-variant"] {
+					[data-block="${ clientId }"] [data-type="altis/personalization-variant"] {
 						display: none;
 					}
 					[data-block="${ clientId }"] #block-${ activeVariant } {
@@ -148,7 +148,7 @@ const Edit = ( {
 			<div className={ className }>
 				<div className="wp-core-ui altis-experience-block-header">
 					<span className="altis-experience-block-header__title">
-						{ __( 'Experience Block', 'altis-experiments' ) }
+						{ __( 'Personalized Content', 'altis-experiments' ) }
 						{ ' ・ ' }
 						{ getVariantName( activeVariantIndex ) }
 					</span>
@@ -201,7 +201,7 @@ export default compose(
 		// Ensure at least one variant is present.
 		// Note TEMPLATE does not seem to have the desired effect every time.
 		if ( innerBlocks.length === 0 ) {
-			const initialVariant = createBlock( 'altis/experience-block-variant', {
+			const initialVariant = createBlock( 'altis/personalization-variant', {
 				parentId: clientId,
 				audience: null,
 			} );
@@ -222,7 +222,7 @@ export default compose(
 
 				let innerBlocks = getBlocks( clientId );
 
-				const newVariant = createBlock( 'altis/experience-block-variant', {
+				const newVariant = createBlock( 'altis/personalization-variant', {
 					parentId: attributes.clientId,
 					audience: null,
 				} );

@@ -1,19 +1,19 @@
 <?php
 /**
- * Experience Block Server Side.
+ * Personalization Block Server Side.
  *
  * @phpcs:ignoreFile HM.Files.FunctionFileName.WrongFile
  *
  * @package altis-experiments
  */
 
-namespace Altis\Experiments\Features\Blocks\Experience;
+namespace Altis\Experiments\Features\Blocks\Personalization;
 
 use Altis\Experiments;
 use Altis\Experiments\Features\Blocks;
 use Altis\Experiments\Utils;
 
-const BLOCK = 'experience';
+const BLOCK = 'personalization';
 
 /**
  * Registers the block type assets and server side rendering.
@@ -36,8 +36,8 @@ function setup() {
  */
 function enqueue_assets() {
 	wp_enqueue_script(
-		'altis-experiments-features-blocks-experience',
-		Utils\get_asset_url( 'features/blocks/experience.js' ),
+		'altis-experiments-features-blocks-personalization',
+		Utils\get_asset_url( 'features/blocks/personalization.js' ),
 		[
 			'wp-plugins',
 			'wp-blocks',
@@ -46,7 +46,7 @@ function enqueue_assets() {
 			'wp-components',
 			'wp-core-data',
 			'wp-edit-post',
-			'altis-experiments-features-blocks-variant',
+			'altis-experiments-features-blocks-personalization-variant',
 			// Exports the audience UI modal component.
 			'altis-analytics-audience-ui',
 		],
@@ -67,8 +67,8 @@ function enqueue_assets() {
 
 	// Queue up editor CSS.
 	wp_enqueue_style(
-		'altis-experiments-features-blocks-experience',
-		plugins_url( 'inc/features/blocks/experience/edit.css', Experiments\ROOT_DIR . '/plugin.php' ),
+		'altis-experiments-features-blocks-personalization',
+		plugins_url( 'inc/features/blocks/personalization/edit.css', Experiments\ROOT_DIR . '/plugin.php' ),
 		[],
 		'2020-05-18-02'
 	);
@@ -95,12 +95,12 @@ function render_block( array $attributes, ?string $inner_content = '' ) : string
 	}
 
 	if ( ! $client_id ) {
-		trigger_error( 'Experience block has no client ID set.', E_USER_WARNING );
+		trigger_error( 'Personalization block has no client ID set.', E_USER_WARNING );
 		return '';
 	}
 
 	return sprintf(
-		'%s<experience-block class="%s" client-id="%s"></experience-block>',
+		'%s<personalization-block class="%s" client-id="%s"></personalization-block>',
 		$inner_content,
 		$class_name,
 		$client_id

@@ -222,7 +222,7 @@ Test.registerGoal( 'click', ( element, record ) => {
 	} );
 }, [ 'a' ] );
 
-class ExperienceBlock extends HTMLElement {
+class PersonalizationBlock extends HTMLElement {
 
 	get clientId() {
 		return this.getAttribute( 'client-id' );
@@ -287,6 +287,7 @@ class ExperienceBlock extends HTMLElement {
 		// Log an event for tracking views and audience.
 		window.Altis.Analytics.record( 'experienceView', {
 			attributes: {
+				type: 'personalization',
 				clientId: this.clientId,
 				audience: audience,
 			},
@@ -303,7 +304,7 @@ window.Altis.Analytics.Experiments = Object.assign( {}, window.Altis.Analytics.E
 // Define custom elements when analytics has loaded.
 window.Altis.Analytics.onReady( () => {
 	window.customElements.define( 'ab-test', ABTest );
-	window.customElements.define( 'experience-block', ExperienceBlock );
+	window.customElements.define( 'personalization-block', PersonalizationBlock );
 } );
 
 // Fire a ready event once userland API has been exported.

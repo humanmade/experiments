@@ -1,8 +1,8 @@
 {
-    "name": "altis/experience-block",
+    "name": "altis/personalization",
     "settings": {
-        "category": "layout",
-        "icon": "lightbulb",
+        "category": "altis-experience-blocks",
+        "icon": "groups",
         "supports": {
             "alignWide": true,
             "html": false,

@@ -1,18 +1,18 @@
 <?php
 /**
- * Experience Block Server Side.
+ * Personalization Variant Block Server Side.
  *
  * @phpcs:ignoreFile HM.Files.FunctionFileName.WrongFile
  *
  * @package altis-experiments
  */
 
-namespace Altis\Experiments\Features\Blocks\Variant;
+namespace Altis\Experiments\Features\Blocks\Personalization_Variant;
 
 use Altis\Experiments\Features\Blocks;
 use Altis\Experiments\Utils;
 
-const BLOCK = 'variant';
+const BLOCK = 'personalization-variant';
 
 /**
  * Registers the block type assets and server side rendering.
@@ -35,14 +35,14 @@ function setup() {
  */
 function enqueue_assets() {
 	wp_enqueue_script(
-		'altis-experiments-features-blocks-variant',
-		Utils\get_asset_url( 'features/blocks/variant.js' ),
+		'altis-experiments-features-blocks-personalization-variant',
+		Utils\get_asset_url( 'features/blocks/personalization-variant.js' ),
 		[],
 		null
 	);
 
 	wp_add_inline_script(
-		'altis-experiments-features-blocks-variant',
+		'altis-experiments-features-blocks-personalization-variant',
 		sprintf(
 			'window.Altis = window.Altis || {};' .
 			'window.Altis.Analytics = window.Altis.Analytics || {};' .
@@ -55,7 +55,7 @@ function enqueue_assets() {
 }
 
 /**
- * Render callback for the experience block.
+ * Render callback for the personalization variant block.
  *
  * Because this block only saves <InnerBlocks.Content> on the JS side,
  * the content string represents only the wrapped inner block markup.
@@ -69,7 +69,7 @@ function render_block( array $attributes, ?string $inner_content = '' ) : string
 	$audience = $attributes['audience'] ?? 0;
 
 	if ( ! $parent_id ) {
-		trigger_error( 'Experience block variant has no parent ID set.', E_USER_WARNING );
+		trigger_error( 'Personalization block variant has no parent ID set.', E_USER_WARNING );
 		return '';
 	}
 
