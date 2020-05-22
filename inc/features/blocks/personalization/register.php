@@ -70,7 +70,7 @@ function enqueue_assets() {
 		'altis-experiments-features-blocks-personalization',
 		plugins_url( 'inc/features/blocks/personalization/edit.css', Experiments\ROOT_DIR . '/plugin.php' ),
 		[],
-		'2020-05-18-02'
+		'2020-05-22-01'
 	);
 }
 

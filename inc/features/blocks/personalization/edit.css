@@ -9,8 +9,8 @@
 		315deg,
 		rgba(0, 0, 0, .05),
 		rgba(0, 0, 0, .05) 10px,
-		rgba(0, 0, 0, 0) 10px,
-		rgba(0, 0, 0, 0) 20px
+		rgba(255, 255, 255, .05) 10px,
+		rgba(255, 255, 255, .05) 20px
 	);
 	padding: 14px;
 	margin: 0 -14px -28px;
@@ -72,10 +72,10 @@
 	margin-bottom: 4px;
 }
 
-.wp-block[data-type="altis/experience-block-variant"] {
+.wp-block[data-type="altis/personalization-variant"] {
 	max-width: none;
 }
 
-.wp-block[data-type="altis/experience-block-variant"] .wp-block {
+.wp-block[data-type="altis/personalization-variant"] .wp-block {
 	max-width: none;
 }
