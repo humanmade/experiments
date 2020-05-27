@@ -247,7 +247,7 @@ class PersonalizationBlock extends HTMLElement {
 		window.Altis.Analytics.on( 'updateAudiences', this.setContent );
 	}
 
-	setContent() {
+	setContent = () => {
 		const audiences = window.Altis.Analytics.getAudiences();
 
 		// Get associated templates.
