@@ -248,38 +248,40 @@ class PersonalizationBlock extends HTMLElement {
 	}
 
 	setContent = () => {
-		const audiences = window.Altis.Analytics.getAudiences();
+		const audiences = window.Altis.Analytics.getAudiences() || [];
 
-		// Get associated templates.
-		const templates = document.querySelectorAll( `template[data-parent-id="${ this.clientId }"]` );
+		// Track whether we need to use the fallback.
+		let fallback = true;
 
-		// Take the first fallback template if found.
-		let fallback = null;
-
-		// Track the audience for recording event later.
+		// Track the audience for recording an event later.
 		let audience = 0;
 
 		// Find a matching template.
-		for ( let index = 0; index < templates.length; index++ ) {
-			const template = templates[ index ];
-			audience = Number( template.dataset.audience );
-			if ( audience === 0 && ! fallback ) {
-				fallback = template;
+		for ( let index = 0; index < audiences.length; index++ ) {
+			// Find the first matching audience template.
+			const template = document.querySelector( `template[data-audience="${ audiences[ index ] }"][data-parent-id="${ this.clientId }"]` );
+			if ( ! template ) {
+				continue;
 			}
-			if ( audiences.indexOf( audience ) >= 0 ) {
-				// Unset fallback if we match an audience.
-				fallback = null;
-				// Populate experience block content.
-				const experience = template.content.cloneNode( true );
-				this.innerHTML = '';
-				this.appendChild( experience );
-				break;
-			}
+
+			// We have a matching template, update audience and fallback value.
+			audience = audiences[ index ];
+			fallback = false;
+
+			// Populate experience block content.
+			const experience = template.content.cloneNode( true );
+			this.innerHTML = '';
+			this.appendChild( experience );
+			break;
 		}
 
-		// Set fallback content if one is available.
+		// Set fallback content if needed.
 		if ( fallback ) {
-			const experience = fallback.content.cloneNode( true );
+			const template = document.querySelector( `template[data-fallback][data-parent-id="${ this.clientId }"]` );
+			if ( ! template ) {
+				return;
+			}
+			const experience = template.content.cloneNode( true );
 			this.innerHTML = '';
 			this.appendChild( experience );
 		}

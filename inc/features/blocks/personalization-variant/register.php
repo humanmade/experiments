@@ -60,23 +60,32 @@ function enqueue_assets() {
  * Because this block only saves <InnerBlocks.Content> on the JS side,
  * the content string represents only the wrapped inner block markup.
  *
- * @param array  $attributes   The block's attributes object.
+ * @param array $attributes The block's attributes object.
  * @param string $innerContent The block's saved content.
  * @return string The final rendered block markup, as an HTML string.
  */
 function render_block( array $attributes, ?string $inner_content = '' ) : string {
 	$parent_id = $attributes['parentId'] ?? false;
 	$audience = $attributes['audience'] ?? 0;
+	$fallback = $attributes['fallback'] ?? false;
 
 	if ( ! $parent_id ) {
 		trigger_error( 'Personalization block variant has no parent ID set.', E_USER_WARNING );
 		return '';
 	}
 
+	if ( $fallback ) {
+		return sprintf(
+			'<template data-fallback data-parent-id="%s">%s</template>',
+			esc_attr( $parent_id ),
+			$inner_content
+		);
+	}
+
 	return sprintf(
 		'<template data-audience="%d" data-parent-id="%s">%s</template>',
-		$audience,
-		$parent_id,
+		esc_attr( $audience ),
+		esc_attr( $parent_id ),
 		$inner_content
 	);
 }

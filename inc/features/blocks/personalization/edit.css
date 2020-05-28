@@ -47,6 +47,7 @@
 	margin: 3px 3px 3px 0;
 	height: 30px;
 	line-height: 13px;
+	flex-shrink: 0;
 }
 
 .altis-variants-toolbar .altis-variant-button.is-active,

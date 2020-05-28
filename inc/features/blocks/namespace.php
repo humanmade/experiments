@@ -49,7 +49,8 @@ function get_block_settings( string $name ) : ?array {
 
 	// Check name is valid.
 	if ( ! file_exists( $json_path ) ) {
-		trigger_error( 'Error reading %/block.json: file does not exist.', E_USER_WARNING );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		trigger_error( sprintf( 'Error reading %/block.json: file does not exist.', $name ), E_USER_WARNING );
 		return null;
 	}
 
@@ -61,6 +62,7 @@ function get_block_settings( string $name ) : ?array {
 
 	// Check JSON is valid.
 	if ( json_last_error() ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		trigger_error( sprintf( 'Error decoding %/block.json: %s', $name, json_last_error_msg() ), E_USER_WARNING );
 		return null;
 	}

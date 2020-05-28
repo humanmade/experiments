@@ -16,6 +16,9 @@
             },
             "audience": {
                 "type": "number"
+            },
+            "fallback": {
+                "type": "boolean"
             }
         }
     }
