@@ -59,7 +59,7 @@ const Edit = ( {
 		setAttributes( { clientId } );
 	}
 
-	// Ensure variant parentId is correct.
+	// Ensure variant data is correct parentId is correct.
 	variants.forEach( variant => {
 		if ( ! variant.attributes.parentId || variant.attributes.parentId !== attributes.clientId ) {
 			setVariantAttributes( variant.clientId, {
@@ -231,7 +231,10 @@ export default compose(
 	withSelect( ( select, ownProps ) => {
 		const { clientId, attributes } = ownProps;
 		const { getBlocks } = select( 'core/block-editor' );
-		const { getPost: getAudience } = select( 'audience' );
+		const {
+			getPost: getAudience,
+			getIsLoading,
+		} = select( 'audience' );
 
 		const parentClientId = attributes.clientId || clientId;
 		const innerBlocks = getBlocks( clientId );
@@ -256,17 +259,19 @@ export default compose(
 		}
 
 		// Pre-fetch selected audiences for variants.
-		const audiences = [];
 		innerBlocks.forEach( block => {
 			if ( block.attributes.audience ) {
-				audiences.push( getAudience( block.attributes.audience ) );
+				getAudience( block.attributes.audience );
 			}
 		} );
 
+		// Provide a means of determining if an audience has been deleted or not.
+		const isLoading = getIsLoading();
+
 		return {
-			audiences,
-			variants: innerBlocks,
 			getAudience,
+			isLoading,
+			variants: innerBlocks,
 		};
 	} ),
 	withDispatch( ( dispatch, ownProps, registry ) => {
