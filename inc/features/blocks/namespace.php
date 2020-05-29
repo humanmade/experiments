@@ -61,7 +61,7 @@ function get_block_settings( string $name ) : ?array {
 	$settings = json_decode( $json, ARRAY_A );
 
 	// Check JSON is valid.
-	if ( json_last_error() ) {
+	if ( json_last_error() !== JSON_ERROR_NONE ) {
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		trigger_error( sprintf( 'Error decoding %/block.json: %s', $name, json_last_error_msg() ), E_USER_WARNING );
 		return null;
