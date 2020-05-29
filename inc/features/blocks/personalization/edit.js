@@ -15,8 +15,8 @@ const {
 	Toolbar,
 } = wp.components;
 const { compose } = wp.compose;
-const { withSelect, withDispatch } = wp.data;
-const { sprintf, __ } = wp.i18n;
+const { withSelect, withDispatch, useSelect } = wp.data;
+const { __ } = wp.i18n;
 
 /**
  * Only variants can be direct descendents so that we can generate
@@ -31,15 +31,41 @@ const TEMPLATE = [
 	[ 'altis/personalization-variant' ],
 ];
 
-// Audience picker input.
+// Component for fetching and displaying the variant title string.
+const VariantTitle = ( { variant } ) => {
+	const audience = useSelect( select => {
+		return select( 'audience' ).getPost( variant.attributes.audience );
+	}, [ variant.attributes.audience ] );
+	const isLoading = useSelect( select => {
+		return select( 'audience' ).getIsLoading();
+	}, [] );
 
+	if ( variant.attributes.fallback ) {
+		return __( 'Fallback', 'altis-experiments' );
+	}
+
+	if ( ! variant.attributes.audience ) {
+		return __( 'Select audience', 'altis-experiments' );
+	}
+
+	if ( audience && audience.title && audience.title.rendered ) {
+		return audience.title.rendered;
+	}
+
+	if ( isLoading ) {
+		return __( 'Loading...', 'altis-experiments' );
+	}
+
+	return '';
+}
+
+// Audience picker input.
 const Edit = ( {
 	addVariant,
 	attributes,
 	className,
 	clientId,
 	copyVariant,
-	getAudience,
 	isSelected,
 	removeVariant,
 	setAttributes,
@@ -68,25 +94,6 @@ const Edit = ( {
 		}
 	} );
 
-	// Get the current variant name from the audience if available.
-	const getVariantName = index => {
-		const variant = variants[ index ];
-		if ( ! variant ) {
-			return __( 'Unknown variant', 'altis-experiments' );
-		}
-		if ( variant.attributes.fallback ) {
-			return __( 'Fallback', 'altis-experiments' )
-		}
-		if ( ! variant.attributes.audience ) {
-			return __( 'Select audience', 'altis-experiments' );
-		}
-		const audience = getAudience( variant.attributes.audience );
-		if ( audience && audience.title && audience.title.rendered ) {
-			return audience.title.rendered;
-		}
-		return __( 'Loading...', 'altis-experiments' );
-	};
-
 	return (
 		<Fragment>
 			<BlockControls>
@@ -104,20 +111,20 @@ const Edit = ( {
 						},
 					] }
 				>
-					{ variants.map( ( variant, index ) => (
+					{ variants.map( variant => (
 						<Button
 							key={ `variant-select-${ variant.clientId }` }
 							className={ `altis-variant-button components-icon-button has-text ${ activeVariant === variant.clientId && 'is-active' }` }
 							title={ __( 'Select variant', 'altis-experiments' ) }
 							onClick={ () => setVariant( variant.clientId ) }
 						>
-							{ getVariantName( index ) }
+							<VariantTitle variant={ variant } />
 						</Button>
 					) ) }
 				</Toolbar>
 			</BlockControls>
 			<InspectorControls>
-				{ variants.map( ( variant, index ) => {
+				{ variants.map( variant => {
 					if ( variant.attributes.fallback ) {
 						return (
 							<PanelBody
@@ -134,7 +141,7 @@ const Edit = ( {
 					return (
 						<PanelBody
 							key={ `variant-settings-${ variant.clientId }` }
-							title={ getVariantName( index ) }
+							title={ <VariantTitle variant={ variant } /> }
 						>
 							<AudiencePicker
 								label={ __( 'Audience' ) }
@@ -170,7 +177,7 @@ const Edit = ( {
 					<span className="altis-experience-block-header__title">
 						{ __( 'Personalized Content', 'altis-experiments' ) }
 						{ ' ・ ' }
-						{ getVariantName( activeVariantIndex ) }
+						<VariantTitle variant={ variants[ activeVariantIndex ] } />
 					</span>
 					{ isSelected && (
 						<div className="altis-experience-block-header__toolbar">
@@ -231,10 +238,6 @@ export default compose(
 	withSelect( ( select, ownProps ) => {
 		const { clientId, attributes } = ownProps;
 		const { getBlocks } = select( 'core/block-editor' );
-		const {
-			getPost: getAudience,
-			getIsLoading,
-		} = select( 'audience' );
 
 		const parentClientId = attributes.clientId || clientId;
 		const innerBlocks = getBlocks( clientId );
@@ -258,19 +261,7 @@ export default compose(
 			}
 		}
 
-		// Pre-fetch selected audiences for variants.
-		innerBlocks.forEach( block => {
-			if ( block.attributes.audience ) {
-				getAudience( block.attributes.audience );
-			}
-		} );
-
-		// Provide a means of determining if an audience has been deleted or not.
-		const isLoading = getIsLoading();
-
 		return {
-			getAudience,
-			isLoading,
 			variants: innerBlocks,
 		};
 	} ),
