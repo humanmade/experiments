@@ -30,13 +30,13 @@ const VariantPanel = ( {
 				onSelect={ audience => updateBlockAttributes( variant.clientId, { audience: audience.id } ) }
 				onClearSelection={ () => updateBlockAttributes( variant.clientId, { audience: null } ) }
 			/>
-			{ ! variant.attributes.audience && (
+			{ !variant.attributes.audience && (
 				<p className="description">
 					{ __( 'You must select an audience for this variant.', 'altis-experiments' ) }
 				</p>
 			) }
 		</PanelBody>
 	);
-}
+};
 
 export default VariantPanel;

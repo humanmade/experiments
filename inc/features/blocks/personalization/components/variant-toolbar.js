@@ -20,16 +20,16 @@ const VariantToolbar = props => {
 			>
 				{ __( 'Copy', 'altis-experiments' ) }
 			</IconButton>
-			{ ! isFallback && (
+			{ !isFallback && (
 				<IconButton
 					icon='trash'
 					title={ __( 'Remove variant', 'altis-experiments' ) }
-					disabled={ ! canRemove }
+					disabled={ !canRemove }
 					onClick={ onRemove }
 				/>
 			) }
 		</div>
-	)
+	);
 };
 
 export default VariantToolbar;
