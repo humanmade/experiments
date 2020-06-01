@@ -2,7 +2,8 @@
 /**
  * Personalization Variant Block Server Side.
  *
- * @phpcs:ignoreFile HM.Files.FunctionFileName.WrongFile
+ * @phpcs:disable HM.Files.NamespaceDirectoryName.NameMismatch
+ * @phpcs:disable HM.Files.FunctionFileName.WrongFile
  *
  * @package altis-experiments
  */
@@ -74,6 +75,8 @@ function render_block( array $attributes, ?string $inner_content = '' ) : string
 		return '';
 	}
 
+	// If this is the fallback variant output the template with different attributes
+	// for easier and more specific targeting by document.querySelector().
 	if ( $fallback ) {
 		return sprintf(
 			'<template data-fallback data-parent-id="%s">%s</template>',

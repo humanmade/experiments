@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const { InnerBlocks } = wp.blockEditor;
 const { compose } = wp.compose;
@@ -9,20 +9,20 @@ const Edit = ( {
 	isSelected,
 	selectParent,
 } ) => {
-	// Autofocus experience block variant parent on select.
-	if ( isSelected ) {
-		selectParent();
+	// Select the block parent if a variant is directly selected.
+	useEffect( () => {
+		if ( isSelected ) {
+			selectParent();
+		}
+	}, [ isSelected ] );
+
+	const props = {};
+	if ( ! hasChildBlocks ) {
+		// If we don't have any child blocks, show large block appender button.
+		props.renderAppender = () => <InnerBlocks.ButtonBlockAppender />;
 	}
 
-	return (
-		<InnerBlocks
-			renderAppender={
-				hasChildBlocks
-					? undefined
-					: () => <InnerBlocks.ButtonBlockAppender />
-			}
-		/>
-	);
+	return <InnerBlocks { ...props } />;
 };
 
 export default compose(

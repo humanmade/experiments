@@ -2,7 +2,8 @@
 /**
  * Personalization Block Server Side.
  *
- * @phpcs:ignoreFile HM.Files.FunctionFileName.WrongFile
+ * @phpcs:disable HM.Files.NamespaceDirectoryName.NameMismatch
+ * @phpcs:disable HM.Files.FunctionFileName.WrongFile
  *
  * @package altis-experiments
  */
@@ -85,8 +86,6 @@ function enqueue_assets() {
  * @return string The final rendered block markup, as an HTML string.
  */
 function render_block( array $attributes, ?string $inner_content = '' ) : string {
-	static $client_ids = [];
-
 	$client_id = $attributes['clientId'] ?? false;
 	$class_name = $attributes['className'] ?? '';
 	$align = $attributes['align'] ?? 'none';
@@ -99,14 +98,6 @@ function render_block( array $attributes, ?string $inner_content = '' ) : string
 	if ( ! $client_id ) {
 		trigger_error( 'Personalization block has no client ID set.', E_USER_WARNING );
 		return '';
-	}
-
-	// No need to output templates twice for the same parent client ID.
-	// This can happen if a reusable block appears twice on a page.
-	if ( in_array( $client_id, $client_ids, true ) ) {
-		$inner_content = '';
-	} else {
-		$client_ids[] = $client_id;
 	}
 
 	return sprintf(
