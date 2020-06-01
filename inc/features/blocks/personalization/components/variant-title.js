@@ -22,6 +22,10 @@ const VariantTitle = ( { variant } ) => {
 		return audience.title.rendered;
 	}
 
+	if ( audience && audience.error && audience.error.message ) {
+		return audience.error.message;
+	}
+
 	if ( isLoading ) {
 		return __( 'Loading...', 'altis-experiments' );
 	}
