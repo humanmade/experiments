@@ -18,10 +18,20 @@ const VariantTitle = ( { variant } ) => {
 		return __( 'Select audience', 'altis-experiments' );
 	}
 
-	if ( audience && audience.title && audience.title.rendered ) {
+	const status = ( audience && audience.status ) || 'draft';
+	const title = audience && audience.title && audience.title.rendered;
+
+	// Audience is valid and has a title.
+	if ( status !== 'trash' && title ) {
 		return audience.title.rendered;
 	}
 
+	// Audience has been deleted.
+	if ( status === 'trash' ) {
+		return __( '(deleted)', 'altis-experiments' );
+	}
+
+	// Check if audience reponse is a REST API error.
 	if ( audience && audience.error && audience.error.message ) {
 		return audience.error.message;
 	}
