@@ -250,9 +250,6 @@ class PersonalizationBlock extends HTMLElement {
 	setContent = () => {
 		const audiences = window.Altis.Analytics.getAudiences() || [];
 
-		// Track whether we need to use the fallback.
-		let fallback = true;
-
 		// Track the audience for recording an event later.
 		let audience = 0;
 
@@ -266,7 +263,6 @@ class PersonalizationBlock extends HTMLElement {
 
 			// We have a matching template, update audience and fallback value.
 			audience = audiences[ index ];
-			fallback = false;
 
 			// Populate experience block content.
 			const experience = template.content.cloneNode( true );
@@ -276,7 +272,7 @@ class PersonalizationBlock extends HTMLElement {
 		}
 
 		// Set fallback content if needed.
-		if ( fallback ) {
+		if ( ! audience ) {
 			const template = document.querySelector( `template[data-fallback][data-parent-id="${ this.clientId }"]` );
 			if ( ! template ) {
 				return;
