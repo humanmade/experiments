@@ -61,7 +61,7 @@ function enqueue_assets() {
 			'window.Altis.Analytics = window.Altis.Analytics || {};' .
 			'window.Altis.Analytics.Experiments = window.Altis.Analytics.Experiments || {};' .
 			'window.Altis.Analytics.Experiments.BuildURL = %s;',
-			wp_json_encode( plugins_url( 'build', dirname( __FILE__, 4 ) ) )
+			wp_json_encode( plugins_url( 'build', Experiments\ROOT_FILE ) )
 		),
 		'before'
 	);
@@ -69,7 +69,7 @@ function enqueue_assets() {
 	// Queue up editor CSS.
 	wp_enqueue_style(
 		'altis-experiments-features-blocks-personalization',
-		plugins_url( 'inc/features/blocks/personalization/edit.css', Experiments\ROOT_DIR . '/plugin.php' ),
+		plugins_url( 'inc/features/blocks/personalization/edit.css', Experiments\ROOT_FILE ),
 		[],
 		'2020-05-22-01'
 	);

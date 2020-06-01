@@ -10,6 +10,7 @@
 
 namespace Altis\Experiments\Features\Blocks\Personalization_Variant;
 
+use Altis\Experiments;
 use Altis\Experiments\Features\Blocks;
 use Altis\Experiments\Utils;
 
@@ -49,7 +50,7 @@ function enqueue_assets() {
 			'window.Altis.Analytics = window.Altis.Analytics || {};' .
 			'window.Altis.Analytics.Experiments = window.Altis.Analytics.Experiments || {};' .
 			'window.Altis.Analytics.Experiments.BuildURL = %s;',
-			wp_json_encode( plugins_url( 'build', dirname( __FILE__, 4 ) ) )
+			wp_json_encode( plugins_url( 'build', Experiments\ROOT_FILE ) )
 		),
 		'before'
 	);

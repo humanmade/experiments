@@ -36,5 +36,5 @@ function get_asset_url( string $filename ) {
 		return $path;
 	}
 
-	return plugins_url( $manifest[ $filename ], Experiments\ROOT_DIR . '/build/assets' );
+	return plugins_url( $manifest[ $filename ], $manifest_file );
 }
