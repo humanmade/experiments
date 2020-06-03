@@ -28,26 +28,29 @@
 	flex: 0;
 	border: 0;
 	padding: 0;
-	margin: 0;
+	margin: -4px 0;
 	display: flex;
 }
 
-.altis-experience-block-header__toolbar .components-icon-button {
-	padding: 3px 5px;
+.altis-experience-block-header__toolbar .components-button {
 	margin-left: 3px;
+	color: inherit;
 }
 
 .altis-variants-toolbar {
+	flex-shrink: 1;
+}
+
+.altis-variants-toolbar .altis-variants-toolbar__tabs {
 	max-width: 460px;
 	overflow-x: auto;
+	margin-left: 0;
 }
 
 .altis-variants-toolbar .altis-variant-button {
 	width: auto;
-	margin: 3px 3px 3px 0;
-	height: 30px;
-	line-height: 13px;
 	flex-shrink: 0;
+	padding: 0 11px;
 }
 
 .altis-variants-toolbar .altis-variant-button.is-active,
@@ -56,11 +59,16 @@
 .altis-variants-toolbar .altis-variant-button.is-pressed:hover,
 .altis-variants-toolbar .altis-variant-button.is-active:focus,
 .altis-variants-toolbar .altis-variant-button.is-pressed:focus,
+.altis-variants-toolbar .altis-variant-button:not(:disabled):not([aria-disabled="true"]):not(.is-secondary):not(.is-primary):not(.is-tertiary):not(.is-link).is-active,
+.altis-variants-toolbar .altis-variant-button:not(:disabled):not([aria-disabled="true"]):not(.is-secondary):not(.is-primary):not(.is-tertiary):not(.is-link).is-pressed,
 .altis-variants-toolbar .altis-variant-button:not(:disabled):not([aria-disabled="true"]):not(.is-default).is-active,
 .altis-variants-toolbar .altis-variant-button:not(:disabled):not([aria-disabled="true"]):not(.is-default).is-pressed {
 	outline: none;
 	color: #fff;
 	box-shadow: none;
+	margin: 3px;
+	height: 30px;
+	padding: 0 8px;
 	background: #555d66;
 }
 

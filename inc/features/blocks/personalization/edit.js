@@ -86,16 +86,18 @@ const Edit = ( {
 					className="altis-variants-toolbar"
 					controls={ variantsToolbarControls }
 				>
-					{ variants.map( variant => (
-						<Button
-							key={ `variant-select-${ variant.clientId }` }
-							className={ `altis-variant-button components-icon-button has-text ${ activeVariant === variant.clientId && 'is-active' }` }
-							title={ __( 'Select variant', 'altis-experiments' ) }
-							onClick={ () => setVariant( variant.clientId ) }
-						>
-							<VariantTitle variant={ variant } />
-						</Button>
-					) ) }
+					<div className="altis-variants-toolbar__tabs">
+						{ variants.map( variant => (
+							<Button
+								key={ `variant-select-${ variant.clientId }` }
+								className={ `altis-variant-button components-icon-button has-text ${ activeVariant === variant.clientId && 'is-active' }` }
+								title={ __( 'Select variant', 'altis-experiments' ) }
+								onClick={ () => setVariant( variant.clientId ) }
+							>
+								<VariantTitle variant={ variant } />
+							</Button>
+						) ) }
+					</div>
 				</Toolbar>
 			</BlockControls>
 			<InspectorControls>
