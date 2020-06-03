@@ -37,12 +37,16 @@
 	color: inherit;
 }
 
+.block-editor-block-contextual-toolbar[data-type="altis/personalization"] .block-editor-block-toolbar__slot {
+	flex-shrink: 0;
+}
+
 .altis-variants-toolbar {
 	flex-shrink: 1;
 }
 
 .altis-variants-toolbar .altis-variants-toolbar__tabs {
-	max-width: 460px;
+	max-width: 400px;
 	overflow-x: auto;
 	margin-left: 0;
 }

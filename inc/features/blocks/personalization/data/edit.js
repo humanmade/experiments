@@ -52,7 +52,7 @@ const withData = Component => compose(
 		return {
 			onAddVariant() {
 				const { clientId, attributes } = ownProps;
-				const { replaceInnerBlocks } = dispatch( 'core/block-editor' );
+				const { replaceInnerBlocks, selectBlock } = dispatch( 'core/block-editor' );
 				const { getBlocks } = registry.select( 'core/block-editor' );
 
 				const newVariant = createBlock( 'altis/personalization-variant', {
@@ -68,6 +68,9 @@ const withData = Component => compose(
 
 				// Update the inner blocks.
 				replaceInnerBlocks( clientId, innerBlocks );
+
+				// Focus defaults to the newly added inner block so keep it on the parent.
+				selectBlock( clientId );
 
 				// Return new client ID to enable selection.
 				return newVariant.clientId;
