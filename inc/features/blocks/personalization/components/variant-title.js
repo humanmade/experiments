@@ -6,6 +6,7 @@ const VariantTitle = ( { variant } ) => {
 	const audience = useSelect( select => {
 		return select( 'audience' ).getPost( variant.attributes.audience );
 	}, [ variant.attributes.audience ] );
+
 	const isLoading = useSelect( select => {
 		return select( 'audience' ).getIsLoading();
 	}, [] );

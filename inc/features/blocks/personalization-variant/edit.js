@@ -7,12 +7,12 @@ const { withSelect, withDispatch } = wp.data;
 const Edit = ( {
 	hasChildBlocks,
 	isSelected,
-	selectParent,
+	onSelect,
 } ) => {
 	// Select the block parent if a variant is directly selected.
 	useEffect( () => {
 		if ( isSelected ) {
-			selectParent();
+			onSelect();
 		}
 	}, [ isSelected ] );
 
@@ -43,7 +43,9 @@ export default compose(
 		const rootClientId = getBlockRootClientId( clientId );
 
 		return {
-			selectParent: () => selectBlock( rootClientId ),
+			onSelect: () => {
+				selectBlock( rootClientId );
+			},
 		};
 	} ),
 )( Edit );

@@ -50,7 +50,7 @@ const withData = Component => compose(
 	} ),
 	withDispatch( ( dispatch, ownProps, registry ) => {
 		return {
-			addVariant() {
+			onAddVariant() {
 				const { clientId, attributes } = ownProps;
 				const { replaceInnerBlocks } = dispatch( 'core/block-editor' );
 				const { getBlocks } = registry.select( 'core/block-editor' );
@@ -72,7 +72,7 @@ const withData = Component => compose(
 				// Return new client ID to enable selection.
 				return newVariant.clientId;
 			},
-			copyVariant( variantClientId ) {
+			onCopyVariant( variantClientId ) {
 				const { replaceInnerBlocks } = dispatch( 'core/block-editor' );
 				const {
 					getBlock,
@@ -105,7 +105,7 @@ const withData = Component => compose(
 
 				return newVariant.clientId;
 			},
-			removeVariant( variantClientId ) {
+			onRemoveVariant( variantClientId ) {
 				const { clientId, attributes } = ownProps;
 				const { replaceInnerBlocks } = dispatch( 'core/block-editor' );
 				const { getBlocks } = registry.select( 'core/block-editor' );
@@ -121,9 +121,22 @@ const withData = Component => compose(
 				// Update the inner blocks.
 				replaceInnerBlocks( clientId, innerBlocks );
 			},
-			setVariantAttributes( variantClientId, attributes ) {
+			onSetClientId() {
+				const { attributes, setAttributes } = ownProps;
+				if ( ! attributes.clientId ) {
+					setAttributes( { clientId: attributes.clientId } );
+				}
+			},
+			onSetVariantParents() {
+				const { attributes, variants } = ownProps;
 				const { updateBlockAttributes } = dispatch( 'core/block-editor' );
-				updateBlockAttributes( variantClientId, attributes );
+				variants.forEach( variant => {
+					if ( ! variant.attributes.parentId || variant.attributes.parentId !== attributes.clientId ) {
+						updateBlockAttributes( variant.clientId, {
+							parentId: attributes.clientId,
+						} );
+					}
+				} );
 			},
 		};
 	} ),

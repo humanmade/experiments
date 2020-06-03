@@ -31,15 +31,15 @@ const TEMPLATE = [
 
 // Audience picker input.
 const Edit = ( {
-	addVariant,
 	attributes,
 	className,
 	clientId,
-	copyVariant,
 	isSelected,
-	removeVariant,
-	setAttributes,
-	setVariantAttributes,
+	onAddVariant,
+	onCopyVariant,
+	onRemoveVariant,
+	onSetClientId,
+	onSetVariantParents,
 	variants,
 } ) => {
 	// Track currently selected variant.
@@ -51,20 +51,12 @@ const Edit = ( {
 
 	// Set clientId attribute if not set.
 	useEffect( () => {
-		if ( ! attributes.clientId ) {
-			setAttributes( { clientId } );
-		}
+		onSetClientId();
 	}, [] );
 
 	// Ensure variant parentId is correct.
 	useEffect( () => {
-		variants.forEach( variant => {
-			if ( ! variant.attributes.parentId || variant.attributes.parentId !== attributes.clientId ) {
-				setVariantAttributes( variant.clientId, {
-					parentId: attributes.clientId,
-				} );
-			}
-		} );
+		onSetVariantParents();
 	}, [ attributes.clientId ] );
 
 	// Controls that appear before the variant selector buttons.
@@ -73,10 +65,7 @@ const Edit = ( {
 			icon: 'plus',
 			title: __( 'Add a variant', 'altis-experiments' ),
 			className: 'altis-add-variant-button',
-			onClick: () => {
-				const newClientId = addVariant();
-				setVariant( newClientId );
-			},
+			onClick: () => setVariant( onAddVariant() ),
 		},
 	];
 
@@ -87,7 +76,7 @@ const Edit = ( {
 		} else {
 			setVariant( variants[ activeVariantIndex - 1 ].clientId );
 		}
-		removeVariant( activeVariant );
+		onRemoveVariant( activeVariant );
 	};
 
 	return (
@@ -138,7 +127,7 @@ const Edit = ( {
 						<VariantToolbar
 							canRemove={ variants.length > 1 }
 							isFallback={ activeVariant && variants[ activeVariantIndex ].attributes.fallback }
-							onCopy={ () => setVariant( copyVariant( activeVariant ) ) }
+							onCopy={ () => setVariant( onCopyVariant( activeVariant ) ) }
 							onRemove={ onRemove }
 						/>
 					) }

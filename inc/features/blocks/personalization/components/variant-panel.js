@@ -7,9 +7,7 @@ const { PanelBody } = wp.components;
 const { useDispatch } = wp.data;
 const { __ } = wp.i18n;
 
-const VariantPanel = ( {
-	variant,
-} ) => {
+const VariantPanel = ( { variant } ) => {
 	const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
 
 	if ( variant.attributes.fallback ) {
@@ -30,7 +28,7 @@ const VariantPanel = ( {
 				onSelect={ audience => updateBlockAttributes( variant.clientId, { audience: audience.id } ) }
 				onClearSelection={ () => updateBlockAttributes( variant.clientId, { audience: null } ) }
 			/>
-			{ !variant.attributes.audience && (
+			{ ! variant.attributes.audience && (
 				<p className="description">
 					{ __( 'You must select an audience for this variant.', 'altis-experiments' ) }
 				</p>

@@ -24,7 +24,7 @@ const VariantToolbar = props => {
 				<IconButton
 					icon='trash'
 					title={ __( 'Remove variant', 'altis-experiments' ) }
-					disabled={ !canRemove }
+					disabled={ ! canRemove }
 					onClick={ onRemove }
 				/>
 			) }
