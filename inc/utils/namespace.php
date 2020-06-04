@@ -12,7 +12,7 @@ use Altis\Experiments;
 /**
  * Return asset file name based on generated manifest.json file.
  *
- * @param string $filename The entrpoint filename used in webpack.config.js.
+ * @param string $filename The entrypoint filename used in webpack.config.js.
  * @return string|false The URL of the generated asset file.
  */
 function get_asset_url( string $filename ) {
