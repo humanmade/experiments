@@ -22,7 +22,11 @@ const Edit = ( {
 		props.renderAppender = () => <InnerBlocks.ButtonBlockAppender />;
 	}
 
-	return <InnerBlocks { ...props } />;
+	return (
+		<InnerBlocks
+			{ ...props }
+		/>
+	);
 };
 
 export default compose(
