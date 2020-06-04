@@ -59,7 +59,7 @@ const removeTitle = ( titles, index ) => {
 	const newTitles = [ ...titles ];
 	newTitles.splice( index, 1 );
 	return newTitles;
-}
+};
 
 const TitleTextField = props => {
 	const {
@@ -109,7 +109,7 @@ const TitleTextField = props => {
 							} }
 							placeholder={ __( 'Enter another title here.', 'altis-experiments' ) }
 							value={ title }
-							readOnly={ !isEditable }
+							readOnly={ ! isEditable }
 							rows={ 3 }
 						/>
 						<Info>
