@@ -32,7 +32,7 @@ const dispatchHandler = ( dispatch, props ) => {
 		}
 
 		setState( { isSaving: false } );
-	}
+	};
 
 	const updateTest = async ( test = {}, titles = false, save = false ) => {
 		const data = {

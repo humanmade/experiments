@@ -705,7 +705,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	if ( ! is_array( $query_filter ) ) {
 		trigger_error( sprintf(
 			'AB Tests: Query filter for test %s on post %d is not an array',
-			sanitize_text_field( $test_id ),
+			esc_html( $test_id ),
 			intval( $post_id )
 		), E_USER_WARNING );
 		return;
@@ -744,7 +744,7 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	if ( ! is_array( $goal_filter ) ) {
 		trigger_error( sprintf(
 			'AB Tests: Goal filter for test %s on post %d is not an array',
-			sanitize_text_field( $test_id ),
+			esc_html( $test_id ),
 			intval( $post_id )
 		), E_USER_WARNING );
 		return;

@@ -16,7 +16,7 @@ const Duration = props => {
 
 		return function cleanup() {
 			clearInterval( timer );
-		}
+		};
 	} );
 
 	if ( duration <= 0 ) {
@@ -25,7 +25,7 @@ const Duration = props => {
 
 	return (
 		<span>{ getDurationString( duration ) }</span>
-	)
+	);
 };
 
 export default Duration;

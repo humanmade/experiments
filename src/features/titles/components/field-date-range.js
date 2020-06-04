@@ -29,7 +29,7 @@ const DateRange = props => {
 					currentTime={ startDate.toISOString() }
 					onChange={ time => {
 						const newDate = new Date( time );
-						onChangeStart( newDate < endDate ? newDate.getTime() : endTime - ( 24 * 60 * 60 * 1000 ) )
+						onChangeStart( newDate < endDate ? newDate.getTime() : endTime - ( 24 * 60 * 60 * 1000 ) );
 					} }
 				/>
 			</div>

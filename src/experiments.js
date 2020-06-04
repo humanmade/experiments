@@ -33,10 +33,6 @@ class Test extends HTMLElement {
 		return this.getAttribute( 'goal' );
 	}
 
-	constructor() {
-		super();
-	}
-
 	connectedCallback() {
 		// Extract test set by URL parameters.
 		const regex = new RegExp( `(utm_campaign|set_test)=test_${ this.testIdWithPost }:(\\d+)`, 'i' );

@@ -84,7 +84,7 @@ export const Results = props => {
 								</Fragment>
 							) }
 						</Variant>
-					)
+					);
 				} ) }
 			</PanelRow>
 			<PanelRow>
