@@ -47,9 +47,7 @@ export default compose(
 		const rootClientId = getBlockRootClientId( clientId );
 
 		return {
-			onSelect: () => {
-				selectBlock( rootClientId );
-			},
+			onSelect: () => selectBlock( rootClientId ),
 		};
 	} ),
 )( Edit );

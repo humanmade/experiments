@@ -7,9 +7,7 @@ const VariantTitle = ( { variant } ) => {
 		return select( 'audience' ).getPost( variant.attributes.audience );
 	}, [ variant.attributes.audience ] );
 
-	const isLoading = useSelect( select => {
-		return select( 'audience' ).getIsLoading();
-	}, [] );
+	const isLoading = useSelect( select => select( 'audience' ).getIsLoading(), [] );
 
 	if ( variant.attributes.fallback ) {
 		return __( 'Fallback', 'altis-experiments' );
