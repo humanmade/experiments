@@ -662,7 +662,7 @@ function output_ab_test_html_for_post( string $test_id, int $post_id, string $de
 		fallback="<?php echo esc_attr( $default_output ); ?>"
 		variants="<?php echo esc_attr( wp_json_encode( $variant_output, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ); ?>"
 	>
-		<?php echo $default_output; // phpcs:ignore ?>
+		<?php echo $default_output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	</ab-test>
 	<?php
 	return ob_get_clean();
