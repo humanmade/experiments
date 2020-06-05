@@ -686,12 +686,12 @@ function output_ab_test_html_for_post( string $test_id, int $post_id, string $de
 	<ab-test
 		test-id="<?php echo esc_attr( $test_id ); ?>"
 		post-id="<?php echo esc_attr( $post_id ); ?>"
-		traffic-percentage="<?php echo get_ab_test_traffic_percentage_for_post( $test_id, $post_id ); ?>"
+		traffic-percentage="<?php echo esc_attr( get_ab_test_traffic_percentage_for_post( $test_id, $post_id ) ); ?>"
 		goal="<?php echo esc_attr( $test['goal'] ); ?>"
 		fallback="<?php echo esc_attr( $default_output ); ?>"
 		variants="<?php echo esc_attr( wp_json_encode( $variant_output, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ); ?>"
 	>
-		<?php echo $default_output; ?>
+		<?php echo $default_output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	</ab-test>
 	<?php
 	return ob_get_clean();
@@ -734,8 +734,8 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	if ( ! is_array( $query_filter ) ) {
 		trigger_error( sprintf(
 			'AB Tests: Query filter for test %s on post %d is not an array',
-			$test_id,
-			$post_id
+			esc_html( $test_id ),
+			intval( $post_id )
 		), E_USER_WARNING );
 		return;
 	}
@@ -773,8 +773,8 @@ function process_post_ab_test_result( string $test_id, int $post_id ) {
 	if ( ! is_array( $goal_filter ) ) {
 		trigger_error( sprintf(
 			'AB Tests: Goal filter for test %s on post %d is not an array',
-			$test_id,
-			$post_id
+			esc_html( $test_id ),
+			intval( $post_id )
 		), E_USER_WARNING );
 		return;
 	}
