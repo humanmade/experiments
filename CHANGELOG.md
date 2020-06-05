@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.1.0
+
+- Added experience blocks feature
+
 ## v2.0.4
 
 - Prevent setting cron task during installation
