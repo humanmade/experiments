@@ -1,4 +1,3 @@
-/* global wp */
 import React, { Fragment } from 'react';
 import { Panel } from './components';
 import { DEFAULT_TEST } from './data/shapes';

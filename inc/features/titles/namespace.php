@@ -7,9 +7,8 @@
 
 namespace Altis\Experiments\Features\Titles;
 
-use const Altis\Experiments\ROOT_DIR;
-use function Altis\Experiments\output_ab_test_html_for_post;
-use function Altis\Experiments\register_post_ab_test;
+use Altis\Experiments;
+use Altis\Experiments\Utils;
 
 /**
  * Bootstrap Title AB Tests Feature.
@@ -25,7 +24,7 @@ function setup() {
 /**
  * Load Block Editor sidebar plugin.
  *
- * @param string $hook
+ * @param string $hook Page hook suffix.
  */
 function admin_scripts( string $hook ) {
 	if ( ! in_array( $hook, [ 'post.php', 'post-new.php' ], true ) ) {
@@ -41,7 +40,7 @@ function admin_scripts( string $hook ) {
 
 	wp_enqueue_script(
 		'altis-experiments-features-titles',
-		plugins_url( 'build/features/titles.js', ROOT_DIR . '/plugin.php' ),
+		Utils\get_asset_url( 'features/titles.js' ),
 		[
 			'wp-plugins',
 			'wp-blocks',
@@ -51,7 +50,20 @@ function admin_scripts( string $hook ) {
 			'wp-core-data',
 			'wp-edit-post',
 			'moment',
-		]
+		],
+		null
+	);
+
+	wp_add_inline_script(
+		'altis-experiments-features-titles',
+		sprintf(
+			'window.Altis = window.Altis || {};' .
+			'window.Altis.Analytics = window.Altis.Analytics || {};' .
+			'window.Altis.Analytics.Experiments = window.Altis.Analytics.Experiments || {};' .
+			'window.Altis.Analytics.Experiments.BuildURL = %s;',
+			wp_json_encode( plugins_url( 'build', Experiments\ROOT_FILE ) )
+		),
+		'before'
 	);
 }
 
@@ -84,7 +96,7 @@ function register_default_post_type_support() {
  * @return string
  */
 function add_title_ab_test_to_title( string $title, int $post_id ) : string {
-	return output_ab_test_html_for_post( 'titles', $post_id, $title );
+	return Experiments\output_ab_test_html_for_post( 'titles', $post_id, $title );
 }
 
 /**
@@ -95,7 +107,7 @@ function init() {
 		add_filter( 'the_title', __NAMESPACE__ . '\\add_title_ab_test_to_title', 10, 2 );
 	}
 
-	register_post_ab_test(
+	Experiments\register_post_ab_test(
 		'titles',
 		[
 			'label' => __( 'Titles', 'altis-experiments' ),

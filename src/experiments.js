@@ -33,10 +33,6 @@ class Test extends HTMLElement {
 		return this.getAttribute( 'goal' );
 	}
 
-	constructor() {
-		super();
-	}
-
 	connectedCallback() {
 		// Extract test set by URL parameters.
 		const regex = new RegExp( `(utm_campaign|set_test)=test_${ this.testIdWithPost }:(\\d+)`, 'i' );
@@ -226,10 +222,89 @@ Test.registerGoal( 'click', ( element, record ) => {
 	} );
 }, [ 'a' ] );
 
-// Define custom elements.
-window.customElements.define( 'ab-test', ABTest );
+class PersonalizationBlock extends HTMLElement {
+
+	get clientId() {
+		return this.getAttribute( 'client-id' );
+	}
+
+	connectedCallback() {
+		// Set default styles.
+		this.attachShadow( { mode: 'open' } );
+		this.shadowRoot.innerHTML = `
+			<style>
+				:host {
+					display: block;
+				}
+			</style>
+			<slot></slot>
+		`;
+
+		// Update the component content.
+		this.setContent();
+
+		// Attach a listener to update the content when audiences are changed.
+		window.Altis.Analytics.on( 'updateAudiences', this.setContent );
+	}
+
+	setContent = () => {
+		const audiences = window.Altis.Analytics.getAudiences() || [];
+
+		// Track the audience for recording an event later.
+		let audience = 0;
+
+		// Find a matching template.
+		for ( let index = 0; index < audiences.length; index++ ) {
+			// Find the first matching audience template.
+			const template = document.querySelector( `template[data-audience="${ audiences[ index ] }"][data-parent-id="${ this.clientId }"]` );
+			if ( ! template ) {
+				continue;
+			}
+
+			// We have a matching template, update audience and fallback value.
+			audience = audiences[ index ];
+
+			// Populate experience block content.
+			const experience = template.content.cloneNode( true );
+			this.innerHTML = '';
+			this.appendChild( experience );
+			break;
+		}
+
+		// Set fallback content if needed.
+		if ( ! audience ) {
+			const template = document.querySelector( `template[data-fallback][data-parent-id="${ this.clientId }"]` );
+			if ( ! template ) {
+				return;
+			}
+			const experience = template.content.cloneNode( true );
+			this.innerHTML = '';
+			this.appendChild( experience );
+		}
+
+		// Log an event for tracking views and audience.
+		window.Altis.Analytics.record( 'experienceView', {
+			attributes: {
+				type: 'personalization',
+				clientId: this.clientId,
+				audience: audience,
+			},
+		} );
+	}
+
+}
 
 // Expose ABTest methods.
 window.Altis.Analytics.Experiments = Object.assign( {}, window.Altis.Analytics.Experiments || {}, {
 	registerGoal: Test.registerGoal,
 } );
+
+// Define custom elements when analytics has loaded.
+window.Altis.Analytics.onReady( () => {
+	window.customElements.define( 'ab-test', ABTest );
+	window.customElements.define( 'personalization-block', PersonalizationBlock );
+} );
+
+// Fire a ready event once userland API has been exported.
+const readyEvent = new CustomEvent( 'altis.experiments.ready' );
+window.dispatchEvent( readyEvent );

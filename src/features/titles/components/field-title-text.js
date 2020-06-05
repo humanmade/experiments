@@ -1,4 +1,3 @@
-/* global wp */
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { getLetter } from '../utils';
@@ -59,7 +58,7 @@ const removeTitle = ( titles, index ) => {
 	const newTitles = [ ...titles ];
 	newTitles.splice( index, 1 );
 	return newTitles;
-}
+};
 
 const TitleTextField = props => {
 	const {
@@ -132,7 +131,7 @@ const TitleTextField = props => {
 							) }
 						</Info>
 					</Variant>
-				)
+				);
 			} ) }
 			{ isEditable && allTitles.length < 26 && (
 				<TextareaControl

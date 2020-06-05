@@ -1,0 +1,25 @@
+{
+    "name": "altis/personalization-variant",
+    "settings": {
+        "category": "altis-experience-blocks",
+        "icon": "groups",
+        "parent": [ "altis/personalization" ],
+        "supports": {
+            "reusable": false,
+            "html": false,
+            "lightBlockWrapper": true,
+            "inserter": false
+        },
+        "attributes": {
+            "parentId": {
+                "type": "string"
+            },
+            "audience": {
+                "type": "number"
+            },
+            "fallback": {
+                "type": "boolean"
+            }
+        }
+    }
+}

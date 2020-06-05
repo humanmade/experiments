@@ -3,7 +3,6 @@
  * AB Tests.
  *
  * @package altis-experiments
- *
  */
 
 namespace Altis\Experiments;
@@ -11,6 +10,7 @@ namespace Altis\Experiments;
 use function Altis\Analytics\Utils\merge_aggregates;
 use function Altis\Analytics\Utils\milliseconds;
 use function Altis\Analytics\Utils\query;
+use function Altis\Experiments\Utils\get_asset_url;
 use MathPHP\Probability\Distribution\Discrete;
 use WP_Post;
 use WP_Query;
@@ -46,19 +46,48 @@ function setup() {
 		require_once ROOT_DIR . '/inc/features/titles/namespace.php';
 		Features\Titles\setup();
 	}
+
+	/**
+	 * Enable Experience Blocks.
+	 *
+	 * @param bool $enabled Whether to enable this feature or not.
+	 */
+	$blocks_feature = apply_filters( 'altis.experiments.features.blocks', true );
+	if ( $blocks_feature ) {
+		require_once ROOT_DIR . '/inc/features/blocks/namespace.php';
+		Features\Blocks\setup();
+	}
 }
 
 /**
  * Queue up the tracker script and required configuration.
  */
 function enqueue_scripts() {
+	global $wp_scripts;
+
 	wp_enqueue_script(
 		'altis-experiments',
-		plugins_url( 'build/experiments.js', ROOT_DIR . '/plugin.php' ),
+		get_asset_url( 'experiments.js' ),
 		[
 			'altis-analytics',
-		]
+		],
+		null
 	);
+
+	wp_add_inline_script(
+		'altis-experiments',
+		sprintf(
+			'window.Altis = window.Altis || {};' .
+			'window.Altis.Analytics = window.Altis.Analytics || {};' .
+			'window.Altis.Analytics.Experiments = window.Altis.Analytics.Experiments || {};' .
+			'window.Altis.Analytics.Experiments.BuildURL = %s;',
+			wp_json_encode( plugins_url( 'build', dirname( __FILE__ ) ) )
+		),
+		'before'
+	);
+
+	// Load async.
+	$wp_scripts->add_data( 'altis-experiments', 'async', true );
 }
 
 /**

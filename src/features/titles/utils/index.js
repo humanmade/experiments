@@ -1,5 +1,3 @@
-/* global moment */
-
 export const getLetter = index => ( 'abcdefghijklmnopqrstuvwxyz'.toUpperCase() )[ Math.max( 0, Math.min( index, 26 ) ) ];
 
 export const getDateString = date => moment( date ).format( 'MMMM D, YYYY — HH:mm' );
