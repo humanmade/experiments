@@ -25,7 +25,7 @@ const VariantPanel = ( { variant } ) => {
 			<AudiencePicker
 				label={ __( 'Audience' ) }
 				audience={ variant.attributes.audience }
-				onSelect={ audience => updateBlockAttributes( variant.clientId, { audience: audience.id } ) }
+				onSelect={ audience => updateBlockAttributes( variant.clientId, { audience } ) }
 				onClearSelection={ () => updateBlockAttributes( variant.clientId, { audience: null } ) }
 			/>
 			{ ! variant.attributes.audience && (
