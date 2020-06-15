@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.0
+
+- Update AWS analytics requirement and `AudiencePicker` `onSelect` prop usage
+
 ## v2.1.0
 
 - Added experience blocks feature
