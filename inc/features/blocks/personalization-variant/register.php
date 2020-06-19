@@ -63,33 +63,25 @@ function enqueue_assets() {
  * the content string represents only the wrapped inner block markup.
  *
  * @param array $attributes The block's attributes object.
- * @param string $innerContent The block's saved content.
+ * @param string $inner_content The block's saved content.
  * @return string The final rendered block markup, as an HTML string.
  */
 function render_block( array $attributes, ?string $inner_content = '' ) : string {
-	$parent_id = $attributes['parentId'] ?? false;
 	$audience = $attributes['audience'] ?? 0;
 	$fallback = $attributes['fallback'] ?? false;
-
-	if ( ! $parent_id ) {
-		trigger_error( 'Personalization block variant has no parent ID set.', E_USER_WARNING );
-		return '';
-	}
 
 	// If this is the fallback variant output the template with different attributes
 	// for easier and more specific targeting by document.querySelector().
 	if ( $fallback ) {
 		return sprintf(
-			'<template data-fallback data-parent-id="%s">%s</template>',
-			esc_attr( $parent_id ),
+			'<template data-fallback data-parent-id="__PARENT_CLIENT_ID__">%s</template>',
 			$inner_content
 		);
 	}
 
 	return sprintf(
-		'<template data-audience="%d" data-parent-id="%s">%s</template>',
+		'<template data-audience="%d" data-parent-id="__PARENT_CLIENT_ID__">%s</template>',
 		esc_attr( $audience ),
-		esc_attr( $parent_id ),
 		$inner_content
 	);
 }

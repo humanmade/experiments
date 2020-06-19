@@ -8,10 +8,6 @@
             "html": false,
             "align": true
         },
-        "attributes": {
-            "clientId": {
-                "type": "string"
-            }
-        }
+        "attributes": {}
     }
 }

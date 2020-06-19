@@ -82,11 +82,10 @@ function enqueue_assets() {
  * the content string represents only the wrapped inner block markup.
  *
  * @param array $attributes The block's attributes object.
- * @param string $innerContent The block's saved content.
+ * @param string $inner_content The block's saved content.
  * @return string The final rendered block markup, as an HTML string.
  */
 function render_block( array $attributes, ?string $inner_content = '' ) : string {
-	$client_id = $attributes['clientId'] ?? false;
 	$class_name = $attributes['className'] ?? '';
 	$align = $attributes['align'] ?? 'none';
 
@@ -95,10 +94,9 @@ function render_block( array $attributes, ?string $inner_content = '' ) : string
 		$class_name .= sprintf( 'align%s', $align );
 	}
 
-	if ( ! $client_id ) {
-		trigger_error( 'Personalization block has no client ID set.', E_USER_WARNING );
-		return '';
-	}
+	// Get a unique ID for the block and apply it to the templates in $inner_content.
+	$client_id = wp_generate_uuid4();
+	$inner_content = str_replace( '__PARENT_CLIENT_ID__', $client_id, $inner_content );
 
 	return sprintf(
 		'%s<personalization-block class="%s" client-id="%s"></personalization-block>',

@@ -3,6 +3,10 @@ const { __ } = wp.i18n;
 
 // Component for fetching and displaying the variant title string.
 const VariantTitle = ( { variant } ) => {
+	if ( ! variant || typeof variant !== 'object' ) {
+		return '';
+	}
+
 	const audience = useSelect( select => {
 		return select( 'audience' ).getPost( variant.attributes.audience );
 	}, [ variant.attributes.audience ] );
