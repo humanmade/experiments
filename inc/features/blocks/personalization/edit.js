@@ -22,42 +22,31 @@ const { __ } = wp.i18n;
  */
 const ALLOWED_BLOCKS = [ 'altis/personalization-variant' ];
 
-/**
- * Start with a default template of one variant.
- */
-const TEMPLATE = [
-	[ 'altis/personalization-variant' ],
-];
-
 // Audience picker input.
 const Edit = ( {
-	attributes,
 	className,
 	clientId,
 	isSelected,
 	onAddVariant,
 	onCopyVariant,
 	onRemoveVariant,
-	onSetClientId,
-	onSetVariantParents,
 	variants,
 } ) => {
 	// Track currently selected variant.
 	const defaultVariantClientId = ( variants.length > 0 && variants[ 0 ].clientId ) || null;
 	const [ activeVariant, setVariant ] = useState( defaultVariantClientId );
 
-	// Track the active variant index to show in the title.
-	const activeVariantIndex = variants.findIndex( variant => variant.clientId === activeVariant );
-
-	// Set clientId attribute if not set.
+	// Add a default fallback variant if none present.
 	useEffect( () => {
-		onSetClientId();
+		// Ensure at least one variant is present as a fallback.
+		// Note TEMPLATE does not seem to have the desired effect every time.
+		if ( variants.length === 0 ) {
+			setVariant( onAddVariant( { fallback: true } ) );
+		}
 	}, [] );
 
-	// Ensure variant parentId is correct.
-	useEffect( () => {
-		onSetVariantParents();
-	}, [ attributes.clientId ] );
+	// Track the active variant index to show in the title.
+	const activeVariantIndex = variants.findIndex( variant => variant.clientId === activeVariant );
 
 	// Controls that appear before the variant selector buttons.
 	const variantsToolbarControls = [
@@ -123,7 +112,9 @@ const Edit = ( {
 					<span className="altis-experience-block-header__title">
 						{ __( 'Personalized Content', 'altis-experiments' ) }
 						{ ' ・ ' }
-						<VariantTitle variant={ variants[ activeVariantIndex ] } />
+						{ variants.length > 0 && (
+							<VariantTitle variant={ variants[ activeVariantIndex ] } />
+						) }
 					</span>
 					{ isSelected && (
 						<VariantToolbar
@@ -137,7 +128,6 @@ const Edit = ( {
 				<InnerBlocks
 					allowedBlocks={ ALLOWED_BLOCKS }
 					renderAppender={ false }
-					template={ TEMPLATE }
 				/>
 			</div>
 		</Fragment>

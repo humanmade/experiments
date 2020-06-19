@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.1
+
+- Bug: move client ID assignment to server side rendering
+
 ## v2.2.0
 
 - Update AWS analytics requirement and `AudiencePicker` `onSelect` prop usage

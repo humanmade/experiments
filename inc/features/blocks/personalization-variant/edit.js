@@ -19,7 +19,7 @@ const Edit = ( {
 	const props = {};
 	if ( ! hasChildBlocks ) {
 		// If we don't have any child blocks, show large block appender button.
-		props.renderAppender = () => <InnerBlocks.ButtonBlockAppender />;
+		props.renderAppender = () => <InnerBlocks.DefaultBlockAppender />;
 	}
 
 	return (
@@ -35,7 +35,7 @@ export default compose(
 		const { getBlockOrder } = select( 'core/block-editor' );
 
 		return {
-			hasChildBlocks: () => getBlockOrder( clientId ).length > 0,
+			hasChildBlocks: getBlockOrder( clientId ).length > 0,
 		};
 	} ),
 	withDispatch( ( dispatch, ownProps, registry ) => {

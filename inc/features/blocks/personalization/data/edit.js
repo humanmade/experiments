@@ -3,20 +3,6 @@ const { compose } = wp.compose;
 const { withSelect, withDispatch } = wp.data;
 
 /**
- * Creates a new fallback variant block within the provided experience block clientId.
- *
- * @param {String} parentId The parent experience block client ID.
- * @return The new fallback variant block.
- */
-const createFallbackBlock = parentId => {
-	return createBlock( 'altis/personalization-variant', {
-		parentId,
-		audience: null,
-		fallback: true,
-	} );
-};
-
-/**
  * Returns an upgraded React Component with data store connectors.
  *
  * @param {React.Component} Component
@@ -24,25 +10,10 @@ const createFallbackBlock = parentId => {
  */
 const withData = Component => compose(
 	withSelect( ( select, ownProps ) => {
-		const { clientId, attributes } = ownProps;
+		const { clientId } = ownProps;
 		const { getBlocks } = select( 'core/block-editor' );
 
-		const parentClientId = attributes.clientId || clientId;
 		const innerBlocks = getBlocks( clientId );
-
-		// Ensure at least one variant is present as a fallback.
-		// Note TEMPLATE does not seem to have the desired effect every time.
-		if ( innerBlocks.length === 0 ) {
-			const fallbackBlock = createFallbackBlock( parentClientId );
-			innerBlocks.push( fallbackBlock );
-		} else {
-			// Add a flag to check if we have a fallback explicitly set.
-			const hasFallback = innerBlocks.find( block => block.attributes.fallback );
-			if ( ! hasFallback ) {
-				const fallbackBlock = createFallbackBlock( parentClientId );
-				innerBlocks.push( fallbackBlock );
-			}
-		}
 
 		return {
 			variants: innerBlocks,
@@ -50,15 +21,16 @@ const withData = Component => compose(
 	} ),
 	withDispatch( ( dispatch, ownProps, registry ) => {
 		return {
-			onAddVariant() {
-				const { clientId, attributes } = ownProps;
+			onAddVariant( attributes = {} ) {
+				const { clientId } = ownProps;
 				const { replaceInnerBlocks, selectBlock } = dispatch( 'core/block-editor' );
 				const { getBlocks } = registry.select( 'core/block-editor' );
 
 				const newVariant = createBlock( 'altis/personalization-variant', {
-					parentId: attributes.clientId,
 					audience: null,
-				} );
+					fallback: false,
+					...attributes,
+				}, [] );
 
 				// Prepend the new variant.
 				const innerBlocks = [
@@ -123,23 +95,6 @@ const withData = Component => compose(
 
 				// Update the inner blocks.
 				replaceInnerBlocks( clientId, innerBlocks );
-			},
-			onSetClientId() {
-				const { attributes, setAttributes } = ownProps;
-				if ( ! attributes.clientId ) {
-					setAttributes( { clientId: attributes.clientId } );
-				}
-			},
-			onSetVariantParents() {
-				const { attributes, variants } = ownProps;
-				const { updateBlockAttributes } = dispatch( 'core/block-editor' );
-				variants.forEach( variant => {
-					if ( ! variant.attributes.parentId || variant.attributes.parentId !== attributes.clientId ) {
-						updateBlockAttributes( variant.clientId, {
-							parentId: attributes.clientId,
-						} );
-					}
-				} );
 			},
 		};
 	} ),

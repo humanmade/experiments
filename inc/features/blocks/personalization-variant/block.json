@@ -11,9 +11,6 @@
             "inserter": false
         },
         "attributes": {
-            "parentId": {
-                "type": "string"
-            },
             "audience": {
                 "type": "number"
             },
