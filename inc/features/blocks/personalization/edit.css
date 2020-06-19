@@ -1,0 +1,94 @@
+/**
+ * Experience block editor CSS.
+ */
+
+.altis-experience-block-header {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-size: 16px;
+	background: repeating-linear-gradient(
+		315deg,
+		rgba(0, 0, 0, .05),
+		rgba(0, 0, 0, .05) 10px,
+		rgba(255, 255, 255, .05) 10px,
+		rgba(255, 255, 255, .05) 20px
+	);
+	padding: 14px;
+	margin: 0 -14px -28px;
+	position: relative;
+	top: -14px;
+	display: flex;
+}
+
+.altis-experience-block-header__title {
+	flex: 1;
+	font-weight: bold;
+}
+
+.altis-experience-block-header__toolbar {
+	flex: 0;
+	border: 0;
+	padding: 0;
+	margin: -4px 0;
+	display: flex;
+}
+
+.altis-experience-block-header__toolbar .components-button {
+	margin-left: 3px;
+	color: inherit;
+}
+
+.block-editor-block-contextual-toolbar[data-type="altis/personalization"] .block-editor-block-toolbar__slot {
+	flex-shrink: 0;
+}
+
+.altis-variants-toolbar {
+	flex-shrink: 1;
+}
+
+.altis-variants-toolbar .altis-variants-toolbar__tabs {
+	max-width: 400px;
+	overflow-x: auto;
+	margin-left: 0;
+}
+
+.altis-variants-toolbar .altis-variant-button {
+	width: auto;
+	flex-shrink: 0;
+	padding: 0 11px;
+}
+
+.altis-variants-toolbar .altis-variant-button.is-active,
+.altis-variants-toolbar .altis-variant-button.is-pressed,
+.altis-variants-toolbar .altis-variant-button.is-active:hover,
+.altis-variants-toolbar .altis-variant-button.is-pressed:hover,
+.altis-variants-toolbar .altis-variant-button.is-active:focus,
+.altis-variants-toolbar .altis-variant-button.is-pressed:focus,
+.altis-variants-toolbar .altis-variant-button:not(:disabled):not([aria-disabled="true"]):not(.is-secondary):not(.is-primary):not(.is-tertiary):not(.is-link).is-active,
+.altis-variants-toolbar .altis-variant-button:not(:disabled):not([aria-disabled="true"]):not(.is-secondary):not(.is-primary):not(.is-tertiary):not(.is-link).is-pressed,
+.altis-variants-toolbar .altis-variant-button:not(:disabled):not([aria-disabled="true"]):not(.is-default).is-active,
+.altis-variants-toolbar .altis-variant-button:not(:disabled):not([aria-disabled="true"]):not(.is-default).is-pressed {
+	outline: none;
+	color: #fff;
+	box-shadow: none;
+	margin: 3px;
+	height: 30px;
+	padding: 0 8px;
+	background: #555d66;
+}
+
+.altis-variants-toolbar .altis-add-variant-button svg {
+	padding: 6px 5px 4px 5px;
+}
+
+.audience-picker-control .audience-picker-control__value {
+	margin-top: 6px;
+	margin-bottom: 4px;
+}
+
+.wp-block[data-type="altis/personalization-variant"] {
+	max-width: none;
+}
+
+.wp-block[data-type="altis/personalization-variant"] .wp-block {
+	max-width: none;
+}

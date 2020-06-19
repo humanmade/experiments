@@ -1,0 +1,16 @@
+{
+    "name": "altis/experiments",
+    "description": "Web Experimentation framework for Altis",
+    "type": "wordpress-plugin",
+    "require": {
+        "altis/aws-analytics": "~2.2.0",
+        "markrogoyski/math-php": "^0.51.0"
+    },
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Human Made Limited",
+            "email": "hello@humanmade.com"
+        }
+    ]
+}
