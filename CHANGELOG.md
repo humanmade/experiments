@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.2
+
+- Update: Bring experience block header styling in line with reusable blocks
+- Update: Set a fixed client ID attribute on experience blocks for tracking
+
 ## v2.2.1
 
 - Bug: move client ID assignment to server side rendering
