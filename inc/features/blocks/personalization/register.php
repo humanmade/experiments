@@ -86,8 +86,15 @@ function enqueue_assets() {
  * @return string The final rendered block markup, as an HTML string.
  */
 function render_block( array $attributes, ?string $inner_content = '' ) : string {
+	$client_id = $attributes['clientId'] ?? null;
 	$class_name = $attributes['className'] ?? '';
 	$align = $attributes['align'] ?? 'none';
+
+	// Warn if a client ID is not set.
+	if ( ! $client_id ) {
+		trigger_error( 'Personalized content blocks must have a client ID set to track impressions. Please re-save the post content to generate one.', E_USER_WARNING );
+		$client_id = wp_generate_uuid4();
+	}
 
 	// Add alignment class.
 	if ( ! empty( $align ) ) {
@@ -95,7 +102,6 @@ function render_block( array $attributes, ?string $inner_content = '' ) : string
 	}
 
 	// Get a unique ID for the block and apply it to the templates in $inner_content.
-	$client_id = wp_generate_uuid4();
 	$inner_content = str_replace( '__PARENT_CLIENT_ID__', $client_id, $inner_content );
 
 	return sprintf(

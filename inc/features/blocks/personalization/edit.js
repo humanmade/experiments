@@ -1,4 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
+import { v4 as uuid } from 'uuid';
 import VariantTitle from './components/variant-title';
 import VariantPanel from './components/variant-panel';
 import VariantToolbar from './components/variant-toolbar';
@@ -24,14 +25,23 @@ const ALLOWED_BLOCKS = [ 'altis/personalization-variant' ];
 
 // Audience picker input.
 const Edit = ( {
+	attributes,
 	className,
 	clientId,
 	isSelected,
 	onAddVariant,
 	onCopyVariant,
 	onRemoveVariant,
+	setAttributes,
 	variants,
 } ) => {
+	// Set the block clientId if none currently set.
+	useEffect( () => {
+		if ( ! attributes.clientId ) {
+			setAttributes( { clientId: uuid() } );
+		}
+	}, [] );
+
 	// Track currently selected variant.
 	const defaultVariantClientId = ( variants.length > 0 && variants[ 0 ].clientId ) || null;
 	const [ activeVariant, setVariant ] = useState( defaultVariantClientId );
@@ -102,7 +112,7 @@ const Edit = ( {
 					[data-block="${ clientId }"] [data-type="altis/personalization-variant"] {
 						display: none;
 					}
-					[data-block="${ clientId }"] #block-${ activeVariant } {
+					[data-block="${ clientId }"] [data-type="altis/personalization-variant"][data-block="${ activeVariant }"] {
 						display: block;
 					}
 				`,
