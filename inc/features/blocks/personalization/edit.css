@@ -3,29 +3,17 @@
  */
 
 .altis-experience-block-header {
+	display: flex;
+	flex-wrap: nowrap;
 	align-items: center;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	font-size: 13px;
-	background: #f8f9f9;
-	color: #555d66;
-	padding: 12px 14px;
-	margin: 0 -14px;
-	display: flex;
-	position: relative;
-	top: -14px;
-	border: 1px dashed rgba(145, 151, 162, 0.25);
-}
-
-.wp-block.is-selected .altis-experience-block-header {
-	border-bottom: none;
-	border-color: rgba(66, 88, 99, 0.4);
-	border-left-color: transparent;
-}
-
-.block-editor-block-list__layout .block-editor-block-list__block[data-type="altis/personalization"].is-selected::before {
-	border-left-color: transparent;
-	border-style: dashed;
-	border-width: 1px;
+	color: #1e1e1e;
+	padding: 12px;
+	border-radius: 2px;
+	background-color: #fff;
+	box-shadow: 0 0 0 1px #1e1e1e;
+	outline: 1px solid transparent;
 }
 
 .altis-experience-block-header__title {
@@ -37,7 +25,7 @@
 	flex: 0;
 	border: 0;
 	padding: 0;
-	margin: -6px 0;
+	margin: -7px 0;
 	display: flex;
 }
 
@@ -58,6 +46,9 @@
 	max-width: 400px;
 	overflow-x: auto;
 	margin-left: 0;
+	display: flex;
+	align-items: center;
+	flex-wrap: nowrap;
 }
 
 .altis-variants-toolbar .altis-variant-button {
@@ -83,6 +74,12 @@
 	height: 30px;
 	padding: 0 8px;
 	background: #555d66;
+	background: var(--wp-admin-theme-color);
+}
+
+.altis-variants-toolbar .altis-variant-button:before {
+	left: 0;
+	right: 0;
 }
 
 .altis-variants-toolbar .altis-add-variant-button svg {
