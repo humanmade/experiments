@@ -6,6 +6,7 @@ const { __ } = wp.i18n;
 
 const StyledRangeControl = styled( RangeControl )`
 	.components-base-control__field { justify-content: flex-start; }
+	.components-range-control__wrapper { margin-left: 0; }
 	.components-range-control__slider { flex: 1 1 50%; }
 `;
 
