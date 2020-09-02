@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.0
+
+- Update: WordPress 5.5 compatibility
+
 ## v2.2.2
 
 - Update: Bring experience block header styling in line with reusable blocks
