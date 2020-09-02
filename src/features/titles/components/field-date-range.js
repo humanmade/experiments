@@ -1,8 +1,19 @@
 import React from 'react';
 import { Notice } from '.';
+import styled from 'styled-components';
 
 const { TimePicker } = wp.components;
 const { __ } = wp.i18n;
+
+const StyledDateRange = styled.div`
+	.altis-experiments-date-range__label {
+		margin-bottom: 2px;
+	}
+	select, input {
+		padding-top: 2px;
+		padding-bottom: 2px;
+	}
+`;
 
 const DateRange = props => {
 	const {
@@ -19,7 +30,7 @@ const DateRange = props => {
 	const endDate = new Date( endTime );
 
 	return (
-		<div className="altis-experiments-date-range">
+		<StyledDateRange className="altis-experiments-date-range">
 			<div className="altis-experiments-date-range__field">
 				<div className="altis-experiments-date-range__label">
 					<label>{ __( 'Start date', 'altis-experiments' ) }</label>
@@ -50,7 +61,7 @@ const DateRange = props => {
 			{ description && (
 				<p className="altis-experiments-date-range__description description">{ description }</p>
 			) }
-		</div>
+		</StyledDateRange>
 	);
 };
 
