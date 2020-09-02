@@ -5,6 +5,7 @@ const { compose } = wp.compose;
 const { withSelect, withDispatch } = wp.data;
 
 const Edit = ( {
+	clientId,
 	hasChildBlocks,
 	isSelected,
 	onSelect,
@@ -23,9 +24,14 @@ const Edit = ( {
 	}
 
 	return (
-		<InnerBlocks
-			{ ...props }
-		/>
+		<div
+			data-type="altis/personalization-variant"
+			data-block={ clientId }
+		>
+			<InnerBlocks
+				{ ...props }
+			/>
+		</div>
 	);
 };
 
