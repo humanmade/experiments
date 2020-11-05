@@ -15,7 +15,7 @@ const {
 	Button,
 	Toolbar,
 } = wp.components;
-const { __ } = wp.i18n;
+const { __, sprintf } = wp.i18n;
 
 /**
  * Only variants can be direct descendents so that we can generate
@@ -86,24 +86,35 @@ const Edit = ( {
 					controls={ variantsToolbarControls }
 				>
 					<div className="altis-variants-toolbar__tabs">
-						{ variants.map( variant => (
+						{ variants.map( ( variant, index ) => (
 							<Button
 								key={ `variant-select-${ variant.clientId }` }
 								className={ `altis-variant-button components-icon-button has-text ${ activeVariant === variant.clientId && 'is-active' }` }
 								title={ __( 'Select variant', 'altis-experiments' ) }
 								onClick={ () => setVariant( variant.clientId ) }
 							>
-								<VariantTitle variant={ variant } />
+								<VariantTitle variant={ variant } placeholder={ sprintf( __( 'Variant %d', 'altis-experiments' ), index + 1 ) } />
 							</Button>
 						) ) }
 					</div>
 				</Toolbar>
 			</BlockControls>
 			<InspectorControls>
-				{ variants.map( variant => (
+				<div className="components-panel__body is-opened">
+					<Button
+						onClick={ () => setVariant( onAddVariant() ) }
+						isLarge
+						isSecondary
+					>
+						{ __( 'Add a variant', 'altis-experiments' ) }
+					</Button>
+				</div>
+				{ variants.map( ( variant, index ) => (
 					<VariantPanel
+						className={ `variant-settings-${ variant.clientId }` }
 						key={ `variant-settings-${ variant.clientId }` }
 						variant={ variant }
+						placeholder={ sprintf( __( 'Variant %d', 'altis-experiments' ), index + 1 ) }
 					/>
 				) ) }
 			</InspectorControls>
@@ -123,7 +134,10 @@ const Edit = ( {
 						{ __( 'Personalized Content', 'altis-experiments' ) }
 						{ ' ・ ' }
 						{ variants.length > 0 && (
-							<VariantTitle variant={ variants[ activeVariantIndex ] } />
+							<VariantTitle
+								variant={ variants[ activeVariantIndex ] }
+								placeholder={ sprintf( __( 'Variant %d', 'altis-experiments' ), activeVariantIndex + 1 ) }
+							/>
 						) }
 					</span>
 					{ isSelected && (
