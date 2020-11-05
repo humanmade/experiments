@@ -1,4 +1,21 @@
 /**
+ * Check if an element is visible in the viewport.
+ *
+ * @param <HTMLElement> element The element to check visibility for.
+ * @return Boolean
+ */
+function isVisible( element ) {
+	const rect = element.getBoundingClientRect();
+
+	return (
+		rect.top >= 0 &&
+		rect.left >= 0 &&
+		rect.bottom <= ( window.innerHeight || document.documentElement.clientHeight ) &&
+		rect.right <= ( window.innerWidth || document.documentElement.clientWidth )
+	);
+}
+
+/**
  * Test element base class.
  */
 class Test extends HTMLElement {
@@ -282,13 +299,25 @@ class PersonalizationBlock extends HTMLElement {
 			this.appendChild( experience );
 		}
 
-		// Log an event for tracking views and audience.
-		window.Altis.Analytics.record( 'experienceView', {
-			attributes: {
-				type: 'personalization',
-				clientId: this.clientId,
-				audience: audience,
-			},
+		// Log an event for tracking views and audience when scrolled into view.
+		let tracked = false;
+		const trackView = window.addEventListener( 'scroll', () => {
+			if ( ! isVisible( this ) || tracked ) {
+				return;
+			}
+
+			// Prevent spamming events.
+			tracked = true;
+
+			window.removeEventListener( 'scroll', trackView );
+
+			window.Altis.Analytics.record( 'experienceView', {
+				attributes: {
+					type: 'personalization',
+					clientId: this.clientId,
+					audience: audience,
+				},
+			} );
 		} );
 	}
 
