@@ -7,7 +7,7 @@ const { PanelBody } = wp.components;
 const { useDispatch } = wp.data;
 const { __ } = wp.i18n;
 
-const VariantPanel = ( { variant } ) => {
+const VariantPanel = ( { variant, placeholder = null } ) => {
 	const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
 
 	if ( variant.attributes.fallback ) {
@@ -21,9 +21,9 @@ const VariantPanel = ( { variant } ) => {
 	}
 
 	return (
-		<PanelBody title={ <VariantTitle variant={ variant } /> }>
+		<PanelBody title={ <VariantTitle variant={ variant } placeholder={ placeholder } /> }>
 			<AudiencePicker
-				label={ __( 'Audience' ) }
+				label={ __( 'Audience', 'altis-experiments' ) }
 				audience={ variant.attributes.audience }
 				onSelect={ audience => updateBlockAttributes( variant.clientId, { audience } ) }
 				onClearSelection={ () => updateBlockAttributes( variant.clientId, { audience: null } ) }
