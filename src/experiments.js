@@ -1,5 +1,8 @@
 /**
- * Utils.
+ * Check if an element is visible in the viewport.
+ *
+ * @param <HTMLElement> element The element to check visibility for.
+ * @return Boolean
  */
 function isVisible( element ) {
 	const rect = element.getBoundingClientRect();
