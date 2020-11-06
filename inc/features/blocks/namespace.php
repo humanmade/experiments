@@ -191,6 +191,25 @@ function handle_views_request( WP_REST_Request $request ) : WP_REST_Response {
 }
 
 /**
+ * Map aggregate bucket data to response format.
+ *
+ * @param array $bucket Elasticsearch aggregate bucket data.
+ * @return array
+ */
+function map_terms_bucket( array $bucket ) : array {
+	$data = [
+		'id' => absint( $bucket['key'] ),
+		'count' => $bucket['doc_count'],
+	];
+
+	if ( isset( $bucket['audiences']['buckets'] ) ) {
+		$data['audiences'] = map_terms_bucket( $bucket['audiences']['buckets'] );
+	}
+
+	return $data;
+}
+
+/**
  * Get the Experience Block views data.
  *
  * @param string $block_id The Experience block client ID to get data for.
@@ -213,15 +232,6 @@ function get_views( string $block_id, ?int $post_id = null ) {
 					[
 						'term' => [
 							'attributes.clientId.keyword' => $block_id,
-						],
-					],
-
-					// Last month.
-					[
-						'range' => [
-							'event_timestamp' => [
-								'gte' => Utils\milliseconds() - ( MONTH_IN_SECONDS * 1000 ),
-							],
 						],
 					],
 
@@ -274,7 +284,7 @@ function get_views( string $block_id, ?int $post_id = null ) {
 		];
 	}
 
-	$key = sprintf( 'views:%s', "{$block_id}:{$post_id}" );
+	$key = sprintf( 'views:%s:%s', $block_id, $post_id );
 	$cache = wp_cache_get( $key, 'altis-xbs' );
 	if ( $cache ) {
 		return $cache;
@@ -288,12 +298,10 @@ function get_views( string $block_id, ?int $post_id = null ) {
 		];
 	}
 
-	$audiences = array_map( function ( array $bucket ) {
-		return [
-			'id' => absint( $bucket['key'] ),
-			'count' => $bucket['doc_count'],
-		];
-	}, $result['aggregations']['audiences']['buckets'] );
+	$audiences = array_map(
+		__NAMESPACE__ . '\\map_terms_bucket',
+		$result['aggregations']['audiences']['buckets']
+	);
 
 	$views = [
 		'total' => $result['hits']['total'],
@@ -302,19 +310,10 @@ function get_views( string $block_id, ?int $post_id = null ) {
 
 	// Add the posts aggregations.
 	if ( isset( $result['aggregations']['posts']['buckets'] ) ) {
-		$views['posts'] = array_map( function ( array $bucket ) {
-			$audiences = array_map( function ( array $bucket ) {
-				return [
-					'id' => absint( $bucket['key'] ),
-					'count' => $bucket['doc_count'],
-				];
-			}, $bucket['audiences']['buckets'] );
-			return [
-				'id' => absint( $bucket['key'] ),
-				'count' => $bucket['doc_count'],
-				'audiences' => $audiences,
-			];
-		}, $result['aggregations']['posts']['buckets'] );
+		$views['posts'] = array_map(
+			__NAMESPACE__ . '\\map_terms_bucket',
+			$result['aggregations']['posts']['buckets']
+		);
 	} else {
 		$views['post_id'] = $post_id;
 	}

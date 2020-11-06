@@ -26,7 +26,8 @@ const BlockAnalytics = ( { clientId } ) => {
 
 	return (
 		<div className="altis-experience-block-analytics">
-			<h4>{ __( 'Analytics' ) }</h4>
+			<h4>{ __( 'Analytics', 'altis-experiments' ) }</h4>
+			<p>{ __( 'Statisitics shown are for the configured data retention period.', 'altis-experiments' ) }</p>
 			<Views total={ total } isLoading={ isLoading } />
 		</div>
 	);

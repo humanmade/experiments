@@ -24,6 +24,13 @@ const reducer = function reducer( state, action ) {
 			};
 		}
 
+		case 'REMOVE_VIEWS': {
+			const key = `${ action.clientId }${ action.postId ? `-${ action.postId }` : '' }`;
+			const newState = { ...state };
+			delete newState.views[ key ];
+			return newState;
+		}
+
 		case 'SET_IS_LOADING': {
 			return {
 				...state,
@@ -53,6 +60,13 @@ const actions = {
 			clientId,
 			postId,
 			views,
+		};
+	},
+	removeViews( clientId, postId ) {
+		return {
+			type: 'REMOVE_VIEWS',
+			clientId,
+			postId,
 		};
 	},
 	setIsLoading( isLoading ) {

@@ -36,10 +36,9 @@ const VariantAnalytics = ( { variant } ) => {
 	}, [ views ] );
 
 	const audienceId = audience || 0;
-
-	const audienceViews = views?.audiences?.
-		find( audienceData => audienceData.id === audienceId )?.
-		count || 0;
+	const audiencesData = ( views && views.audiences ) || [];
+	const audienceData = audiencesData.find( data => data.id === audienceId ) || {};
+	const audienceViews = audienceData.count || 0;
 
 	return (
 		<Views total={ audienceViews } isLoading={ isLoading } />
