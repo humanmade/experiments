@@ -1,4 +1,5 @@
 import React from 'react';
+import VariantAnalytics from './variant-analytics';
 import VariantTitle from './variant-title';
 
 const { AudiencePicker } = Altis.Analytics.components;
@@ -16,6 +17,7 @@ const VariantPanel = ( { variant } ) => {
 				<p className="description">
 					{ __( 'This variant will be shown as a fallback if no audiences are matched. You can leave the content empty if you do not wish to show anything.', 'altis-experiments' ) }
 				</p>
+				<VariantAnalytics variant={ variant } />
 			</PanelBody>
 		);
 	}
@@ -33,6 +35,7 @@ const VariantPanel = ( { variant } ) => {
 					{ __( 'You must select an audience for this variant.', 'altis-experiments' ) }
 				</p>
 			) }
+			<VariantAnalytics variant={ variant } />
 		</PanelBody>
 	);
 };

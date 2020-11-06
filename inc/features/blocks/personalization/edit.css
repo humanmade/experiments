@@ -98,3 +98,15 @@
 .wp-block[data-type="altis/personalization-variant"] .wp-block {
 	max-width: none;
 }
+
+.altis-variant-analytics {
+	font-size: 11px;
+}
+
+.altis-variant-analytics .dashicon {
+	width: 1rem;
+	height: 1rem;
+	vertical-align: text-top;
+	margin-right: 4px;
+	margin-top: 1px;
+}
