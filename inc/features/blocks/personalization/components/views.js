@@ -3,7 +3,7 @@ import React from 'react';
 const { Icon } = wp.components;
 const { __, _n, sprintf } = wp.i18n;
 
-const Views = ( { total, isLoading } ) => {
+const Views = ( { isLoading, label = null, total } ) => {
 	if ( ! total && isLoading ) {
 		return (
 			<p className="altis-analytics-views">
@@ -27,7 +27,7 @@ const Views = ( { total, isLoading } ) => {
 	return (
 		<p className="altis-analytics-views">
 			<Icon icon="visibility" />
-			{ sprintf( _n( '%d view', '%d views', total, 'altis-experiments' ), total ) }
+			{ label || sprintf( _n( '%d view', '%d views', total, 'altis-experiments' ), total ) }
 		</p>
 	);
 };

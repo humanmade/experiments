@@ -2,7 +2,7 @@ import React from 'react';
 import Views from './views';
 
 const { useSelect } = wp.data;
-const { __ } = wp.i18n;
+const { __, sprintf } = wp.i18n;
 
 const BlockAnalytics = ( { clientId } ) => {
 	const postId = useSelect( select => {
@@ -22,13 +22,17 @@ const BlockAnalytics = ( { clientId } ) => {
 		return select( 'analytics/xbs' ).getIsLoading();
 	}, [ views ] );
 
-	const total = views?.total;
+	const total = ( views && views.total ) || 0;
 
 	return (
 		<div className="altis-experience-block-analytics">
 			<h4>{ __( 'Analytics', 'altis-experiments' ) }</h4>
 			<p>{ __( 'Statisitics shown are for the configured data retention period.', 'altis-experiments' ) }</p>
-			<Views total={ total } isLoading={ isLoading } />
+			<Views
+				isLoading={ isLoading }
+				label={ sprintf( __( '%d total views', 'altis-experiments' ), total ) }
+				total={ total }
+			/>
 		</div>
 	);
 };
