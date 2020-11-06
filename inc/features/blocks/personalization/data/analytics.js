@@ -26,8 +26,7 @@ const reducer = function reducer( state, action ) {
 
 		case 'REMOVE_VIEWS': {
 			const key = `${ action.clientId }${ action.postId ? `-${ action.postId }` : '' }`;
-			const newState = { ...state };
-			delete newState.views[ key ];
+			const { [ key ]: deletedItem, ...newState } = state;
 			return newState;
 		}
 
