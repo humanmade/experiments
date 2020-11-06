@@ -2,7 +2,7 @@ const { useSelect } = wp.data;
 const { __ } = wp.i18n;
 
 // Component for fetching and displaying the variant title string.
-const VariantTitle = ( { variant } ) => {
+const VariantTitle = ( { variant, placeholder = null } ) => {
 	if ( ! variant || typeof variant !== 'object' ) {
 		return '';
 	}
@@ -18,6 +18,9 @@ const VariantTitle = ( { variant } ) => {
 	}
 
 	if ( ! variant.attributes.audience ) {
+		if ( placeholder ) {
+			return placeholder;
+		}
 		return __( 'Select audience', 'altis-experiments' );
 	}
 
