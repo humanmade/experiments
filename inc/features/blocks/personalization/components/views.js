@@ -30,6 +30,6 @@ const Views = ( { total, isLoading } ) => {
 			{ sprintf( _n( '%d view', '%d views', total, 'altis-experiments' ), total ) }
 		</p>
 	);
-}
+};
 
 export default Views;

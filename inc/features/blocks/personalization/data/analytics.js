@@ -24,7 +24,6 @@ const reducer = function reducer( state, action ) {
 			};
 		}
 
-
 		case 'SET_IS_LOADING': {
 			return {
 				...state,
