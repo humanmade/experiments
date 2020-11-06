@@ -319,7 +319,7 @@ function get_views( string $block_id, ?int $post_id = null ) {
 		$views['post_id'] = $post_id;
 	}
 
-	// wp_cache_set( $key, $views, 'altis-xbs', MINUTE_IN_SECONDS );
+	wp_cache_set( $key, $views, 'altis-xbs', MINUTE_IN_SECONDS );
 
 	return $views;
 }
