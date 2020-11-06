@@ -1,6 +1,9 @@
 import edit from './edit';
 import save from './save';
 
+// Load analytics data store.
+import './data/analytics';
+
 import blockData from './block.json';
 
 const { registerBlockType } = wp.blocks;
@@ -14,6 +17,7 @@ const settings = {
 		__( 'personalize', 'altis-experiments' ),
 		__( 'conditional', 'altis-experiments' ),
 		__( 'audience', 'altis-experiments' ),
+		__( 'analytics', 'altis-experiments' ),
 	],
 	edit,
 	save,
