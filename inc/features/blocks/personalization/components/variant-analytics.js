@@ -35,7 +35,11 @@ const VariantAnalytics = ( { variant } ) => {
 		return select( 'analytics/xbs' ).getIsLoading();
 	}, [ views ] );
 
-	const audienceViews = views?.audiences.find( audienceData => audienceData.id === audience )?.count || 0;
+	const audienceId = audience || 0;
+
+	const audienceViews = views?.audiences?.
+		find( audienceData => audienceData.id === audienceId )?.
+		count || 0;
 
 	return (
 		<Views total={ audienceViews } isLoading={ isLoading } />

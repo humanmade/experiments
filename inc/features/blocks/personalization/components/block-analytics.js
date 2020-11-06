@@ -2,6 +2,7 @@ import React from 'react';
 import Views from './views';
 
 const { useSelect } = wp.data;
+const { __ } = wp.i18n;
 
 const BlockAnalytics = ( { clientId } ) => {
 	const postId = useSelect( select => {
@@ -24,7 +25,10 @@ const BlockAnalytics = ( { clientId } ) => {
 	const total = views?.total;
 
 	return (
-		<Views total={ total } isLoading={ isLoading } />
+		<div className="altis-experience-block-analytics">
+			<h4>{ __( 'Analytics' ) }</h4>
+			<Views total={ total } isLoading={ isLoading } />
+		</div>
 	);
 };
 

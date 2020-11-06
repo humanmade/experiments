@@ -32,4 +32,4 @@ const Views = ( { total, isLoading } ) => {
 	);
 }
 
-export const Views;
+export default Views;
