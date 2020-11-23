@@ -9,6 +9,7 @@ namespace Altis\Experiments\Features\Blocks;
 
 use Altis\Analytics\Audiences;
 use Altis\Analytics\Utils;
+use Altis\Experiments;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -29,55 +30,6 @@ function setup() {
 
 	// Register API endpoints for getting XB analytics data.
 	add_action( 'rest_api_init', __NAMESPACE__ . '\\rest_api_init' );
-
-	// Register default conversion goals.
-	register_goal(
-		'click_any_link',
-		__( 'Click on any link', 'altis-experiments' ),
-		'click',
-		'a'
-	);
-	register_goal(
-		'submit_form',
-		__( 'Submit a form', 'altis-experiments' ),
-		'submit',
-		'form'
-	);
-}
-
-/**
- * Registers a new conversion goal for front end tracking.
- *
- * @param string $name A reference name for the goal.
- * @param string $label A human readable label for the goal.
- * @param string $event The JS event to trigger on.
- * @param string|null $selector An optional CSS selector to scope the event to.
- * @return void
- */
-function register_goal( string $name, string $label, string $event, ?string $selector = null, ?string $closest = null ) : void {
-	global $altis_experience_block_goals;
-
-	if ( ! is_array( $altis_experience_block_goals ) ) {
-		$altis_experience_block_goals = [];
-	}
-
-	$altis_experience_block_goals[ $name ] = [
-		'name' => $name,
-		'event' => sanitize_key( $event ),
-		'label' => $label,
-		'selector' => $selector,
-		'closest' => $closest,
-	];
-}
-
-/**
- * Returns registered goals.
- *
- * @return array
- */
-function get_goals() : array {
-	global $altis_experience_block_goals;
-	return $altis_experience_block_goals ?? [];
 }
 
 /**

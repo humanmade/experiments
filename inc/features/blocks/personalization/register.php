@@ -63,7 +63,7 @@ function enqueue_assets() {
 			'window.Altis.Analytics.Experiments.BuildURL = %s;' .
 			'window.Altis.Analytics.Experiments.Goals = %s;',
 			wp_json_encode( plugins_url( 'build', Experiments\ROOT_FILE ) ),
-			wp_json_encode( (object) Blocks\get_goals() )
+			wp_json_encode( (object) Experiments\get_goals() )
 		),
 		'before'
 	);

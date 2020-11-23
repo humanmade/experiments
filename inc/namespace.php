@@ -58,6 +58,20 @@ function setup() {
 		require_once ROOT_DIR . '/inc/features/blocks/namespace.php';
 		Features\Blocks\setup();
 	}
+
+	// Register default conversion goals.
+	register_goal(
+		'click_any_link',
+		__( 'Click on any link', 'altis-experiments' ),
+		'click',
+		'a'
+	);
+	register_goal(
+		'submit_form',
+		__( 'Submit a form', 'altis-experiments' ),
+		'submit',
+		'form'
+	);
 }
 
 /**
@@ -84,13 +98,48 @@ function enqueue_scripts() {
 			'window.Altis.Analytics.Experiments.BuildURL = %s;' .
 			'window.Altis.Analytics.Experiments.Goals = %s;',
 			wp_json_encode( plugins_url( 'build', dirname( __FILE__ ) ) ),
-			wp_json_encode( (object) Blocks\get_goals() )
+			wp_json_encode( (object) get_goals() )
 		),
 		'before'
 	);
 
 	// Load async.
 	$wp_scripts->add_data( 'altis-experiments', 'async', true );
+}
+
+/**
+ * Registers a new conversion goal for front end tracking.
+ *
+ * @param string $name A reference name for the goal.
+ * @param string $label A human readable label for the goal.
+ * @param string $event The JS event to trigger on.
+ * @param string|null $selector An optional CSS selector to scope the event to.
+ * @return void
+ */
+function register_goal( string $name, string $label, string $event, ?string $selector = null, ?string $closest = null ) : void {
+	global $altis_analytics_goals;
+
+	if ( ! is_array( $altis_analytics_goals ) ) {
+		$altis_analytics_goals = [];
+	}
+
+	$altis_analytics_goals[ $name ] = [
+		'name' => $name,
+		'event' => sanitize_key( $event ),
+		'label' => $label,
+		'selector' => $selector,
+		'closest' => $closest,
+	];
+}
+
+/**
+ * Returns registered goals.
+ *
+ * @return array
+ */
+function get_goals() : array {
+	global $altis_analytics_goals;
+	return $altis_analytics_goals ?? [];
 }
 
 /**
