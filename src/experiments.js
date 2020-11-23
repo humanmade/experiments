@@ -1,3 +1,6 @@
+// Ensure Experiments global object is set.
+window.Altis.Analytics.Experiments = window.Altis.Analytics.Experiments || {};
+
 /**
  * Check if an element is visible in the viewport.
  *
@@ -48,6 +51,14 @@ class Test extends HTMLElement {
 
 	get goal() {
 		return this.getAttribute( 'goal' );
+	}
+
+	get selector() {
+		return this.getAttribute( 'selector' );
+	}
+
+	get closest() {
+		return this.getAttribute( 'closest' );
 	}
 
 	connectedCallback() {
@@ -101,7 +112,8 @@ class ABTest extends Test {
 		const postId = this.postId;
 		const parent = this.parentNode;
 		const goal = this.goal.split( ':' );
-		const [ eventType, selector ] = goal;
+		const closest = this.closest;
+		const [ eventType, selector = this.selector ] = goal;
 
 		// Get the variant content.
 		const variant = this.variants[ variantId || 0 ];
@@ -110,41 +122,26 @@ class ABTest extends Test {
 		this.outerHTML = variant;
 
 		// Call goal handler on parent.
-		const goalHandler = Test.goalHandlers[ eventType ] || false;
+		const goalHandler = getGoalHandler( eventType, {
+			selector,
+			closest,
+		} );
 		if ( ! eventType || ! goalHandler ) {
 			return;
 		}
 
-		// Get nodes to bind click handler for.
-		let nodes = [ parent ];
-		if ( selector ) {
-			nodes = parent.querySelectorAll( selector );
-		} else if ( goalHandler.closest.length ) {
-			// Find closest allowed element.
-			const allowedNodes = goalHandler.closest.map( tag => tag.toUpperCase() );
-			let el = parent;
-			while ( el.parentNode && allowedNodes.indexOf( el.nodeName ) < 0 ) {
-				el = el.parentNode;
-			}
-			if ( allowedNodes.indexOf( el.nodeName ) >= 0 ) {
-				nodes = [ el ];
-			}
-		}
-
-		// Apply goal callback for each found node.
-		nodes.forEach( node => {
-			goalHandler.callback( node, ( attributes = {}, metrics = {} ) => {
-				window.Altis.Analytics.record( eventType, {
-					attributes: {
-						...attributes,
-						eventTestId: testId,
-						eventPostId: postId,
-						eventVariantId: variantId,
-					},
-					metrics: {
-						...metrics,
-					},
-				} );
+		// Apply goal callback.
+		goalHandler( parent, ( attributes = {}, metrics = {} ) => {
+			window.Altis.Analytics.record( eventType, {
+				attributes: {
+					...attributes,
+					eventTestId: testId,
+					eventPostId: postId,
+					eventVariantId: variantId,
+				},
+				metrics: {
+					...metrics,
+				},
 			} );
 		} );
 	}
@@ -196,7 +193,7 @@ class ABTest extends Test {
 /**
  * Static list of goal handlers.
  */
-Test.goalHandlers = {};
+const goalHandlers = {};
 
 /**
  * Add an event handler for recording an analytics event.
@@ -209,15 +206,58 @@ Test.goalHandlers = {};
  * @param <Function> callback to bind an event listener.
  * @param <String[]> array of allowed node types to bind listener to.
  */
-Test.registerGoal = ( name, callback, closest = [] ) => {
-	Test.goalHandlers[ name ] = {
+const registerGoalHandler = ( name, callback, closest = [] ) => {
+	goalHandlers[ name ] = {
 		callback,
 		closest: Array.isArray( closest ) ? closest : [ closest ],
 	};
 };
 
+/**
+ *
+ * @param {HTMLElement} node The target node to attach the event listener to.
+ * @param {*} record The function called by the event listener to record an event.
+ * @param {*} on The JS dvent name to listen on.
+ */
+const bindListener = ( node, record, on ) => node && node.addEventListener( on, event => {
+	typeof record === 'function' && record( event );
+} );
+
+/**
+ * Get a goal handling function.
+ *
+ * @param {String} name The name of a registered goal, goal handler or a valid JS event.
+ * @param {Object} options Optional overrides for the registered goal properties.
+ */
+const getGoalHandler = ( name, options = {} ) => {
+	// Compile the goal configuration.
+	const goal = Object.assign( {
+			name,
+			event: name,
+			callback: bindListener,
+		},
+		window.Altis.Analytics.Experiments.Goals[ name ] || {},
+		goalHandlers[ name ] || {},
+		options
+	);
+
+	// Return a callback that handles the goal configuration and binds event listeners.
+	return ( node, record ) => {
+		if ( goal.closest ) {
+			node = node.closest( goal.closest );
+		}
+
+		if ( goal.selector ) {
+			node.querySelectorAll( goal.selector ).forEach( child => goal.callback( child, record, goal.event ) );
+			return;
+		}
+
+		goal.callback( node, record, goal.event );
+	};
+};
+
 // Register built in click goal handler.
-Test.registerGoal( 'click', ( element, record ) => {
+registerGoalHandler( 'click', ( element, record ) => {
 	// Collect attributes.
 	const attributes = {
 		elementNode: element.nodeName || '',
@@ -270,6 +310,9 @@ class PersonalizationBlock extends HTMLElement {
 		// Track the audience for recording an event later.
 		let audience = 0;
 
+		// Get conversion goal from template if found.
+		let goal = false;
+
 		// Find a matching template.
 		for ( let index = 0; index < audiences.length; index++ ) {
 			// Find the first matching audience template.
@@ -280,6 +323,9 @@ class PersonalizationBlock extends HTMLElement {
 
 			// We have a matching template, update audience and fallback value.
 			audience = audiences[ index ];
+
+			// Set goal.
+			goal = template.dataset.goal;
 
 			// Populate experience block content.
 			const experience = template.content.cloneNode( true );
@@ -294,10 +340,23 @@ class PersonalizationBlock extends HTMLElement {
 			if ( ! template ) {
 				return;
 			}
+
+			// Set goal.
+			goal = template.dataset.goal;
+
 			const experience = template.content.cloneNode( true );
 			this.innerHTML = '';
 			this.appendChild( experience );
 		}
+
+		// Record a load event for conversion tracking.
+		window.Altis.Analytics.record( 'experienceLoad', {
+			attributes: {
+				audience,
+				clientId: this.clientId,
+				type: 'personalization',
+			},
+		} );
 
 		// Log an event for tracking views and audience when scrolled into view.
 		let tracked = false;
@@ -313,9 +372,35 @@ class PersonalizationBlock extends HTMLElement {
 
 			window.Altis.Analytics.record( 'experienceView', {
 				attributes: {
-					type: 'personalization',
+					audience,
 					clientId: this.clientId,
-					audience: audience,
+					type: 'personalization',
+				},
+			} );
+		} );
+
+		// Get goal handler from registered goals.
+		const goalHandler = getGoalHandler( goal );
+		if ( ! goalHandler ) {
+			return;
+		}
+
+		// Bind goal event handler to this component.
+		let goalTracked = false;
+		goalHandler( this, event => {
+			if ( goalTracked ) {
+				return;
+			}
+
+			// Only track once.
+			goalTracked = true;
+
+			window.Altis.Analytics.record( 'conversion', {
+				attributes: {
+					audience,
+					clientId: this.clientId,
+					goal,
+					type: event.type,
 				},
 			} );
 		} );
@@ -323,10 +408,9 @@ class PersonalizationBlock extends HTMLElement {
 
 }
 
-// Expose ABTest methods.
-window.Altis.Analytics.Experiments = Object.assign( {}, window.Altis.Analytics.Experiments || {}, {
-	registerGoal: Test.registerGoal,
-} );
+// Expose experiments API functions.
+window.Altis.Analytics.Experiments.registerGoal = registerGoalHandler; // Back compat.
+window.Altis.Analytics.Experiments.registerGoalHandler = registerGoalHandler;
 
 // Define custom elements when analytics has loaded.
 window.Altis.Analytics.onReady( () => {

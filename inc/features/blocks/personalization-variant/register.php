@@ -69,19 +69,22 @@ function enqueue_assets() {
 function render_block( array $attributes, ?string $inner_content = '' ) : string {
 	$audience = $attributes['audience'] ?? 0;
 	$fallback = $attributes['fallback'] ?? false;
+	$goal = $attributes['goal'] ?? '';
 
 	// If this is the fallback variant output the template with different attributes
 	// for easier and more specific targeting by document.querySelector().
 	if ( $fallback ) {
 		return sprintf(
-			'<template data-fallback data-parent-id="__PARENT_CLIENT_ID__">%s</template>',
+			'<template data-fallback data-parent-id="__PARENT_CLIENT_ID__" data-goal="%s">%s</template>',
+			esc_attr( $goal ),
 			$inner_content
 		);
 	}
 
 	return sprintf(
-		'<template data-audience="%d" data-parent-id="__PARENT_CLIENT_ID__">%s</template>',
+		'<template data-audience="%d" data-parent-id="__PARENT_CLIENT_ID__" data-goal="%s">%s</template>',
 		esc_attr( $audience ),
+		esc_attr( $goal ),
 		$inner_content
 	);
 }

@@ -112,6 +112,7 @@ function init() {
 		[
 			'label' => __( 'Titles', 'altis-experiments' ),
 			'goal' => 'click',
+			'closest' => 'a',
 			// Exclude all events from the target post page.
 			'query_filter' => function ( $test_id, $post_id ) : array {
 				$url = get_the_permalink( $post_id );

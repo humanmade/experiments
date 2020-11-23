@@ -7,6 +7,7 @@
 
 namespace Altis\Experiments;
 
+use Altis\Experiments\Features\Blocks;
 use function Altis\Analytics\Utils\merge_aggregates;
 use function Altis\Analytics\Utils\milliseconds;
 use function Altis\Analytics\Utils\query;
@@ -80,8 +81,10 @@ function enqueue_scripts() {
 			'window.Altis = window.Altis || {};' .
 			'window.Altis.Analytics = window.Altis.Analytics || {};' .
 			'window.Altis.Analytics.Experiments = window.Altis.Analytics.Experiments || {};' .
-			'window.Altis.Analytics.Experiments.BuildURL = %s;',
-			wp_json_encode( plugins_url( 'build', dirname( __FILE__ ) ) )
+			'window.Altis.Analytics.Experiments.BuildURL = %s;' .
+			'window.Altis.Analytics.Experiments.Goals = %s;',
+			wp_json_encode( plugins_url( 'build', dirname( __FILE__ ) ) ),
+			wp_json_encode( (object) Blocks\get_goals() )
 		),
 		'before'
 	);
@@ -259,6 +262,8 @@ function register_post_ab_tests_rest_fields() {
  *       'rest_api_variants_field' => (string) REST API field name to return variants on.
  *       'rest_api_variants_type' => (string) REST API field data type.
  *       'goal' => (string) The event handler.
+ *       'closest' => (string) A CSS selector for a parent element to bind the listener to.
+ *       'selector' => (string) A CSS selector for children of the current element to bind the listener to.
  *       'variant_callback' => (callable) Callback for providing the variant output.
  *                             Arguments:
  *                               mixed $value The stored variant value.
@@ -281,6 +286,8 @@ function register_post_ab_test( string $test_id, array $options ) {
 		'rest_api_variants_field' => 'ab_test_' . $test_id,
 		'rest_api_variants_type' => 'string',
 		'goal' => 'click',
+		'closest' => '',
+		'selector' => '',
 		'variant_callback' => function ( $value, int $post_id, array $args ) {
 			return $value;
 		},
@@ -688,6 +695,7 @@ function output_ab_test_html_for_post( string $test_id, int $post_id, string $de
 		post-id="<?php echo esc_attr( $post_id ); ?>"
 		traffic-percentage="<?php echo esc_attr( get_ab_test_traffic_percentage_for_post( $test_id, $post_id ) ); ?>"
 		goal="<?php echo esc_attr( $test['goal'] ); ?>"
+		closest="<?php echo esc_attr( $test['closest'] ); ?>"
 		fallback="<?php echo esc_attr( $default_output ); ?>"
 		variants="<?php echo esc_attr( wp_json_encode( $variant_output, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ); ?>"
 	>

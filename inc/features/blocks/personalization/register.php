@@ -55,13 +55,15 @@ function enqueue_assets() {
 	);
 
 	wp_add_inline_script(
-		'altis-experiments-features-blocks-experience',
+		'altis-experiments-features-blocks-personalization',
 		sprintf(
 			'window.Altis = window.Altis || {};' .
 			'window.Altis.Analytics = window.Altis.Analytics || {};' .
 			'window.Altis.Analytics.Experiments = window.Altis.Analytics.Experiments || {};' .
-			'window.Altis.Analytics.Experiments.BuildURL = %s;',
-			wp_json_encode( plugins_url( 'build', Experiments\ROOT_FILE ) )
+			'window.Altis.Analytics.Experiments.BuildURL = %s;' .
+			'window.Altis.Analytics.Experiments.Goals = %s;',
+			wp_json_encode( plugins_url( 'build', Experiments\ROOT_FILE ) ),
+			wp_json_encode( (object) Blocks\get_goals() )
 		),
 		'before'
 	);

@@ -16,6 +16,10 @@
             },
             "fallback": {
                 "type": "boolean"
+            },
+            "goal": {
+                "type": "string",
+                "default": ""
             }
         }
     }
