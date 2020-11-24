@@ -345,7 +345,7 @@ function get_views( string $block_id, ?int $post_id = null ) {
 	$key = sprintf( 'views:%s:%s', $block_id, $post_id );
 	$cache = wp_cache_get( $key, 'altis-xbs' );
 	if ( $cache ) {
-		// return $cache;
+		return $cache;
 	}
 
 	$result = Utils\query( $query );
