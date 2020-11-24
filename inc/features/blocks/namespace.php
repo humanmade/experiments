@@ -9,7 +9,6 @@ namespace Altis\Experiments\Features\Blocks;
 
 use Altis\Analytics\Audiences;
 use Altis\Analytics\Utils;
-use Altis\Experiments;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -241,7 +240,7 @@ function map_aggregations( array $event_buckets ) : array {
 					'conversions' => 0,
 				];
 			}
-			$data['audiences'][ $audience_bucket['key'] ][ $key ] += $audience_bucket['doc_count']	;
+			$data['audiences'][ $audience_bucket['key'] ][ $key ] += $audience_bucket['doc_count'];
 		}
 	}
 

@@ -231,7 +231,8 @@ const bindListener = ( node, record, on ) => node && node.addEventListener( on, 
  */
 const getGoalHandler = ( name, options = {} ) => {
 	// Compile the goal configuration.
-	const goal = Object.assign( {
+	const goal = Object.assign(
+		{
 			name,
 			event: name,
 			callback: bindListener,

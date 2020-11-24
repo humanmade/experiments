@@ -7,7 +7,6 @@
 
 namespace Altis\Experiments;
 
-use Altis\Experiments\Features\Blocks;
 use function Altis\Analytics\Utils\merge_aggregates;
 use function Altis\Analytics\Utils\milliseconds;
 use function Altis\Analytics\Utils\query;

@@ -9,7 +9,7 @@ const Views = ( {
 	conversionsLabel = null,
 	isLoading,
 	label = null,
-	total
+	total,
 } ) => {
 	if ( ! total && isLoading ) {
 		return (
