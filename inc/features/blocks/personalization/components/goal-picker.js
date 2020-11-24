@@ -22,7 +22,10 @@ const GoalPicker = ( { goal, onChange } ) => {
 
 	// Add registered goals to dropdown.
 	goals.forEach( ( [ name, data ] ) => {
-		options.push( { label: data.label || name, value: name } );
+		options.push( {
+			label: data.label || name,
+			value: name,
+		} );
 	} );
 
 	return (
