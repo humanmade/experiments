@@ -20,7 +20,7 @@ const GoalPicker = ( { goal, onChange } ) => {
 		...goals.map( ( [ name, data ] ) => ( {
 			label: data.label || name,
 			value: name,
-		} ),
+		} ) ),
 	];
 
 	return (
