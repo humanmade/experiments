@@ -220,7 +220,11 @@ const registerGoalHandler = ( name, callback, closest = [] ) => {
  * @param {*} on The JS dvent name to listen on.
  */
 const bindListener = ( node, record, on ) => node && node.addEventListener( on, event => {
-	typeof record === 'function' && record( event );
+	if ( typeof record !== 'function' ) {
+		console.error( 'Altis Analytics goal handler is not a function', node, event );
+		return;
+	}
+	record( event );
 } );
 
 /**

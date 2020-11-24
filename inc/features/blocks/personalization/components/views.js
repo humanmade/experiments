@@ -31,6 +31,8 @@ const Views = ( {
 		);
 	}
 
+	const conversionPercent = ( ( conversions / ( conversionsDenominator || total ) ) * 100 ).toFixed( 1 );
+
 	return (
 		<div className="altis-analytics-views">
 			<div className="altis-analytics-views__total">
@@ -41,7 +43,7 @@ const Views = ( {
 				<Icon icon="yes" />
 				{ conversionsLabel || sprintf( _n( '%d conversion', '%d conversions', conversions, 'altis-experiments' ), conversions ) }
 				{ ' ' }
-				({ ( ( conversions / ( conversionsDenominator || total ) ) * 100 ).toFixed( 1 ) }%)
+				({ conversionPercent }%)
 			</div>
 		</div>
 	);

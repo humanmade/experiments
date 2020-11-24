@@ -26,9 +26,9 @@ const GoalPicker = ( { goal, onChange } ) => {
 	return (
 		<SelectControl
 			label={ __( 'Choose a conversion goal', 'altis-experiments' ) }
-			value={ goal }
-			options={ options }
 			onChange={ onChange }
+			options={ options }
+			value={ goal }
 		/>
 	);
 };
