@@ -113,6 +113,7 @@ function enqueue_scripts() {
  * @param string $label A human readable label for the goal.
  * @param string $event The JS event to trigger on.
  * @param string|null $selector An optional CSS selector to scope the event to.
+ * @param string|null $closest An optional CSS selector for finding the closest matching parent to bind the event to.
  * @return void
  */
 function register_goal( string $name, string $label, string $event, ?string $selector = null, ?string $closest = null ) : void {
