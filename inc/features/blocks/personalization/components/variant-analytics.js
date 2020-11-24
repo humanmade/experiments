@@ -38,9 +38,6 @@ const VariantAnalytics = ( { variant } ) => {
 	const audienceId = audience || 0;
 
 	// Total loads, views & conversions.
-	let conversions = null;
-	let conversionsDenominator = null;
-
 	const audiences = ( data && data.audiences ) || [];
 	const audienceData = audiences.find( data => data.id === audienceId ) || {};
 	const total = audienceData.views;
