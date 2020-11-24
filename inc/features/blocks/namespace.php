@@ -109,16 +109,12 @@ function rest_api_init() : void {
 		'schema' => [
 			'type' => 'object',
 			'properties' => [
-				'total' => [ 'type' => 'number' ],
+				'loads' => [ 'type' => 'number' ],
+				'views' => [ 'type' => 'number' ],
+				'conversions' => [ 'type' => 'number' ],
 				'audiences' => [
 					'type' => 'array',
-					'items' => [
-						'type' => 'object',
-						'properties' => [
-							'id' => [ 'type' => 'number' ],
-							'count' => [ 'type' => 'number' ],
-						],
-					],
+					'items' => get_audiences_data_schema(),
 				],
 				'posts' => [
 					'type' => 'array',
@@ -126,17 +122,10 @@ function rest_api_init() : void {
 						'type' => 'object',
 						'properties' => [
 							'id' => [ 'type' => 'number' ],
-							'count' => [ 'type' => 'number' ],
-							'audiences' => [
-								'type' => 'array',
-								'items' => [
-									'type' => 'object',
-									'properties' => [
-										'id' => [ 'type' => 'number' ],
-										'count' => [ 'type' => 'number' ],
-									],
-								],
-							],
+							'loads' => [ 'type' => 'number' ],
+							'views' => [ 'type' => 'number' ],
+							'conversions' => [ 'type' => 'number' ],
+							'audiences' => get_audiences_data_schema(),
 						],
 					],
 				],
@@ -144,6 +133,31 @@ function rest_api_init() : void {
 			],
 		],
 	] );
+}
+
+/**
+ * Get the schema for XB analytics audience metrics.
+ *
+ * @return array
+ */
+function get_audiences_data_schema() : array {
+	return [
+		'type' => 'object',
+		'properties' => [
+			'id' => [
+				'type' => 'number',
+			],
+			'loads' => [
+				'type' => 'number',
+			],
+			'views' => [
+				'type' => 'number',
+			],
+			'conversions' => [
+				'type' => 'number',
+			],
+		],
+	];
 }
 
 /**
@@ -190,20 +204,47 @@ function handle_views_request( WP_REST_Request $request ) : WP_REST_Response {
 }
 
 /**
- * Map aggregate bucket data to response format.
+ * Map event type aggregate bucket data to response format.
  *
- * @param array $bucket Elasticsearch aggregate bucket data.
+ * @param array $event_buckets Elasticsearch aggregate buckets data.
  * @return array
  */
-function map_terms_bucket( array $bucket ) : array {
+function map_aggregations( array $event_buckets ) : array {
 	$data = [
-		'id' => absint( $bucket['key'] ),
-		'count' => $bucket['doc_count'],
+		'loads' => 0,
+		'views' => 0,
+		'conversions' => 0,
+		'audiences' => [],
 	];
 
-	if ( isset( $bucket['audiences']['buckets'] ) ) {
-		$data['audiences'] = map_terms_bucket( $bucket['audiences']['buckets'] );
+	// Map collected event names to output schema.
+	$event_type_map = [
+		'experienceLoad' => 'loads',
+		'experienceView' => 'views',
+		'conversion' => 'conversions',
+	];
+
+	foreach ( $event_buckets as $event_bucket ) {
+		$key = $event_type_map[ $event_bucket['key'] ];
+
+		// Set the total.
+		$data[ $key ] = $event_bucket['doc_count'];
+
+		foreach ( $event_bucket['audiences']['buckets'] as $audience_bucket ) {
+			if ( ! isset( $data['audiences'][ $audience_bucket['key'] ] ) ) {
+				$data['audiences'][ $audience_bucket['key'] ] = [
+					'id' => absint( $audience_bucket['key'] ),
+					'loads' => 0,
+					'views' => 0,
+					'conversions' => 0,
+				];
+			}
+			$data['audiences'][ $audience_bucket['key'] ][ $key ] += $audience_bucket['doc_count'];
+		}
 	}
+
+	// Ensure audiences key is an array.
+	$data['audiences'] = array_values( $data['audiences'] );
 
 	return $data;
 }
@@ -234,32 +275,49 @@ function get_views( string $block_id, ?int $post_id = null ) {
 						],
 					],
 
-					// Limit event type to experienceView.
+					// Limit event type to experience block related records.
 					[
-						'term' => [
-							'event_type.keyword' => 'experienceView',
+						'terms' => [
+							'event_type.keyword' => [ 'experienceLoad', 'experienceView', 'conversion' ],
 						],
 					],
 				],
 			],
 		],
 		'aggs' => [
-			// Get the split by audience.
-			'audiences' => [
+			'events' => [
+				// Get buckets for each even type.
 				'terms' => [
-					'field' => 'attributes.audience.keyword',
+					'field' => 'event_type.keyword',
+				],
+				'aggs' => [
+					// Get the split by audience.
+					'audiences' => [
+						'terms' => [
+							'field' => 'attributes.audience.keyword',
+						],
+					],
 				],
 			],
-
 			// Get the split by post ID and audience.
 			'posts' => [
 				'terms' => [
 					'field' => 'attributes.postId.keyword',
+					'size' => 100,
 				],
 				'aggs' => [
-					'audiences' => [
+					'events' => [
+						// Get buckets for each even type.
 						'terms' => [
-							'field' => 'attributes.audience.keyword',
+							'field' => 'event_type.keyword',
+						],
+						'aggs' => [
+							// Get the split by audience.
+							'audiences' => [
+								'terms' => [
+									'field' => 'attributes.audience.keyword',
+								],
+							],
 						],
 					],
 				],
@@ -293,31 +351,29 @@ function get_views( string $block_id, ?int $post_id = null ) {
 
 	if ( ! $result ) {
 		return [
-			'total' => 0,
+			'loads' => 0,
+			'views' => 0,
+			'conversions' => 0,
+			'audiences' => [],
 		];
 	}
 
-	$audiences = array_map(
-		__NAMESPACE__ . '\\map_terms_bucket',
-		$result['aggregations']['audiences']['buckets']
-	);
+	// Collect metrics.
+	$data = map_aggregations( $result['aggregations']['events']['buckets'] );
 
-	$views = [
-		'total' => $result['hits']['total'],
-		'audiences' => $audiences,
-	];
-
-	// Add the posts aggregations.
-	if ( isset( $result['aggregations']['posts']['buckets'] ) ) {
-		$views['posts'] = array_map(
-			__NAMESPACE__ . '\\map_terms_bucket',
-			$result['aggregations']['posts']['buckets']
-		);
+	// Add the post ID or posts aggregation.
+	if ( $post_id ) {
+		$data['post_id'] = $post_id;
 	} else {
-		$views['post_id'] = $post_id;
+		$data['posts'] = [];
+		foreach ( $result['aggregations']['posts']['buckets'] as $posts_bucket ) {
+			$post_metrics = map_aggregations( $posts_bucket );
+			$post_metrics['id'] = absint( $posts_bucket['key'] );
+			$data['posts'][] = $post_metrics;
+		}
 	}
 
-	wp_cache_set( $key, $views, 'altis-xbs', MINUTE_IN_SECONDS );
+	wp_cache_set( $key, $data, 'altis-xbs', MINUTE_IN_SECONDS );
 
-	return $views;
+	return $data;
 }

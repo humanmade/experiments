@@ -28,20 +28,30 @@ const VariantAnalytics = ( { variant } ) => {
 	}, [ variant.clientId ] );
 
 	// Fetch the stats.
-	const views = useSelect( select => {
+	const data = useSelect( select => {
 		return select( 'analytics/xbs' ).getViews( clientId, postId );
 	}, [ clientId, postId ] );
 	const isLoading = useSelect( select => {
 		return select( 'analytics/xbs' ).getIsLoading();
-	}, [ views ] );
+	}, [ data ] );
 
 	const audienceId = audience || 0;
-	const audiencesData = ( views && views.audiences ) || [];
-	const audienceData = audiencesData.find( data => data.id === audienceId ) || {};
-	const audienceViews = audienceData.count || 0;
+
+	// Total loads, views & conversions.
+	const audiences = ( data && data.audiences ) || [];
+	const audienceData = audiences.find( data => data.id === audienceId ) || {};
+	const total = audienceData.views;
+
+	const conversions = variant.attributes.goal ? audienceData.conversions : audienceData.views;
+	const conversionsDenominator = variant.attributes.goal ? null : audienceData.loads;
 
 	return (
-		<Views total={ audienceViews } isLoading={ isLoading } />
+		<Views
+			conversions={ conversions }
+			conversionsDenominator={ conversionsDenominator }
+			isLoading={ isLoading }
+			total={ total }
+		/>
 	);
 };
 
