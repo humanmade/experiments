@@ -241,7 +241,7 @@ const getGoalHandler = ( name, options = {} ) => {
 		callback: bindListener,
 		...( window.Altis.Analytics.Experiments.Goals[ name ] || {} ),
 		...( goalHandlers[ name ] || {} ),
-		...options
+		...options,
 	};
 
 	// Return a callback that handles the goal configuration and binds event listeners.
