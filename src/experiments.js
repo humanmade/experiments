@@ -231,16 +231,14 @@ const bindListener = ( node, record, on ) => node && node.addEventListener( on, 
  */
 const getGoalHandler = ( name, options = {} ) => {
 	// Compile the goal configuration.
-	const goal = Object.assign(
-		{
-			name,
-			event: name,
-			callback: bindListener,
-		},
-		window.Altis.Analytics.Experiments.Goals[ name ] || {},
-		goalHandlers[ name ] || {},
-		options
-	);
+	const goal = {
+		name,
+		event: name,
+		callback: bindListener,
+		...( window.Altis.Analytics.Experiments.Goals[ name ] || {} ),
+		...( goalHandlers[ name ] || {} ),
+		...options
+	};
 
 	// Return a callback that handles the goal configuration and binds event listeners.
 	return ( node, record ) => {

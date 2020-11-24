@@ -45,19 +45,15 @@ const VariantAnalytics = ( { variant } ) => {
 	const audienceData = audiences.find( data => data.id === audienceId ) || {};
 	const total = audienceData.views;
 
-	if ( variant.attributes.goal ) {
-		conversions = audienceData.conversions;
-	} else {
-		conversions = audienceData.views;
-		conversionsDenominator = audienceData.loads;
-	}
+	const conversions = variant.attributes.goal ? audienceData.conversions : audienceData.views;
+	const conversionsDenominator = variant.attributes.goal ? null : audienceData.loads;
 
 	return (
 		<Views
-			isLoading={ isLoading }
-			total={ total }
 			conversions={ conversions }
 			conversionsDenominator={ conversionsDenominator }
+			isLoading={ isLoading }
+			total={ total }
 		/>
 	);
 };

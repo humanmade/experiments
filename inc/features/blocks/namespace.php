@@ -225,7 +225,6 @@ function map_aggregations( array $event_buckets ) : array {
 	];
 
 	foreach ( $event_buckets as $event_bucket ) {
-
 		$key = $event_type_map[ $event_bucket['key'] ];
 
 		// Set the total.

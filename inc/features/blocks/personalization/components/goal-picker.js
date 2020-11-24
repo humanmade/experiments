@@ -6,7 +6,6 @@ const { __ } = wp.i18n;
 const registeredGoals = window.Altis.Analytics.Experiments.Goals || {};
 
 const GoalPicker = ( { goal, onChange } ) => {
-
 	const goals = Object.entries( registeredGoals );
 
 	if ( goals.length < 1 ) {
@@ -18,15 +17,11 @@ const GoalPicker = ( { goal, onChange } ) => {
 			label: __( 'Impressions', 'altis-experiments' ),
 			value: '',
 		},
-	];
-
-	// Add registered goals to dropdown.
-	goals.forEach( ( [ name, data ] ) => {
-		options.push( {
+		...goals.map( ( [ name, data ] ) => ( {
 			label: data.label || name,
 			value: name,
-		} );
-	} );
+		} ),
+	];
 
 	return (
 		<SelectControl
