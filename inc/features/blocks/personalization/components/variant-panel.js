@@ -1,4 +1,5 @@
 import React from 'react';
+import GoalPicker from './goal-picker';
 import VariantAnalytics from './variant-analytics';
 import VariantTitle from './variant-title';
 
@@ -17,6 +18,10 @@ const VariantPanel = ( { variant, placeholder = null } ) => {
 				<p className="description">
 					{ __( 'This variant will be shown as a fallback if no audiences are matched.', 'altis-experiments' ) }
 				</p>
+				<GoalPicker
+					goal={ variant.attributes.goal }
+					onChange={ goal => updateBlockAttributes( variant.clientId, { goal } ) }
+				/>
 				<VariantAnalytics variant={ variant } />
 			</PanelBody>
 		);
@@ -34,6 +39,10 @@ const VariantPanel = ( { variant, placeholder = null } ) => {
 					{ __( 'You must select an audience for this variant.', 'altis-experiments' ) }
 				</p>
 			) }
+			<GoalPicker
+				goal={ variant.attributes.goal }
+				onChange={ goal => updateBlockAttributes( variant.clientId, { goal } ) }
+			/>
 			<VariantAnalytics variant={ variant } />
 		</PanelBody>
 	);
