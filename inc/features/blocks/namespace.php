@@ -359,7 +359,7 @@ function get_views( string $block_id, ?int $post_id = null ) {
 	}
 
 	// Collect metrics.
-	$data = map_aggregations( $result['aggregations']['events']['buckets'] );
+	$data = map_aggregations( $result['aggregations']['events']['buckets'] ?? [] );
 
 	// Add the post ID or posts aggregation.
 	if ( $post_id ) {
