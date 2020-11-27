@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.4.0
+
+- Update: Add Experience Block variant analytics tracking and inline data display
+
 ## v2.3.0
 
 - Update: WordPress 5.5 compatibility
