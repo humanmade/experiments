@@ -289,6 +289,9 @@ class PersonalizationBlock extends HTMLElement {
 	}
 
 	connectedCallback() {
+		// Track load status.
+		this.audience = false;
+
 		// Set default styles.
 		this.attachShadow( { mode: 'open' } );
 		this.shadowRoot.innerHTML = `
@@ -316,10 +319,13 @@ class PersonalizationBlock extends HTMLElement {
 		// Get conversion goal from template if found.
 		let goal = false;
 
+		// Track the template we want.
+		let template;
+
 		// Find a matching template.
 		for ( let index = 0; index < audiences.length; index++ ) {
 			// Find the first matching audience template.
-			const template = document.querySelector( `template[data-audience="${ audiences[ index ] }"][data-parent-id="${ this.clientId }"]` );
+			template = document.querySelector( `template[data-audience="${ audiences[ index ] }"][data-parent-id="${ this.clientId }"]` );
 			if ( ! template ) {
 				continue;
 			}
@@ -329,28 +335,32 @@ class PersonalizationBlock extends HTMLElement {
 
 			// Set goal.
 			goal = template.dataset.goal;
-
-			// Populate experience block content.
-			const experience = template.content.cloneNode( true );
-			this.innerHTML = '';
-			this.appendChild( experience );
 			break;
 		}
 
 		// Set fallback content if needed.
 		if ( ! audience ) {
-			const template = document.querySelector( `template[data-fallback][data-parent-id="${ this.clientId }"]` );
+			template = document.querySelector( `template[data-fallback][data-parent-id="${ this.clientId }"]` );
 			if ( ! template ) {
 				return;
 			}
 
 			// Set goal.
 			goal = template.dataset.goal;
-
-			const experience = template.content.cloneNode( true );
-			this.innerHTML = '';
-			this.appendChild( experience );
 		}
+
+		// Avoid resetting content if it hasn't changed.
+		if ( this.audience === audience ) {
+			return;
+		}
+
+		// Track the set audience to avoid unnecessary updates.
+		this.audience = audience;
+
+		// Populate experience block content.
+		const experience = template.content.cloneNode( true );
+		this.innerHTML = '';
+		this.appendChild( experience );
 
 		// Record a load event for conversion tracking.
 		window.Altis.Analytics.record( 'experienceLoad', {
@@ -381,6 +391,9 @@ class PersonalizationBlock extends HTMLElement {
 				},
 			} );
 		} );
+
+		// Trigger scroll handler.
+		window.scroll();
 
 		// Get goal handler from registered goals.
 		const goalHandler = getGoalHandler( goal );
