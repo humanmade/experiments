@@ -7,9 +7,9 @@ Web Experimentation framework for Altis.
 
 The plugin currently provides the following built in features:
 
-### Post Title AB Tests
+### Post Title A/B Tests
 
-With this feature enabled it's simple to create AB Tests for your post titles directly from the post edit screen.
+With this feature enabled it's simple to create A/B Tests for your post titles directly from the post edit screen.
 
 It is enabled by default but can be disabled using the following filter:
 
@@ -25,7 +25,7 @@ add_post_type_support( 'events', 'altis.experiments.titles' );
 
 ## Usage
 
-The plugin provides a programmatic API to register custom AB Tests for post data:
+The plugin provides a programmatic API to register custom A/B Tests for post data:
 
 **`register_post_ab_test( string $test_id, array $options )`**
 
@@ -50,7 +50,7 @@ Sets up the test.
 
 **`output_ab_test_html_for_post( string $test_id, int $post_id, string $default_content, array $args = [] )`**
 
-Returns the AB Test markup for client side processing.
+Returns the A/B Test markup for client side processing.
 
 - `$test_id`: A unique ID for the test.
 - `$post_id`: The post ID for the test.
@@ -101,7 +101,7 @@ You can define your own goal handlers in JavaScript:
 
 **`Altis.Analytics.Experiments.registerGoal( name <string>, callback <function>, closest <array> )`**
 
-This function adds a goal handler where `name` corresponds to the value of `$options['goal']` when registering an AB Test.
+This function adds a goal handler where `name` corresponds to the value of `$options['goal']` when registering an A/B Test.
 
 The callback receives the following parameters:
 
