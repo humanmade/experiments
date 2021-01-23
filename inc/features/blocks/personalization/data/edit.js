@@ -29,6 +29,7 @@ const withData = Component => compose(
 				const newVariant = createBlock( 'altis/personalization-variant', {
 					audience: null,
 					fallback: false,
+					goal: '',
 					...attributes,
 				}, [] );
 
