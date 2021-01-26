@@ -2,6 +2,7 @@ import React from 'react';
 import Views from './views';
 
 const { useSelect } = wp.data;
+const { _n, sprintf } = wp.i18n;
 
 const VariantAnalytics = ( { variant } ) => {
 	const { audience, fallback } = variant.attributes;
@@ -40,17 +41,26 @@ const VariantAnalytics = ( { variant } ) => {
 	// Total loads, views & conversions.
 	const audiences = ( data && data.audiences ) || [];
 	const audienceData = audiences.find( data => data.id === audienceId ) || {};
-	const total = audienceData.views;
 
-	const conversions = variant.attributes.goal ? audienceData.conversions : audienceData.views;
-	const conversionsDenominator = variant.attributes.goal ? null : audienceData.loads;
+	// Use conversions vs total views if a goal is set.
+	if ( variant.attributes.goal ) {
+		return (
+			<Views
+				conversions={ audienceData.conversions }
+				isLoading={ isLoading }
+				total={ audienceData.views }
+			/>
+		);
+	}
 
+	// Use page loads vs block views if no goal is set e.g. show the number of impressions.
 	return (
 		<Views
-			conversions={ conversions }
-			conversionsDenominator={ conversionsDenominator }
+			conversions={ audienceData.views }
+			conversionsLabel={ sprintf( _n( '%d view', '%d views', audienceData.views, 'altis-experiments' ), audienceData.views ) }
 			isLoading={ isLoading }
-			total={ total }
+			label={ sprintf( _n( '%d page load', '%d page loads', audienceData.loads, 'altis-experiments' ), audienceData.loads ) }
+			total={ audienceData.loads }
 		/>
 	);
 };

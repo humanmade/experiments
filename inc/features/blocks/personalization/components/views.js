@@ -5,7 +5,6 @@ const { __, _n, sprintf } = wp.i18n;
 
 const Views = ( {
 	conversions,
-	conversionsDenominator = null,
 	conversionsLabel = null,
 	isLoading,
 	label = null,
@@ -31,7 +30,7 @@ const Views = ( {
 		);
 	}
 
-	const conversionPercent = ( conversions / ( conversionsDenominator || total ) ) * 100;
+	const conversionPercent = ( conversions / total ) * 100;
 
 	return (
 		<div className="altis-analytics-views">
