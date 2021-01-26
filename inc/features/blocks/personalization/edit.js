@@ -14,6 +14,7 @@ const {
 } = wp.blockEditor;
 const {
 	Button,
+	PanelBody,
 	Toolbar,
 } = wp.components;
 const { __, sprintf } = wp.i18n;
@@ -46,6 +47,9 @@ const Edit = ( {
 	// Track currently selected variant.
 	const defaultVariantClientId = ( variants.length > 0 && variants[ 0 ].clientId ) || null;
 	const [ activeVariant, setVariant ] = useState( defaultVariantClientId );
+
+	// Track previous client ID for undo button.
+	const [ prevClientId, setPrevClientId ] = useState();
 
 	// Add a default fallback variant if none present.
 	useEffect( () => {
@@ -104,7 +108,6 @@ const Edit = ( {
 				<div className="components-panel__body is-opened">
 					<Button
 						onClick={ () => setVariant( onAddVariant() ) }
-						isLarge
 						isSecondary
 					>
 						{ __( 'Add a variant', 'altis-experiments' ) }
@@ -119,6 +122,32 @@ const Edit = ( {
 						placeholder={ sprintf( __( 'Variant %d', 'altis-experiments' ), index + 1 ) }
 					/>
 				) ) }
+				<PanelBody title={ __( 'Reset Analytics Data', 'altis-experiments' ) }>
+					<p><em>{ __( 'Editing an experience block may make the existing analytics data meaningless, for example when changing conversion goals or making significant changes to the content.' ) }</em></p>
+					<p>{ __( 'You can reset the tracking data for this block to ensure it is relevant by clicking the button below.' ) }</p>
+					<Button
+						isDestructive
+						onClick={ () => {
+							setPrevClientId( attributes.clientId );
+							setAttributes( { clientId: uuid() } );
+						} }
+					>
+						{ __( 'Reset', 'altis-experiments' ) }
+					</Button>
+					{ ' ' }
+					{ prevClientId && (
+						<Button
+							isTertiary
+							isLink
+							onClick={ () => {
+								setPrevClientId( null );
+								setAttributes( { clientId: prevClientId } );
+							} }
+						>
+							{ __( 'Undo', 'altis-experiments' ) }
+						</Button>
+					) }
+				</PanelBody>
 			</InspectorControls>
 			<style dangerouslySetInnerHTML={ {
 				__html: `
