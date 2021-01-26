@@ -186,8 +186,7 @@ function sanitize_id( $param ) : string {
  * @return boolean
  */
 function check_views_permission() : bool {
-	$type = get_post_type_object( Audiences\POST_TYPE );
-	return current_user_can( $type->cap->edit_posts );
+	return current_user_can( 'edit_posts' );
 }
 
 /**
