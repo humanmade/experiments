@@ -29,6 +29,9 @@ function setup() {
 
 	// Register API endpoints for getting XB analytics data.
 	add_action( 'rest_api_init', __NAMESPACE__ . '\\rest_api_init' );
+
+	// Map the permissions needed to view XB analytics.
+	add_filter( 'map_meta_cap', __NAMESPACE__ . '\\filter_map_meta_cap', 10, 2 );
 }
 
 /**
@@ -186,7 +189,22 @@ function sanitize_id( $param ) : string {
  * @return boolean
  */
 function check_views_permission() : bool {
-	return current_user_can( 'edit_posts' );
+	return current_user_can( 'view_xb_analytics' );
+}
+
+/**
+ * Maps the view XB analytics to edit_posts primitive cap.
+ *
+ * @param string[] $caps Array of the user's capabilities.
+ * @param string $cap Capability name.
+ * @return string[] Array of the user's capabilities.
+ */
+function filter_map_meta_cap( array $caps, string $cap ) : array {
+	if ( $cap === 'view_xb_analytics' ) {
+		$caps = [ 'edit_posts' ];
+	}
+
+	return $caps;
 }
 
 /**
