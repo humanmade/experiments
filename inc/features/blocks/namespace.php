@@ -200,7 +200,7 @@ function check_views_permission() : bool {
  * @return string[] Array of the user's capabilities.
  */
 function filter_map_meta_cap( array $caps, string $cap ) : array {
-	if ( $cap === 'view_xb_analytics' ) {
+	if ( $cap === 'view_xb_analytics' && ! in_array( $cap, $caps, true ) ) {
 		$caps = [ 'edit_posts' ];
 	}
 
