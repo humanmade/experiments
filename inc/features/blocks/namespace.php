@@ -205,10 +205,7 @@ function filter_map_meta_cap( array $caps, string $cap, $user_id ) : array {
 		return $caps;
 	}
 
-	if ( in_array( $cap, $caps, true ) ) {
-		return $caps;
-	}
-
+	// Check if the user has the capability added directly.
 	$user = get_user_by( 'id', $user_id );
 	if ( $user && isset( $user->caps[ $cap ] ) ) {
 		return [ $cap ];
