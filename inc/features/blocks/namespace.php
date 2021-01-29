@@ -31,7 +31,7 @@ function setup() {
 	add_action( 'rest_api_init', __NAMESPACE__ . '\\rest_api_init' );
 
 	// Map the permissions needed to view XB analytics.
-	add_filter( 'map_meta_cap', __NAMESPACE__ . '\\filter_map_meta_cap', 10, 2 );
+	add_filter( 'map_meta_cap', __NAMESPACE__ . '\\filter_map_meta_cap', 10, 3 );
 }
 
 /**
@@ -197,14 +197,23 @@ function check_views_permission() : bool {
  *
  * @param string[] $caps Array of the user's capabilities.
  * @param string $cap Capability name.
+ * @param int $user_id The current user ID.
  * @return string[] Array of the user's capabilities.
  */
-function filter_map_meta_cap( array $caps, string $cap ) : array {
-	if ( $cap === 'view_xb_analytics' && ! in_array( $cap, $caps, true ) ) {
-		$caps = [ 'edit_posts' ];
+function filter_map_meta_cap( array $caps, string $cap, $user_id ) : array {
+	if ( $cap !== 'view_xb_analytics' ) {
+		return $caps;
 	}
 
-	return $caps;
+	if ( in_array( $cap, $caps, true ) ) {
+		return $caps;
+	}
+
+	if ( $user_id && in_array( $cap, get_user_by( 'id', $user_id )->caps ?? [], true ) ) {
+		return $caps;
+	}
+
+	return [ 'edit_posts' ];
 }
 
 /**
