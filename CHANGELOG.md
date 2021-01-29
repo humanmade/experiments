@@ -1,5 +1,16 @@
 # Changelog
 
+# v2.4.1
+
+- Update: Map custom capability for viewing XB analytics
+- Update: Add analytics data reset button for XBs
+- Bug: Allow contributors to see XB analytics
+- Bug: Fix impression conversion goal display
+- Bug: Fix analytics display icon styling
+- Bug: Change all instances of "AB tests" to "A/B tests"
+- Bug: Prevent updating XB content if audience is still the same
+- Update: Bump ini from 1.3.5 to 1.3.7
+
 ## v2.4.0
 
 - Update: Add Experience Block variant analytics tracking and inline data display
