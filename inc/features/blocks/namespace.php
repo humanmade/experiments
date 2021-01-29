@@ -209,8 +209,9 @@ function filter_map_meta_cap( array $caps, string $cap, $user_id ) : array {
 		return $caps;
 	}
 
-	if ( $user_id && in_array( $cap, get_user_by( 'id', $user_id )->caps ?? [], true ) ) {
-		return $caps;
+	$user = get_user_by( 'id', $user_id );
+	if ( $user && isset( $user->caps[ $cap ] ) ) {
+		return [ $cap ];
 	}
 
 	return [ 'edit_posts' ];
