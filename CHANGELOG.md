@@ -1,5 +1,9 @@
 # Changelog
 
+# v2.4.2
+
+- Update: Use audience read capability for viewing XB analytics
+
 # v2.4.1
 
 - Update: Map custom capability for viewing XB analytics
