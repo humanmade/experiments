@@ -40,15 +40,15 @@ const VariantAnalytics = ( { variant } ) => {
 
 	// Total loads, views & conversions.
 	const audiences = ( data && data.audiences ) || [];
-	const audienceData = audiences.find( data => data.id === audienceId ) || {};
+	const audienceData = audiences.find( data => data.id === audienceId ) || { unique: {} };
 
 	// Use conversions vs total views if a goal is set.
 	if ( variant.attributes.goal ) {
 		return (
 			<Views
-				conversions={ audienceData.conversions }
+				conversions={ audienceData.unique.conversions }
 				isLoading={ isLoading }
-				total={ audienceData.views }
+				total={ audienceData.unique.views }
 			/>
 		);
 	}
@@ -56,11 +56,11 @@ const VariantAnalytics = ( { variant } ) => {
 	// Use page loads vs block views if no goal is set e.g. show the number of impressions.
 	return (
 		<Views
-			conversions={ audienceData.views }
-			conversionsLabel={ sprintf( _n( '%d view', '%d views', audienceData.views, 'altis-experiments' ), audienceData.views ) }
+			conversions={ audienceData.unique.views }
+			conversionsLabel={ sprintf( _n( '%d unique view', '%d unique views', audienceData.unique.views, 'altis-experiments' ), audienceData.unique.views ) }
 			isLoading={ isLoading }
-			label={ sprintf( _n( '%d page load', '%d page loads', audienceData.loads, 'altis-experiments' ), audienceData.loads ) }
-			total={ audienceData.loads }
+			label={ sprintf( _n( '%d unique page load', '%d unique page loads', audienceData.unique.loads, 'altis-experiments' ), audienceData.unique.loads ) }
+			total={ audienceData.unique.loads }
 		/>
 	);
 };

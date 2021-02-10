@@ -22,8 +22,8 @@ const BlockAnalytics = ( { clientId } ) => {
 		return select( 'analytics/xbs' ).getIsLoading();
 	}, [ data ] );
 
-	const totalLoads = ( data && data.loads ) || 0;
-	const totalViews = ( data && data.views ) || 0;
+	const totalLoads = ( data && data.unique && data.unique.loads ) || 0;
+	const totalViews = ( data && data.unique && data.unique.views ) || 0;
 
 	return (
 		<div className="altis-experience-block-analytics">
@@ -31,9 +31,9 @@ const BlockAnalytics = ( { clientId } ) => {
 			<p>{ __( 'Statistics shown are for the configured data retention period.', 'altis-experiments' ) }</p>
 			<Views
 				conversions={ totalViews }
-				conversionsLabel={ sprintf( __( '%d block views', 'altis-experiments' ), totalViews ) }
+				conversionsLabel={ sprintf( __( '%d unique block views', 'altis-experiments' ), totalViews ) }
 				isLoading={ isLoading }
-				label={ sprintf( __( '%d total page views', 'altis-experiments' ), totalLoads ) }
+				label={ sprintf( __( '%d total unique page views', 'altis-experiments' ), totalLoads ) }
 				total={ totalLoads }
 			/>
 		</div>
