@@ -16,11 +16,6 @@ const VariantAnalytics = ( { variant } ) => {
 		return select( 'core/editor' ).getCurrentPostId();
 	} );
 
-	// No post ID so post isn't published, don't show anything.
-	if ( ! postId ) {
-		return null;
-	}
-
 	// Get the XB variant parent client ID.
 	const clientId = useSelect( select => {
 		const { getBlockAttributes, getBlockRootClientId } = select( 'core/block-editor' );
@@ -36,6 +31,11 @@ const VariantAnalytics = ( { variant } ) => {
 		return select( 'analytics/xbs' ).getIsLoading();
 	}, [ data ] );
 
+	// No post ID so post isn't published, don't show anything.
+	if ( ! postId ) {
+		return null;
+	}
+
 	const audienceId = audience || 0;
 
 	// Total loads, views & conversions.
@@ -48,7 +48,8 @@ const VariantAnalytics = ( { variant } ) => {
 			<Views
 				conversions={ audienceData.unique.conversions }
 				isLoading={ isLoading }
-				total={ audienceData.unique.views }
+				total={ audienceData.views }
+				uniques={ audienceData.unique.views }
 			/>
 		);
 	}
@@ -57,10 +58,11 @@ const VariantAnalytics = ( { variant } ) => {
 	return (
 		<Views
 			conversions={ audienceData.unique.views }
-			conversionsLabel={ sprintf( _n( '%d unique view', '%d unique views', audienceData.unique.views, 'altis-experiments' ), audienceData.unique.views ) }
+			conversionsLabel={ sprintf( _n( '%d unique view, %d total', '%d unique views, %d total', audienceData.unique.views, 'altis-experiments' ), audienceData.unique.views, audienceData.views ) }
 			isLoading={ isLoading }
-			label={ sprintf( _n( '%d unique page load', '%d unique page loads', audienceData.unique.loads, 'altis-experiments' ), audienceData.unique.loads ) }
-			total={ audienceData.unique.loads }
+			label={ sprintf( _n( '%d unique load, %d total', '%d unique loads, %d total', audienceData.unique.loads, 'altis-experiments' ), audienceData.unique.loads, audienceData.loads ) }
+			total={ audienceData.loads }
+			uniques={ audienceData.unique.loads }
 		/>
 	);
 };

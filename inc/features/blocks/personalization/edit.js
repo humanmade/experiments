@@ -106,13 +106,13 @@ const Edit = ( {
 			</BlockControls>
 			<InspectorControls>
 				<div className="components-panel__body is-opened">
+					<BlockAnalytics clientId={ attributes.clientId } />
 					<Button
 						onClick={ () => setVariant( onAddVariant() ) }
 						isSecondary
 					>
 						{ __( 'Add a variant', 'altis-experiments' ) }
 					</Button>
-					<BlockAnalytics clientId={ attributes.clientId } />
 				</div>
 				{ variants.map( ( variant, index ) => (
 					<VariantPanel

@@ -9,8 +9,9 @@ const Views = ( {
 	isLoading,
 	label = null,
 	total,
+	uniques,
 } ) => {
-	if ( ! total && isLoading ) {
+	if ( ( ! uniques || ! total ) && isLoading ) {
 		return (
 			<p className="altis-analytics-views">
 				<Icon icon="visibility" />
@@ -20,7 +21,7 @@ const Views = ( {
 		);
 	}
 
-	if ( ! total ) {
+	if ( ! uniques || ! total ) {
 		return (
 			<p className="altis-analytics-views">
 				<Icon icon="visibility" />
@@ -30,13 +31,13 @@ const Views = ( {
 		);
 	}
 
-	const conversionPercent = ( conversions / total ) * 100;
+	const conversionPercent = ( conversions / uniques ) * 100;
 
 	return (
 		<div className="altis-analytics-views">
 			<div className="altis-analytics-views__total">
 				<Icon icon="visibility" />
-				{ label || sprintf( _n( '%d view', '%d views', total, 'altis-experiments' ), total ) }
+				{ label || sprintf( `${ _n( '%d unique', '%d uniques', uniques, 'altis-experiments' ) } ${ _n( '(%d view)', '(%d views)', total, 'altis-experiments' ) }`, uniques, total ) }
 			</div>
 			<div className="altis-analytics-views__conversions">
 				<Icon icon="yes" />
