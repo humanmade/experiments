@@ -7,11 +7,7 @@ const { _n, sprintf } = wp.i18n;
 const VariantAnalytics = ( { variant } ) => {
 	const { audience, fallback } = variant.attributes;
 
-	// Show nothing if no audience selected and not the fallback.
-	if ( ! fallback && ! audience ) {
-		return null;
-	}
-
+	// Get the current post ID being edited.
 	const postId = useSelect( select => {
 		return select( 'core/editor' ).getCurrentPostId();
 	} );
@@ -30,6 +26,11 @@ const VariantAnalytics = ( { variant } ) => {
 	const isLoading = useSelect( select => {
 		return select( 'analytics/xbs' ).getIsLoading();
 	}, [ data ] );
+
+	// Show nothing if no audience selected and not the fallback.
+	if ( ! fallback && ! audience ) {
+		return null;
+	}
 
 	// No post ID so post isn't published, don't show anything.
 	if ( ! postId ) {
@@ -57,12 +58,10 @@ const VariantAnalytics = ( { variant } ) => {
 	// Use page loads vs block views if no goal is set e.g. show the number of impressions.
 	return (
 		<Views
-			conversions={ audienceData.unique.views }
-			conversionsLabel={ sprintf( _n( '%d unique view, %d total', '%d unique views, %d total', audienceData.unique.views, 'altis-experiments' ), audienceData.unique.views, audienceData.views ) }
 			isLoading={ isLoading }
-			label={ sprintf( _n( '%d unique load, %d total', '%d unique loads, %d total', audienceData.unique.loads, 'altis-experiments' ), audienceData.unique.loads, audienceData.loads ) }
-			total={ audienceData.loads }
-			uniques={ audienceData.unique.loads }
+			label={ sprintf( _n( '%d unique view, %d total', '%d unique views, %d total', audienceData.unique.views, 'altis-experiments' ), audienceData.unique.views, audienceData.views ) }
+			total={ audienceData.views }
+			uniques={ audienceData.unique.views }
 		/>
 	);
 };

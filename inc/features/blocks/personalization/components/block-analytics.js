@@ -33,9 +33,9 @@ const BlockAnalytics = ( { clientId } ) => {
 			<p>{ __( 'Statistics shown are for the configured data retention period.', 'altis-experiments' ) }</p>
 			<Views
 				conversions={ uniqueViews }
-				conversionsLabel={ sprintf( __( '%d unique views, %d total', 'altis-experiments' ), uniqueViews, totalViews ) }
+				conversionsLabel={ sprintf( __( '%d unique block views, %d total', 'altis-experiments' ), uniqueViews, totalViews ) }
 				isLoading={ isLoading }
-				label={ sprintf( __( '%d unique loads, %d total', 'altis-experiments' ), uniqueLoads, totalLoads ) }
+				label={ sprintf( __( '%d unique page views, %d total', 'altis-experiments' ), uniqueLoads, totalLoads ) }
 				total={ totalLoads }
 				uniques={ uniqueLoads }
 			/>
