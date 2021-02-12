@@ -99,8 +99,13 @@
 	max-width: none;
 }
 
+.altis-experience-block-analytics {
+	margin-bottom: 16px;
+}
+
 .altis-experience-block-analytics h4 {
 	margin-bottom: 4px;
+	margin-top: 0;
 }
 
 .components-panel__body .altis-analytics-views {

@@ -4,13 +4,14 @@ const { Icon } = wp.components;
 const { __, _n, sprintf } = wp.i18n;
 
 const Views = ( {
-	conversions,
+	conversions = null,
 	conversionsLabel = null,
 	isLoading,
 	label = null,
 	total,
+	uniques,
 } ) => {
-	if ( ! total && isLoading ) {
+	if ( ( ! uniques || ! total ) && isLoading ) {
 		return (
 			<p className="altis-analytics-views">
 				<Icon icon="visibility" />
@@ -20,7 +21,7 @@ const Views = ( {
 		);
 	}
 
-	if ( ! total ) {
+	if ( ! uniques || ! total ) {
 		return (
 			<p className="altis-analytics-views">
 				<Icon icon="visibility" />
@@ -30,20 +31,20 @@ const Views = ( {
 		);
 	}
 
-	const conversionPercent = ( conversions / total ) * 100;
-
 	return (
 		<div className="altis-analytics-views">
 			<div className="altis-analytics-views__total">
 				<Icon icon="visibility" />
-				{ label || sprintf( _n( '%d view', '%d views', total, 'altis-experiments' ), total ) }
+				{ label || sprintf( _n( '%d unique view, %d total', '%d unique views, %d total', uniques, 'altis-experiments' ), uniques, total ) }
 			</div>
-			<div className="altis-analytics-views__conversions">
-				<Icon icon="yes" />
-				{ conversionsLabel || sprintf( _n( '%d conversion', '%d conversions', conversions, 'altis-experiments' ), conversions ) }
-				{ ' ' }
-				({ conversionPercent.toFixed( 1 ) }%)
-			</div>
+			{ conversions !== null && (
+				<div className="altis-analytics-views__conversions">
+					<Icon icon="yes" />
+					{ conversionsLabel || sprintf( _n( '%d conversion', '%d conversions', conversions, 'altis-experiments' ), conversions ) }
+					{ ' ' }
+					({ ( ( conversions / uniques ) * 100 ).toFixed( 1 ) }%)
+				</div>
+			) }
 		</div>
 	);
 };
