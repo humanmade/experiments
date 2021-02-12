@@ -120,13 +120,10 @@ function rest_api_init() : void {
 					'type' => 'array',
 					'items' => [
 						'type' => 'object',
-						'properties' => [
-							'id' => [ 'type' => 'number' ],
-							'loads' => [ 'type' => 'number' ],
-							'views' => [ 'type' => 'number' ],
-							'conversions' => [ 'type' => 'number' ],
-							'audiences' => get_audiences_data_schema(),
-						],
+						'properties' => array_merge(
+							get_audiences_data_schema()['properties'],
+							[ 'audiences' => get_audiences_data_schema() ]
+						),
 					],
 				],
 				'postId' => [ 'type' => 'number' ],
@@ -155,6 +152,20 @@ function get_audiences_data_schema() : array {
 			],
 			'conversions' => [
 				'type' => 'number',
+			],
+			'unique' => [
+				'type' => 'object',
+				'properties' => [
+					'loads' => [
+						'type' => 'number',
+					],
+					'views' => [
+						'type' => 'number',
+					],
+					'conversions' => [
+						'type' => 'number',
+					],
+				],
 			],
 		],
 	];
@@ -214,6 +225,11 @@ function map_aggregations( array $event_buckets ) : array {
 		'loads' => 0,
 		'views' => 0,
 		'conversions' => 0,
+		'unique' => [
+			'loads' => 0,
+			'views' => 0,
+			'conversions' => 0,
+		],
 		'audiences' => [],
 	];
 
@@ -229,6 +245,7 @@ function map_aggregations( array $event_buckets ) : array {
 
 		// Set the total.
 		$data[ $key ] = $event_bucket['doc_count'];
+		$data['unique'][ $key ] = $event_bucket['uniques']['value'];
 
 		foreach ( $event_bucket['audiences']['buckets'] as $audience_bucket ) {
 			if ( ! isset( $data['audiences'][ $audience_bucket['key'] ] ) ) {
@@ -237,9 +254,15 @@ function map_aggregations( array $event_buckets ) : array {
 					'loads' => 0,
 					'views' => 0,
 					'conversions' => 0,
+					'unique' => [
+						'loads' => 0,
+						'views' => 0,
+						'conversions' => 0,
+					],
 				];
 			}
-			$data['audiences'][ $audience_bucket['key'] ][ $key ] += $audience_bucket['doc_count'];
+			$data['audiences'][ $audience_bucket['key'] ][ $key ] = $audience_bucket['doc_count'];
+			$data['audiences'][ $audience_bucket['key'] ]['unique'][ $key ] = $audience_bucket['uniques']['value'];
 		}
 	}
 
@@ -286,15 +309,28 @@ function get_views( string $block_id, ?int $post_id = null ) {
 		],
 		'aggs' => [
 			'events' => [
-				// Get buckets for each even type.
+				// Get buckets for each event type.
 				'terms' => [
 					'field' => 'event_type.keyword',
 				],
 				'aggs' => [
+					// Get unique views by event.
+					'uniques' => [
+						'cardinality' => [
+							'field' => 'endpoint.Id.keyword',
+						],
+					],
 					// Get the split by audience.
 					'audiences' => [
 						'terms' => [
 							'field' => 'attributes.audience.keyword',
+						],
+						'aggs' => [
+							'uniques' => [
+								'cardinality' => [
+									'field' => 'endpoint.Id.keyword',
+								],
+							],
 						],
 					],
 				],
@@ -312,10 +348,23 @@ function get_views( string $block_id, ?int $post_id = null ) {
 							'field' => 'event_type.keyword',
 						],
 						'aggs' => [
+							// Get uniques by event.
+							'uniques' => [
+								'cardinality' => [
+									'field' => 'endpoint.Id.keyword',
+								],
+							],
 							// Get the split by audience.
 							'audiences' => [
 								'terms' => [
 									'field' => 'attributes.audience.keyword',
+								],
+								'aggs' => [
+									'uniques' => [
+										'cardinality' => [
+											'field' => 'endpoint.Id.keyword',
+										],
+									],
 								],
 							],
 						],
@@ -350,12 +399,14 @@ function get_views( string $block_id, ?int $post_id = null ) {
 	$result = Utils\query( $query );
 
 	if ( ! $result ) {
-		return [
+		$data = [
 			'loads' => 0,
 			'views' => 0,
 			'conversions' => 0,
 			'audiences' => [],
 		];
+		wp_cache_set( $key, $data, 'altis-xbs', MINUTE_IN_SECONDS );
+		return $data;
 	}
 
 	// Collect metrics.
@@ -367,13 +418,13 @@ function get_views( string $block_id, ?int $post_id = null ) {
 	} else {
 		$data['posts'] = [];
 		foreach ( $result['aggregations']['posts']['buckets'] as $posts_bucket ) {
-			$post_metrics = map_aggregations( $posts_bucket );
-			$post_metrics['id'] = absint( $posts_bucket['key'] );
+			$post_metrics = map_aggregations( $posts_bucket['events']['buckets'] );
+			$post_metrics = [ 'id' => absint( $posts_bucket['key'] ) ] + $post_metrics;
 			$data['posts'][] = $post_metrics;
 		}
 	}
 
-	wp_cache_set( $key, $data, 'altis-xbs', MINUTE_IN_SECONDS );
+	wp_cache_set( $key, $data, 'altis-xbs', MINUTE_IN_SECONDS * 5 );
 
 	return $data;
 }
