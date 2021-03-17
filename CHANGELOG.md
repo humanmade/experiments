@@ -1,5 +1,9 @@
 # Changelog
 
+# v2.4.3
+
+- Bug: Allow null return type from output_ab_test_html function.
+
 # v2.4.2
 
 - Update: Use audience read capability for viewing XB analytics
